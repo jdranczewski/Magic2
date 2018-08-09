@@ -19,13 +19,18 @@ class Fringe():
         self.phase = 0
 
 
-def read_fringes(fringes, fringes_image):
+# read_fringes takes in a Fringes class object, an True-False map
+# representation of the interferogram (where Truths are the Fringe
+# pixels) and an optional graph parameter that determines whether
+# results should be plotted (useful for debugging).
+def read_fringes(fringes, fringes_image, graph=False):
     # Create a list of coordinates of all the black pixels
     # Note that the coordinates will be in the order [y, x]
     # as this is the convention used for matrices: [row, column].
     black_points = np.transpose(np.nonzero(fringes_image))
     # While there are still points to process
-    plt.imshow(fringes_image)
+    if graph:
+        plt.imshow(fringes_image)
     while len(black_points):
         # Create an array to store the points of this fringe
         point = black_points[0]
@@ -65,7 +70,12 @@ def read_fringes(fringes, fringes_image):
                 point = backtrack[0]
                 backtrack = backtrack[1:]
                 neighbours = np.array([[1, 1]])
-        points = np.array(points)
-        plt.plot(points[:, 1], points[:, 0])
+        # Create a fringe obejct and append it to the fringe list
+        fringe = Fringe(points)
+        fringes.list.append(fringe)
+        if graph:
+            points = np.array(points)
+            plt.plot(points[:, 1], points[:, 0])
         black_points = np.transpose(np.nonzero(fringes_image))
-    plt.show()
+    if graph:
+        plt.show()
