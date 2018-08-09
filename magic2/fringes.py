@@ -39,7 +39,7 @@ def read_fringes(fringes, fringes_image, graph=False):
     while len(black_points):
         # Create an array to store the points of this fringe
         point = black_points[0]
-        points = [point]
+        points = [[point[0]-1, point[1]-1]]
         # Create a list of points that need to be checked out later
         backtrack = []
         # Remove in the point so that it is not analysed again
