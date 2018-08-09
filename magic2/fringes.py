@@ -30,27 +30,42 @@ def read_fringes(fringes, fringes_image):
         # Create an array to store the points of this fringe
         point = black_points[0]
         points = [point]
+        # Create a list of points that need to be checked out later
+        backtrack = []
         # Remove in the point so that it is not analysed again
         fringes_image[point[0], point[1]] = False
         # Find the point's neighbours
-        neigbours = np.transpose(np.nonzero(
+        neighbours = np.transpose(np.nonzero(
                     fringes_image[point[0]-1:point[0]+2,
                                   point[1]-1:point[1]+2]))
         # While we still can find any neighbours, add them to the list
-        while len(neigbours):
-            if len(neigbours) > 1:
-                # Store for later backtarcking
-                pass
+        while len(neighbours):
+            # If there are any additional points, store them. We will come
+            # back to them. They have to be earsed to, so that we do not visit
+            # the twice
+            for additional_point in neighbours[1:]:
+                backtrack.append([additional_point[0] + point[0] - 1,
+                                  additional_point[1] + point[1] - 1])
+                fringes_image[additional_point[0] + point[0] - 1,
+                              additional_point[1] + point[1] - 1] = False
             # The neighbours list contains relative coordinates,
-            # we need to offset them
-            point = [neigbours[0, 0] + point[0] - 1,
-                      neigbours[0, 1] + point[1] - 1]
+            # we need to offset them and then add the point to
+            # out points list
+            point = [neighbours[0, 0] + point[0] - 1,
+                     neighbours[0, 1] + point[1] - 1]
             points.append(point)
             fringes_image[point[0], point[1]] = False
-            neigbours = np.transpose(np.nonzero(
+            # Find the neighbours of the new point
+            neighbours = np.transpose(np.nonzero(
                         fringes_image[point[0]-1:point[0]+2,
                                       point[1]-1:point[1]+2]))
+            # If the point has no neighbours, try pulling a point out of the
+            # backtracking list
+            if not len(neighbours) and len(backtrack):
+                point = backtrack[0]
+                backtrack = backtrack[1:]
+                neighbours = np.array([[1, 1]])
         points = np.array(points)
-        # plt.plot(points[:,1], points[:,0])
+        plt.plot(points[:, 1], points[:, 0])
         black_points = np.transpose(np.nonzero(fringes_image))
     plt.show()
