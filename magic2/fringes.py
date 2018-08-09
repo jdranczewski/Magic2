@@ -24,6 +24,11 @@ class Fringe():
 # pixels) and an optional graph parameter that determines whether
 # results should be plotted (useful for debugging).
 def read_fringes(fringes, fringes_image, graph=False):
+    # Pad the image with zeroes on each edge. This solves the issue
+    # of searching for neighbours and reaching beyond the edges
+    # without being too complicated. This is later accounted for
+    # when saving point coordinates
+    fringes_image = np.pad(fringes_image, 1, 'constant')
     # Create a list of coordinates of all the black pixels
     # Note that the coordinates will be in the order [y, x]
     # as this is the convention used for matrices: [row, column].
@@ -58,7 +63,8 @@ def read_fringes(fringes, fringes_image, graph=False):
             # out points list
             point = [neighbours[0, 0] + point[0] - 1,
                      neighbours[0, 1] + point[1] - 1]
-            points.append(point)
+            # This accounts for the padding introduced earlier
+            points.append([point[0]-1, point[1]-1])
             fringes_image[point[0], point[1]] = False
             # Find the neighbours of the new point
             neighbours = np.transpose(np.nonzero(
