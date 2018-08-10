@@ -17,7 +17,7 @@ def main():
     # fringes.list stores a list of pointers to those obejcts
     m2fringes.read_fringes(fringes, canvas.fringes_image)
 
-    m2graphics.render_fringes(fringes, canvas)
+    m2graphics.render_fringes(fringes, canvas, width=3)
     plt.imshow(canvas.fringe_phases,  norm=m2graphics.norm, cmap=m2graphics.cmap)
     plt.show()
 
