@@ -20,7 +20,7 @@ class Canvas():
 
 # This function can be used to draw the fringes on a given canvas
 # at a specified line width. 'fringes' is a Fringes object.
-def render_fringes(fringes, canvas, width=1):
+def render_fringes(fringes, canvas, width=6):
     # Hovewer nasty this nested loop looks, it allows us to easily iterate
     # over all points in all fringes. The x range and y range are also
     # executed only once if width is 0
@@ -38,30 +38,11 @@ def render_fringes(fringes, canvas, width=1):
                 pass
             # The width is used only for drawing the visual representation
             # of the fringes
-            for x in range(-width+1, width):
-                for y in range(-width+1, width):
-                    try:
-                        canvas.fringe_phases_visual[point[0]+y,
-                                                    point[1]+x] = fringe.phase
-                    except IndexError:
-                        pass
-
-
-# This function can be used to draw the fringes on a given canvas
-# at a specified line width. 'fringes' is a Fringes object.
-# It is analogue to 'render_fringes', but it only renders the
-# array which is used for displaying the fringes without updating
-# the metadata array. Useful for changing width of the rendered fringes
-def render_fringes_visual(fringes, canvas, width=1):
-    for fringe in fringes.list:
-        for point in fringe.points:
-            for x in range(-width+1, width):
-                for y in range(-width+1, width):
-                    try:
-                        canvas.fringe_phases_visual[point[0]+y,
-                                                    point[1]+x] = fringe.phase
-                    except IndexError:
-                        pass
+            try:
+                canvas.fringe_phases_visual[point[0]-width:point[0]+width+1,
+                                            point[1]-width:point[1]+width+1] = fringe.phase
+            except IndexError:
+                pass
 
 
 # Define a normalization and a colour map that can be used with
@@ -69,4 +50,4 @@ def render_fringes_visual(fringes, canvas, width=1):
 # a white background.
 norm = Normalize(vmin=-0.5, clip=False)
 cmap = copy(plt.cm.get_cmap('jet'))
-cmap.set_under('white')
+cmap.set_under('white', 1.0)

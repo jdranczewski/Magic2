@@ -42,8 +42,8 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
                 fringes.list[index].phase = phase
             else:
                 phase = fringes.list[index].phase
-    m2graphics.render_fringes(fringes, canvas, width=0)
-    canvas.imshow.set_data(canvas.fringe_phases)
+    m2graphics.render_fringes(fringes, canvas, width=3)
+    canvas.imshow.set_data(canvas.fringe_phases_visual)
     ax.plot(x,y)
 
 
