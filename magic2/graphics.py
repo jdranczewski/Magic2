@@ -15,6 +15,7 @@ class Canvas():
         self.fringe_phases_visual = np.zeros_like(self.fringes_image)-1
         self.fringe_phases = np.zeros_like(self.fringes_image)-1
         self.fringe_indices = np.zeros_like(self.fringes_image)-1
+        self.imshow = None
 
 
 # This function can be used to draw the fringes on a given canvas
