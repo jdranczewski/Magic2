@@ -18,9 +18,9 @@ def main():
     m2fringes.read_fringes(fringes, fringes_image)
     print(fringes.list)
 
-    canvas = np.zeros_like(fringes_image)
+    canvas = np.zeros_like(fringes_image)-1
     m2graphics.render_fringes(fringes, canvas)
-    plt.imshow(canvas)
+    plt.imshow(canvas, norm=m2graphics.norm, cmap=m2graphics.cmap)
     plt.show()
 
 
