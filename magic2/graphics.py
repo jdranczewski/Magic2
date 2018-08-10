@@ -50,4 +50,4 @@ def render_fringes(fringes, canvas, width=6):
 # a white background.
 norm = Normalize(vmin=-0.5, clip=False)
 cmap = copy(plt.cm.get_cmap('jet'))
-cmap.set_under('white', 1.0)
+cmap.set_bad('white', 1.0)
