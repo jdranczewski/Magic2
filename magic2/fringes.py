@@ -12,11 +12,13 @@ class Fringes():
 
 
 class Fringe():
-    def __init__(self, points):
+    def __init__(self, points, index):
         # List of points in the fringe
         self.points = points
         # Phase is an integer, going from 0 up
         self.phase = 0
+        # Store the fringe's index in the main fringe list
+        self.index = index
 
 
 # read_fringes takes in a Fringes class object, an True-False map
@@ -36,7 +38,9 @@ def read_fringes(fringes, fringes_image, graph=False):
     # While there are still points to process
     if graph:
         plt.imshow(fringes_image)
+    fringe_index = -1
     while len(black_points):
+        fringe_index += 1
         # Create an array to store the points of this fringe
         point = black_points[0]
         points = [[point[0]-1, point[1]-1]]
@@ -77,7 +81,7 @@ def read_fringes(fringes, fringes_image, graph=False):
                 backtrack = backtrack[1:]
                 neighbours = np.array([[1, 1]])
         # Create a fringe obejct and append it to the fringe list
-        fringe = Fringe(points)
+        fringe = Fringe(points, fringe_index)
         fringes.list.append(fringe)
         if graph:
             points = np.array(points)
