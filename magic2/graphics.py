@@ -5,9 +5,14 @@ from copy import copy
 
 
 class Canvas():
-    def __init__(self, sample):
-        self.main = np.zeros_like(sample)-1
-        self.fringe_indices = np.zeros_like(sample)-1
+    def __init__(self, filename):
+        # An image is loaded, and only its first colour component is taken
+        # out of red, green, blue, alpha. The .png images supplied are greyscale.
+        image = plt.imread(filename.name)[:, :, 0]
+        self.fringes_image = image == 0
+        self.mask = np.logical_or(image == 1, self.fringes_image)
+        self.fringe_phases = np.zeros_like(self.fringes_image)-1
+        self.fringe_indices = np.zeros_like(self.fringes_image)-1
 
 
 # This function can be used to draw the fringes on a given canvas
@@ -25,7 +30,7 @@ def render_fringes(fringes, canvas, width=1):
                     # of canvas space while alerting us of other valid errors
                     # that could occur
                     try:
-                        canvas.main[point[0]+y, point[1]+x] = fringe.phase
+                        canvas.fringe_phases[point[0]+y, point[1]+x] = fringe.phase
                         canvas.fringe_indices[point[0]+y,
                                               point[1]+x] = fringe.index
                     except IndexError:

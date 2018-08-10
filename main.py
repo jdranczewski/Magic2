@@ -8,20 +8,17 @@ import numpy as np
 def main():
     filename = tkinter.filedialog.askopenfile(filetypes=[("PNG files", "*.png;*.PNG")])
     print("Reading from", filename.name)
-    # An image is loaded, and only its first colour component is taken
-    # out of red, green, blue, alpha. The .png images supplied are greyscale.
-    image = plt.imread(filename.name)[:, :, 0]
-    fringes_image = image == 0
+    # A canvas object is created. It handles extracting the fringes and the
+    # mas out of the image. It also stores the fringe phases and indices
+    # in an array the shape of the initial image for easy referencing
+    canvas = m2graphics.Canvas(filename)
     fringes = m2fringes.Fringes()
     # Fringes are read out of the image and stored in Fringe objects
     # fringes.list stores a list of pointers to those obejcts
-    m2fringes.read_fringes(fringes, fringes_image)
-    print(fringes.list)
+    m2fringes.read_fringes(fringes, canvas.fringes_image)
 
-    canvas = m2graphics.Canvas(fringes_image)
     m2graphics.render_fringes(fringes, canvas)
-    # plt.imshow(canvas.main, norm=m2graphics.norm, cmap=m2graphics.cmap)
-    plt.imshow(canvas.main,  norm=m2graphics.norm, cmap=m2graphics.cmap)
+    plt.imshow(canvas.fringe_phases,  norm=m2graphics.norm, cmap=m2graphics.cmap)
     plt.show()
 
 
