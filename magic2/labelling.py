@@ -116,9 +116,14 @@ def onmove(event, labeller, line_plot):
 
 
 # Store whether the control key is pressed
-def onpress(event, labeller):
+def onpress(event, labeller, line_plot):
     if event.key == 'control':
         labeller.control = True
+    elif event.key == 'backspace':
+        labeller.points = labeller.points[:-1]
+        points = sp.array(labeller.points)
+        line_plot.set_data(points[:, 1], points[:, 0])
+        line_plot.figure.canvas.draw()
 
 
 def onrelease(event, labeller):
@@ -137,6 +142,6 @@ def label(fringes, canvas, fig, ax):
     fig.canvas.mpl_connect('motion_notify_event',
                            lambda event: onmove(event, labeller, line_plot))
     fig.canvas.mpl_connect('key_press_event',
-                           lambda event: onpress(event, labeller))
+                           lambda event: onpress(event, labeller, line_plot))
     fig.canvas.mpl_connect('key_release_event',
                            lambda event: onrelease(event, labeller))
