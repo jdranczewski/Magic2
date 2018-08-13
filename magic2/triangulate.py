@@ -20,6 +20,7 @@ class Triangulation:
             self.triangles.append(triangle)
         print("Finished")
         print(len(self.flat_triangles)/len(self.triangles))
+        print(len(self.flat_triangles), len(self.triangles))
 
     def get_simplices(self):
         return self.dt.simplices
@@ -34,16 +35,23 @@ class Triangle:
     def __init__(self, dt, index, points, values):
         self.vertices = dt.simplices[index]
         self.neighbours = dt.neighbors[index]
-        self.long_edges = [
-            distance(points, self.vertices[1], self.vertices[2]) > sp.sqrt(2),
-            distance(points, self.vertices[2], self.vertices[0]) > sp.sqrt(2),
-            distance(points, self.vertices[0], self.vertices[1]) > sp.sqrt(2)]
         self.flat = (values[self.vertices[0]] == values[self.vertices[1]]
-                     and values[self.vertices[1]] == values[self.vertices[2]]
-                     and sp.count_nonzero(self.long_edges))
+                     and values[self.vertices[1]] == values[self.vertices[2]])
+        if self.flat:
+            self.long_edges = [
+                distance(points, self.vertices[1], self.vertices[2]) > sp.sqrt(2),
+                distance(points, self.vertices[2], self.vertices[0]) > sp.sqrt(2),
+                distance(points, self.vertices[0], self.vertices[1]) > sp.sqrt(2)]
+            self.flat = self.flat and sp.count_nonzero(self.long_edges)
+        else: self.long_edges = [True, True, True]
 
     def get_sloped_neighbour(self, tri):
-        pass
+        for i in range(3):
+            if self.long_edges[i]:
+                n_index = self.neighbours[i]
+                if not tri.triangles[n_index].flat:
+                    return n_index
+        return None
 
 
 def triangulate(canvas):
