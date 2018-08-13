@@ -1,5 +1,5 @@
 import numpy as np
-import magic2.graphics as m2graphics
+from . import graphics as m2graphics
 
 
 class Labeller():
