@@ -1,4 +1,4 @@
-import numpy as np
+import scipy as sp
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from copy import copy
@@ -11,10 +11,10 @@ class Canvas():
         # sThe .png images supplied are greyscale.
         image = plt.imread(filename.name)[:, :, 0]
         self.fringes_image = image == 0
-        self.mask = np.logical_or(image == 1, self.fringes_image)
-        self.fringe_phases_visual = np.zeros_like(self.fringes_image)-1
-        self.fringe_phases = np.zeros_like(self.fringes_image)-1
-        self.fringe_indices = np.zeros_like(self.fringes_image)-1
+        self.mask = sp.logical_or(image == 1, self.fringes_image)
+        self.fringe_phases_visual = sp.zeros_like(self.fringes_image)-1
+        self.fringe_phases = sp.zeros_like(self.fringes_image)-1
+        self.fringe_indices = sp.zeros_like(self.fringes_image)-1
         self.imshow = None
 
 

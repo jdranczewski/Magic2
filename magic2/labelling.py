@@ -1,4 +1,5 @@
-import numpy as np
+import scipy as sp
+import scipy.special as special
 from . import graphics as m2graphics
 
 
@@ -19,7 +20,7 @@ def onclick(event, labeller, line_plot, fringes, canvas, fig, ax):
     if labeller.control and not event.dblclick and event.xdata:
         labeller.points.append([event.ydata, event.xdata])
         # We use the points list to draw a line on the graph
-        points = np.array(labeller.points)
+        points = sp.array(labeller.points)
         line_plot.set_data(points[:, 1], points[:, 0])
         line_plot.figure.canvas.draw()
     # If the event was a double click, label the fringes and clear the data
@@ -46,12 +47,12 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         #           ##
         #             ###
         #                ##
-        resolution = int(np.max([abs(labeller.points[i-1][1]-labeller.points[i][1]),
+        resolution = int(sp.amax([abs(labeller.points[i-1][1]-labeller.points[i][1]),
                                  abs(labeller.points[i-1][0]-labeller.points[i][0])]))
-        x = np.append(x, np.round(np.linspace(labeller.points[i-1][1],
+        x = sp.append(x, special.round(sp.linspace(labeller.points[i-1][1],
                                               labeller.points[i][1],
                                               resolution)))
-        y = np.append(y, np.round(np.linspace(labeller.points[i-1][0],
+        y = sp.append(y, special.round(sp.linspace(labeller.points[i-1][0],
                                               labeller.points[i][0],
                                               resolution)))
     # Prepare for labelling. Phase and prev_index are temporarily set to -1
@@ -93,7 +94,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         fringes.max = phase
     # Render and show the changed fringes
     m2graphics.render_fringes(fringes, canvas, width=3, indices=fix_indices)
-    canvas.imshow.set_data(np.ma.masked_where(canvas.fringe_phases_visual == -1, canvas.fringe_phases_visual))
+    canvas.imshow.set_data(sp.ma.masked_where(canvas.fringe_phases_visual == -1, canvas.fringe_phases_visual))
     canvas.imshow.set_clim(0, fringes.max)
     # This (when uncommented) allows one to see the pixels the labelling line
     # went through. Useful for debugging
@@ -105,7 +106,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
 def onmove(event, labeller, line_plot):
     if len(labeller.points) and event.ydata:
         # Note that we are not actually modifying labeller.points here
-        points = np.append(np.array(labeller.points),
+        points = sp.append(sp.array(labeller.points),
                            [[event.ydata, event.xdata]], 0)
         line_plot.set_data(points[:, 1], points[:, 0])
         line_plot.figure.canvas.draw()

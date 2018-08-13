@@ -1,5 +1,5 @@
 # This file contains functionality related to dealing with fringes
-import numpy as np
+import scipy as sp
 import matplotlib.pyplot as plt
 
 
@@ -31,11 +31,11 @@ def read_fringes(fringes, fringes_image, graph=False, filter=5):
     # of searching for neighbours and reaching beyond the edges
     # without being too complicated. This is later accounted for
     # when saving point coordinates
-    fringes_image = np.pad(fringes_image, 1, 'constant')
+    fringes_image = sp.pad(fringes_image, 1, 'constant')
     # Create a list of coordinates of all the black pixels
     # Note that the coordinates will be in the order [y, x]
     # as this is the convention used for matrices: [row, column].
-    black_points = np.transpose(np.nonzero(fringes_image))
+    black_points = sp.transpose(sp.nonzero(fringes_image))
     # While there are still points to process
     if graph:
         plt.imshow(fringes_image)
@@ -49,7 +49,7 @@ def read_fringes(fringes, fringes_image, graph=False, filter=5):
         # Remove in the point so that it is not analysed again
         fringes_image[point[0], point[1]] = False
         # Find the point's neighbours
-        neighbours = np.transpose(np.nonzero(
+        neighbours = sp.transpose(sp.nonzero(
                     fringes_image[point[0]-1:point[0]+2,
                                   point[1]-1:point[1]+2]))
         # While we still can find any neighbours, add them to the list
@@ -71,7 +71,7 @@ def read_fringes(fringes, fringes_image, graph=False, filter=5):
             points.append([point[0]-1, point[1]-1])
             fringes_image[point[0], point[1]] = False
             # Find the neighbours of the new point
-            neighbours = np.transpose(np.nonzero(
+            neighbours = sp.transpose(sp.nonzero(
                         fringes_image[point[0]-1:point[0]+2,
                                       point[1]-1:point[1]+2]))
             # If the point has no neighbours, try pulling a point out of the
@@ -79,15 +79,15 @@ def read_fringes(fringes, fringes_image, graph=False, filter=5):
             if not len(neighbours) and len(backtrack):
                 point = backtrack[0]
                 backtrack = backtrack[1:]
-                neighbours = np.array([[1, 1]])
+                neighbours = sp.array([[1, 1]])
         # Create a fringe obejct and append it to the fringe list
         if len(points) >= 5:
             fringe_index += 1
             fringe = Fringe(points, fringe_index)
             fringes.list.append(fringe)
             if graph:
-                points = np.array(points)
+                points = sp.array(points)
                 plt.plot(points[:, 1], points[:, 0])
-        black_points = np.transpose(np.nonzero(fringes_image))
+        black_points = sp.transpose(sp.nonzero(fringes_image))
     if graph:
         plt.show()

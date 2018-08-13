@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import magic2.fringes as m2fringes
 import magic2.graphics as m2graphics
 import magic2.labelling as m2labelling
-import numpy as np
+import scipy as sp
 
 
 def main():
@@ -20,7 +20,7 @@ def main():
 
     m2graphics.render_fringes(fringes, canvas, width=3)
     fig, ax = plt.subplots()
-    canvas.imshow = ax.imshow(np.ma.masked_where(canvas.fringe_phases_visual == -1, canvas.fringe_phases_visual), cmap=m2graphics.cmap)
+    canvas.imshow = ax.imshow(sp.ma.masked_where(canvas.fringe_phases_visual == -1, canvas.fringe_phases_visual), cmap=m2graphics.cmap)
     m2labelling.label(fringes, canvas, fig, ax)
     plt.show()
 
