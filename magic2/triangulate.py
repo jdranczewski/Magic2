@@ -27,7 +27,7 @@ class Triangulation:
 
 def distance(points, i1, i2):
     return sp.sqrt((points[i2, 0]-points[i1, 0])**2
-                   + (points[i2, 0]-points[i1, 0])**2)
+                   + (points[i2, 1]-points[i1, 1])**2)
 
 
 class Triangle:
@@ -35,16 +35,15 @@ class Triangle:
         self.vertices = dt.simplices[index]
         self.neighbours = dt.neighbors[index]
         self.long_edges = [
-            distance(points, self.vertices[0], self.vertices[1]) > sp.sqrt(2),
             distance(points, self.vertices[1], self.vertices[2]) > sp.sqrt(2),
-            distance(points, self.vertices[2], self.vertices[0]) > sp.sqrt(2)]
+            distance(points, self.vertices[2], self.vertices[0]) > sp.sqrt(2),
+            distance(points, self.vertices[0], self.vertices[1]) > sp.sqrt(2)]
         self.flat = (values[self.vertices[0]] == values[self.vertices[1]]
-                     and values[self.vertices[1]] == values[self.vertices[2]])
-                     # and sp.count_nonzero(self.long_edges))
+                     and values[self.vertices[1]] == values[self.vertices[2]]
+                     and sp.count_nonzero(self.long_edges))
 
     def get_sloped_neighbour(self, tri):
         pass
-
 
 
 def triangulate(canvas):
