@@ -78,7 +78,6 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         if index >= 0 and index != prev_index:
             if phase >= 0:
                 phase += 1
-                # print(index, phase)
                 fringes.list[index].phase = phase
             else:
                 # This takes the value of the first fringe encountered.

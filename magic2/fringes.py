@@ -24,8 +24,9 @@ class Fringe():
 # read_fringes takes in a Fringes class object, an True-False map
 # representation of the interferogram (where Truths are the Fringe
 # pixels) and an optional graph parameter that determines whether
-# results should be plotted (useful for debugging).
-def read_fringes(fringes, fringes_image, graph=False):
+# results should be plotted (useful for debugging). Filter is the
+# minimum length a fringe should have to be detected
+def read_fringes(fringes, fringes_image, graph=False, filter=5):
     # Pad the image with zeroes on each edge. This solves the issue
     # of searching for neighbours and reaching beyond the edges
     # without being too complicated. This is later accounted for
@@ -40,7 +41,6 @@ def read_fringes(fringes, fringes_image, graph=False):
         plt.imshow(fringes_image)
     fringe_index = -1
     while len(black_points):
-        fringe_index += 1
         # Create an array to store the points of this fringe
         point = black_points[0]
         points = [[point[0]-1, point[1]-1]]
@@ -81,11 +81,13 @@ def read_fringes(fringes, fringes_image, graph=False):
                 backtrack = backtrack[1:]
                 neighbours = np.array([[1, 1]])
         # Create a fringe obejct and append it to the fringe list
-        fringe = Fringe(points, fringe_index)
-        fringes.list.append(fringe)
-        if graph:
-            points = np.array(points)
-            plt.plot(points[:, 1], points[:, 0])
+        if len(points) >= 5:
+            fringe_index += 1
+            fringe = Fringe(points, fringe_index)
+            fringes.list.append(fringe)
+            if graph:
+                points = np.array(points)
+                plt.plot(points[:, 1], points[:, 0])
         black_points = np.transpose(np.nonzero(fringes_image))
     if graph:
         plt.show()
