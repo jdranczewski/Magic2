@@ -34,14 +34,17 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
                                               labeller.points[i][0],
                                               resolution)))
     phase = -1
+    prev_index = -1
     for i in range(len(x)):
         index = canvas.fringe_indices[int(y[i]), int(x[i])]
-        if index >= 0:
+        if index >= 0 and index != prev_index:
             if phase >= 0:
                 phase += 1
+                # print(index, phase)
                 fringes.list[index].phase = phase
             else:
                 phase = fringes.list[index].phase
+            prev_index = index
     if phase > fringes.max:
         fringes.max = phase
     m2graphics.render_fringes(fringes, canvas, width=3)
