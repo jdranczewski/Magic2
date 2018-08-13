@@ -49,7 +49,7 @@ class Triangle:
         for i in range(3):
             if self.long_edges[i]:
                 n_index = self.neighbours[i]
-                if not tri.triangles[n_index].flat:
+                if n_index != -1 and not tri.triangles[n_index].flat:
                     return n_index
         return None
 
