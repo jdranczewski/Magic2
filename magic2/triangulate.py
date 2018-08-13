@@ -1,5 +1,6 @@
 import scipy as sp
 from scipy.spatial import Delaunay
+from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 from . import graphics as m2graphics
 
@@ -38,6 +39,25 @@ class Triangulation:
     def get_simplices(self):
         return self.dt.simplices
 
+    def optimise(self):
+        changes = 1
+        while changes:
+            changes = 0
+            for i in range(len(self.flat_triangles)):
+                triangle = self.triangles[i]
+                neighbour = triangle.get_sloped_neighbour(self)
+                if neighbour is None:
+                    continue
+                # ch = len(ConvexHull(points[triangle.vertices]).vertices)
+                all_points = sp.concatenate(
+                    (self.points[triangle.vertices, :],
+                     self.points[neighbour.vertices, :]), 0)
+                # ch = len(ConvexHull(all_points).vertices)
+                ch = 4
+                if ch == 4:
+                    pass
+                elif ch == 3:
+                    pass
 
 
 # Calculate the distance between two points in the points list
@@ -81,7 +101,7 @@ class Triangle:
                 n_index = self.neighbours[i]
                 # If the neighbour exists and is flat, return its index
                 if n_index != -1 and not tri.triangles[n_index].flat:
-                    return n_index
+                    return tri.triangles[n_index]
         # If no neighbour found, return None
         return None
 
@@ -94,3 +114,6 @@ def triangulate(canvas):
     plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.get_simplices())
     plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
     plt.show()
+    print("Optimisation")
+    tri.optimise()
+    print("Finished")
