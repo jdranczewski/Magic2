@@ -36,7 +36,9 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
     phase = -1
     prev_index = -1
     for i in range(len(x)):
-        index = canvas.fringe_indices[int(y[i]), int(x[i])]
+        for index in canvas.fringe_indices[int(y[i])-1:int(y[i])+1, int(x[i])]:
+            if index != -1:
+                break
         if index >= 0 and index != prev_index:
             if phase >= 0:
                 phase += 1
@@ -50,7 +52,6 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
     m2graphics.render_fringes(fringes, canvas, width=3)
     canvas.imshow.set_data(np.ma.masked_where(canvas.fringe_phases_visual == -1, canvas.fringe_phases_visual))
     canvas.imshow.set_clim(0, fringes.max)
-    ax.plot(x, y)
 
 
 def onmove(event, labeller, line_plot):
