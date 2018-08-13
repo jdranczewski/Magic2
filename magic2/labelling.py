@@ -48,13 +48,13 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         #             ###
         #                ##
         resolution = int(sp.amax([abs(labeller.points[i-1][1]-labeller.points[i][1]),
-                                 abs(labeller.points[i-1][0]-labeller.points[i][0])]))
+                                  abs(labeller.points[i-1][0]-labeller.points[i][0])]))
         x = sp.append(x, special.round(sp.linspace(labeller.points[i-1][1],
-                                              labeller.points[i][1],
-                                              resolution)))
+                                                   labeller.points[i][1],
+                                                   resolution)))
         y = sp.append(y, special.round(sp.linspace(labeller.points[i-1][0],
-                                              labeller.points[i][0],
-                                              resolution)))
+                                                   labeller.points[i][0],
+                                                   resolution)))
     # Prepare for labelling. Phase and prev_index are temporarily set to -1
     phase = -1
     prev_index = -1
