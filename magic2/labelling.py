@@ -42,10 +42,12 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
                 fringes.list[index].phase = phase
             else:
                 phase = fringes.list[index].phase
+    if phase > fringes.max:
+        fringes.max = phase
     m2graphics.render_fringes(fringes, canvas, width=3)
     canvas.imshow.set_data(np.ma.masked_where(canvas.fringe_phases_visual == -1, canvas.fringe_phases_visual))
-    canvas.imshow.set_clim(0, np.amax(canvas.fringe_phases))
-    ax.plot(x,y)
+    canvas.imshow.set_clim(0, fringes.max)
+    ax.plot(x, y)
 
 
 def onmove(event, labeller, line_plot):
