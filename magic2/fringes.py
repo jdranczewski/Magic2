@@ -15,8 +15,9 @@ class Fringe():
     def __init__(self, points, index):
         # List of points in the fringe
         self.points = points
-        # Phase is an integer, going from 0 up
-        self.phase = 0
+        # Phase is an integer, going from 0 up. -2048 indicates
+        # an unlabelled fringe
+        self.phase = -2048
         # Store the fringe's index in the main fringe list
         self.index = index
 

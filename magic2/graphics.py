@@ -12,8 +12,9 @@ class Canvas():
         image = plt.imread(filename.name)[:, :, 0]
         self.fringes_image = image == 0
         self.mask = sp.logical_or(image == 1, self.fringes_image)
-        self.fringe_phases_visual = sp.zeros_like(self.fringes_image)-1
-        self.fringe_phases = sp.zeros_like(self.fringes_image)-1
+        # -1024 indicates an area where there is no data
+        self.fringe_phases_visual = sp.zeros_like(self.fringes_image)-1024
+        self.fringe_phases = sp.zeros_like(self.fringes_image)-1024
         self.fringe_indices = sp.zeros_like(self.fringes_image)-1
         self.imshow = None
 
@@ -57,3 +58,4 @@ def render_fringes(fringes, canvas, width=0, indices=None):
 norm = Normalize(vmin=-0.5, clip=False)
 cmap = copy(plt.cm.get_cmap('jet'))
 cmap.set_bad('white', 1.0)
+cmap.set_under('black', 1.0)

@@ -20,7 +20,7 @@ def main():
 
     m2graphics.render_fringes(fringes, canvas, width=3)
     fig, ax = plt.subplots()
-    canvas.imshow = ax.imshow(sp.ma.masked_where(canvas.fringe_phases_visual == -1, canvas.fringe_phases_visual), cmap=m2graphics.cmap)
+    canvas.imshow = ax.imshow(sp.ma.masked_where(canvas.fringe_phases_visual == -1024, canvas.fringe_phases_visual), cmap=m2graphics.cmap)
     m2labelling.label(fringes, canvas, fig, ax)
     plt.show()
 

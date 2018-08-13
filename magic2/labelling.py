@@ -84,6 +84,9 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
                 # This takes the value of the first fringe encountered.
                 # All values after that are just increments
                 phase = fringes.list[index].phase
+                if phase == -2048:
+                    phase = 0
+                    fringes.list[index].phase = phase
             fix_indices.append(index)
             # Storing this allows us to prevent labelling a fringe
             # multiple times
@@ -94,7 +97,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         fringes.max = phase
     # Render and show the changed fringes
     m2graphics.render_fringes(fringes, canvas, width=3, indices=fix_indices)
-    canvas.imshow.set_data(sp.ma.masked_where(canvas.fringe_phases_visual == -1, canvas.fringe_phases_visual))
+    canvas.imshow.set_data(sp.ma.masked_where(canvas.fringe_phases_visual == -1024, canvas.fringe_phases_visual))
     canvas.imshow.set_clim(0, fringes.max)
     # This (when uncommented) allows one to see the pixels the labelling line
     # went through. Useful for debugging
