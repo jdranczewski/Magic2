@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import magic2.fringes as m2fringes
 import magic2.graphics as m2graphics
 import magic2.labelling as m2labelling
+import magic2.triangulate as m2triangulate
 import scipy as sp
 
 
@@ -23,6 +24,8 @@ def main():
     canvas.imshow = ax.imshow(sp.ma.masked_where(canvas.fringe_phases_visual == -1024, canvas.fringe_phases_visual), cmap=m2graphics.cmap)
     m2labelling.label(fringes, canvas, fig, ax)
     plt.show()
+
+    m2triangulate.triangulate(canvas)
 
 
 if __name__ == "__main__":
