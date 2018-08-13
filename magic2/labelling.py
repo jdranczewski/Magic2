@@ -121,8 +121,11 @@ def onpress(event, labeller, line_plot):
         labeller.control = True
     elif event.key == 'backspace':
         labeller.points = labeller.points[:-1]
-        points = sp.array(labeller.points)
-        line_plot.set_data(points[:, 1], points[:, 0])
+        if len(labeller.points):
+            points = sp.array(labeller.points)
+            line_plot.set_data(points[:, 1], points[:, 0])
+        else:
+            line_plot.set_data([], [])
         line_plot.figure.canvas.draw()
 
 
