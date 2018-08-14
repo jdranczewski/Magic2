@@ -40,10 +40,11 @@ class Triangulation:
         return self.dt.simplices
 
     def optimise(self):
+        initial_len = len(self.flat_triangles)
         # This loop will run until no further changes are possible
         changes = 1
         while changes:
-            print(len(self.flat_triangles))
+            print(1-len(self.flat_triangles)/initial_len)
             # Set the number of changes to 0. If a change is made, this
             # will be incremented, making the while loop do another round
             changes = 0
@@ -109,7 +110,7 @@ class Triangulation:
                         i += 1
 
     def switch_triangles(self, triangle, neighbour, op1, op2):
-        print("switching", triangle.index, neighbour.index, "with neighbours", triangle.neighbours, neighbour.neighbours, self.triangles[29].neighbours)
+        # print("switching", triangle.index, neighbour.index, "with neighbours", triangle.neighbours, neighbour.neighbours, self.triangles[29].neighbours)
         tn = triangle.neighbours.copy()
         nn = neighbour.neighbours.copy()
         triangle.neighbours[op1] = nn[
@@ -125,9 +126,7 @@ class Triangulation:
             n_temp[
                 sp.argwhere(n_temp == neighbour.index)
             ] = triangle.index
-        print("The new neighbours are", triangle.neighbours, neighbour.neighbours)
         if neighbour.neighbours[op2] != -1:
-            # print(op1, op2, self.triangles[triangle.neighbours[op2]])
             n_temp = self.triangles[neighbour.neighbours[op2]].neighbours
             n_temp[
                 sp.argwhere(n_temp == triangle.index)
@@ -185,8 +184,6 @@ class Triangle:
                 # If the neighbour exists and isn't flat, return its index
                 if n_index != -1 and not tri.triangles[n_index].flat:
                     neighbour = tri.triangles[n_index]
-                    print(self.index, self.neighbours, neighbour.index, neighbour.neighbours)
-                    print(i, sp.argwhere(neighbour.neighbours == self.index))
                     return neighbour, i, int(sp.argwhere(neighbour.neighbours == self.index))
         # If no neighbour found, return None
         return None, None, None
