@@ -44,7 +44,6 @@ class Triangulation:
         # This loop will run until no further changes are possible
         changes = 1
         while changes:
-            print(1-len(self.flat_triangles)/initial_len)
             # Set the number of changes to 0. If a change is made, this
             # will be incremented, making the while loop do another round
             changes = 0
@@ -106,11 +105,15 @@ class Triangulation:
                         changes += 1
                     else:
                         # print("concave")
+                        self.add_point(triangle, neighbour, op1, op2)
                         # del self.flat_triangles[i]
                         i += 1
+            print(1-len(self.flat_triangles)/initial_len)
 
     def switch_triangles(self, triangle, neighbour, op1, op2):
-        # print("switching", triangle.index, neighbour.index, "with neighbours", triangle.neighbours, neighbour.neighbours, self.triangles[29].neighbours)
+        # print("switching", triangle.index, neighbour.index,
+        #       "with neighbours", triangle.neighbours,
+        #       neighbour.neighbours, self.triangles[29].neighbours)
         tn = triangle.neighbours.copy()
         nn = neighbour.neighbours.copy()
         # This escapes words, maybe a drawing will help?
@@ -146,6 +149,9 @@ class Triangulation:
         # Finally we change the status of the flat triangle,
         # as it is now sloped
         triangle.flat = False
+
+    def add_point(self, triangle, neighbour, op1, op2):
+        pass
 
 
 # Calculate the distance between two points in the points list
