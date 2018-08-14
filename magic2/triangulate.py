@@ -43,6 +43,7 @@ class Triangulation:
         # This loop will run until no further changes are possible
         changes = 1
         while changes:
+            print(len(self.flat_triangles))
             # Set the number of changes to 0. If a change is made, this
             # will be incremented, making the while loop do another round
             changes = 0
@@ -64,7 +65,7 @@ class Triangulation:
                 # will stay in self.flat_triangles, indicating that it is
                 # not fixable
                 if neighbour is None:
-                    print("none")
+                    # print("none")
                     i += 1
                 else:
                     # Calculate the areas of the two initial triangles, and the
@@ -98,13 +99,46 @@ class Triangulation:
                     # Check if the areas before and after are the same, and
                     # also whether the final areas aren't zero
                     if ai1 + ai2 == af1 + af2 and af1 != 0 and af2 != 0:
-                        print("convex")
-                        # del self.flat_triangles[i]
-                        i += 1
+                        # print("convex")
+                        self.switch_triangles(triangle, neighbour, op1, op2)
+                        del self.flat_triangles[i]
+                        changes += 1
                     else:
-                        print("concave")
+                        # print("concave")
                         # del self.flat_triangles[i]
                         i += 1
+
+    def switch_triangles(self, triangle, neighbour, op1, op2):
+        print("switching", triangle.index, neighbour.index, "with neighbours", triangle.neighbours, neighbour.neighbours, self.triangles[29].neighbours)
+        tn = triangle.neighbours.copy()
+        nn = neighbour.neighbours.copy()
+        triangle.neighbours[op1] = nn[
+            sp.argwhere(neighbour.vertices == triangle.vertices[(op1+1) % 3])
+        ]
+        triangle.neighbours[(op1+2) % 3] = neighbour.index
+        neighbour.neighbours[op2] = tn[(op1+2) % 3]
+        neighbour.neighbours[
+            sp.argwhere(neighbour.vertices == triangle.vertices[(op1+1) % 3])
+        ] = triangle.index
+        if triangle.neighbours[op1] != -1:
+            n_temp = self.triangles[triangle.neighbours[op1]].neighbours
+            n_temp[
+                sp.argwhere(n_temp == neighbour.index)
+            ] = triangle.index
+        print("The new neighbours are", triangle.neighbours, neighbour.neighbours)
+        if neighbour.neighbours[op2] != -1:
+            # print(op1, op2, self.triangles[triangle.neighbours[op2]])
+            n_temp = self.triangles[neighbour.neighbours[op2]].neighbours
+            n_temp[
+                sp.argwhere(n_temp == triangle.index)
+            ] = neighbour.index
+        triangle.vertices[(op1+1) % 3] = neighbour.vertices[op2]
+        neighbour.vertices[
+            sp.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3])
+        ] = triangle.vertices[op1]
+        triangle.vert_coordinates = self.points[triangle.vertices]
+        neighbour.vert_coordinates = self.points[neighbour.vertices]
+        triangle.flat = False
 
 
 # Calculate the distance between two points in the points list
@@ -151,7 +185,9 @@ class Triangle:
                 # If the neighbour exists and isn't flat, return its index
                 if n_index != -1 and not tri.triangles[n_index].flat:
                     neighbour = tri.triangles[n_index]
-                    return neighbour, i, sp.argwhere(neighbour.neighbours == self.index)
+                    print(self.index, self.neighbours, neighbour.index, neighbour.neighbours)
+                    print(i, sp.argwhere(neighbour.neighbours == self.index))
+                    return neighbour, i, int(sp.argwhere(neighbour.neighbours == self.index))
         # If no neighbour found, return None
         return None, None, None
 
@@ -164,11 +200,13 @@ def triangulate(canvas):
     plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.get_simplices())
     plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
     plt.show()
+    # plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.dt.simplices)
     print("Optimisation")
     tri.optimise()
     print("Finished")
     plt.imshow(canvas.fringe_phases, cmap=m2graphics.cmap)
-    plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.get_simplices())
     print(tri.flat_triangles)
+    # plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
+    plt.triplot(tri.points[:, 1], tri.points[:, 0], [triangle.vertices for triangle in tri.triangles])
     plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
     plt.show()
