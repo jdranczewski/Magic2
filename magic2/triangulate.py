@@ -113,6 +113,10 @@ class Triangulation:
         # print("switching", triangle.index, neighbour.index, "with neighbours", triangle.neighbours, neighbour.neighbours, self.triangles[29].neighbours)
         tn = triangle.neighbours.copy()
         nn = neighbour.neighbours.copy()
+        # This escapes words, maybe a drawing will help?
+        # https://imgur.com/ZvuKOZH
+        # Basically we need to update the neighbours lists of the
+        # triangles we're working with...
         triangle.neighbours[op1] = nn[
             sp.argwhere(neighbour.vertices == triangle.vertices[(op1+1) % 3])
         ]
@@ -121,6 +125,7 @@ class Triangulation:
         neighbour.neighbours[
             sp.argwhere(neighbour.vertices == triangle.vertices[(op1+1) % 3])
         ] = triangle.index
+        # ...as well as their neighbouring triangles (if they exist)
         if triangle.neighbours[op1] != -1:
             n_temp = self.triangles[triangle.neighbours[op1]].neighbours
             n_temp[
@@ -131,12 +136,15 @@ class Triangulation:
             n_temp[
                 sp.argwhere(n_temp == triangle.index)
             ] = neighbour.index
+        # Now we just need to update the triangles' vertices
         triangle.vertices[(op1+1) % 3] = neighbour.vertices[op2]
         neighbour.vertices[
             sp.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3])
         ] = triangle.vertices[op1]
         triangle.vert_coordinates = self.points[triangle.vertices]
         neighbour.vert_coordinates = self.points[neighbour.vertices]
+        # Finally we change the status of the flat triangle,
+        # as it is now sloped
         triangle.flat = False
 
 
