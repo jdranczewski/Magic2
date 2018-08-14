@@ -40,23 +40,37 @@ class Triangulation:
         return self.dt.simplices
 
     def optimise(self):
+        # This loop will run until no further changes are possible
         changes = 1
         while changes:
+            # Set the number of changes to 0. If a change is made, this
+            # will be incremented, making the while loop do another round
             changes = 0
+            # Instead of using a for loop, we will use a while loop with
+            # our own iterator (i). This gives us more control, which
+            # is necessary since the list we are iterating on changes size
+            # during this operation
             i = 0
             while i < len(self.flat_triangles):
+                # Get the flat triangle object in quetsion, as well as its
+                # sloped neighbour (if it exists) and the vertex indices
+                # for the points that do not lay on the joining edge
                 triangle = self.triangles[self.flat_triangles[i]]
                 neighbour, op1, op2 = triangle.get_sloped_neighbour(self)
+                # If there is no sloped neighbour across a long edge, we leave
+                # this flat triangle alone. It is possible that it will get a
+                # sloped neighbour later in the loop. If not, the while loop
+                # will break due to no changes being made, and this triangle
+                # will stay in self.flat_triangles, indicating that it is
+                # not fixable
                 if neighbour is None:
                     print("none")
-                    # del self.flat_triangles[i]
                     i += 1
                 else:
-                    # all_points = sp.concatenate(
-                    #     (self.points[triangle.vertices, :],
-                    #      self.points[neighbour.vertices, :]), 0)
-                    # ch = len(ConvexHull(all_points).vertices)
-                    ch = 4
+                    # Calculate the areas of the two initial triangles, and the
+                    # two triangles that would be constructed in an edge flip.
+                    # If the sum of the areas before and after the flip is the
+                    # same, the simplex formed by the triangles was convex
                     ai1 = 0.5 * abs(
                           (triangle.vert_coordinates[op1, 1] - triangle.vert_coordinates[(op1+2)%3, 1])
                         * (triangle.vert_coordinates[(op1+1)%3, 0] - triangle.vert_coordinates[op1, 0])
@@ -81,13 +95,14 @@ class Triangulation:
                         - (triangle.vert_coordinates[op1, 1] - neighbour.vert_coordinates[op2, 1])
                         * (triangle.vert_coordinates[(op1+1)%3, 0] - triangle.vert_coordinates[op1, 0])
                     )
-                    # print(ai1, ai2, af1, af2)
-                    if ai1 + ai2 == af1 + af2:
+                    # Check if the areas before and after are the same, and
+                    # also whether the final areas aren't zero
+                    if ai1 + ai2 == af1 + af2 and af1 != 0 and af2 != 0:
                         print("convex")
                         # del self.flat_triangles[i]
                         i += 1
                     else:
-                        # print("concave")
+                        print("concave")
                         # del self.flat_triangles[i]
                         i += 1
 
