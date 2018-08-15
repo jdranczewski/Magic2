@@ -5,7 +5,7 @@ from copy import copy
 
 
 class Canvas():
-    def __init__(self, filename):
+    def __init__(self, filename, imshow=None):
         # An image is loaded, and only its first colour component is taken
         # out of red, green, blue, alpha.
         # The .png images supplied are greyscale.
@@ -34,7 +34,7 @@ class Canvas():
         self.interpolated = sp.zeros_like(self.fringes_image)-1024.0
         # this parameter will store the object returned by matplotlib's
         # imshow function, making it easy to change the data being displayed
-        self.imshow = None
+        self.imshow = imshow
 
 
 # This function can be used to draw the fringes on a given canvas

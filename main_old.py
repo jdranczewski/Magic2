@@ -17,7 +17,7 @@ def main():
     fringes = m2fringes.Fringes()
     # Fringes are read out of the image and stored in Fringe objects
     # fringes.list stores a list of pointers to those obejcts
-    m2fringes.read_fringes(fringes, canvas.fringes_image)
+    m2fringes.read_fringes(fringes, canvas)
 
     m2graphics.render_fringes(fringes, canvas, width=3)
     fig, ax = plt.subplots()

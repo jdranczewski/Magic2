@@ -27,12 +27,12 @@ class Fringe():
 # pixels) and an optional graph parameter that determines whether
 # results should be plotted (useful for debugging). Filter is the
 # minimum length a fringe should have to be detected
-def read_fringes(fringes, fringes_image, graph=False, filter=5):
+def read_fringes(fringes, canvas, graph=False, filter=5):
     # Pad the image with zeroes on each edge. This solves the issue
     # of searching for neighbours and reaching beyond the edges
     # without being too complicated. This is later accounted for
     # when saving point coordinates
-    fringes_image = sp.pad(fringes_image, 1, 'constant')
+    fringes_image = sp.pad(canvas.fringes_image, 1, 'constant')
     # Create a list of coordinates of all the black pixels
     # Note that the coordinates will be in the order [y, x]
     # as this is the convention used for matrices: [row, column].
