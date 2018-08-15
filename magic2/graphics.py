@@ -16,6 +16,8 @@ class Canvas():
         self.fringe_phases_visual = sp.zeros_like(self.fringes_image)-1024
         self.fringe_phases = sp.zeros_like(self.fringes_image)-1024
         self.fringe_indices = sp.zeros_like(self.fringes_image)-1
+        self.x, self.y = sp.meshgrid(sp.arange(0, len(self.fringes_image[0])), sp.arange(0, len(self.fringes_image)))
+        self.interpolated = sp.zeros_like(self.fringes_image)-10.0
         self.imshow = None
 
 

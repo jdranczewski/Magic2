@@ -217,6 +217,7 @@ class Triangulation:
 
     def interpolate(self, canvas):
         for triangle in self.triangles:
+            # print(triangle.vert_coordinates)
             co = triangle.vert_coordinates
             div = (co[1,0]-co[2,0])*(co[0,1]-co[2,1])+(co[2,1]-co[1,1])*(co[0,0]-co[2,0])
             a0 = (co[1, 0]-co[2, 0])
@@ -227,17 +228,20 @@ class Triangulation:
             xmax = int(sp.amax(triangle.vert_coordinates[:,1]))+1
             ymin = int(sp.amin(triangle.vert_coordinates[:,0]))
             ymax = int(sp.amax(triangle.vert_coordinates[:,0]))+1
-            for x in range(int(sp.amin(triangle.vert_coordinates[:,1])), int(sp.amax(triangle.vert_coordinates[:,1]))+1):
-                for y in range(int(sp.amin(triangle.vert_coordinates[:,0])), int(sp.amax(triangle.vert_coordinates[:,0]))+1):
-                    w0 = (a0*(x-co[2,1])+a1*(y-co[2,0]))/div
-                    w1 = (a2*(x-co[2,1])+a3*(y-co[2,0]))/div
-                    w2 = sp.round_(1-w0-w1, 10)
-                    if w0 >= 0 and w1 >= 0 and w2 >= 0:
-                        canvas.interpolated[y, x] = (
-                            self.values[triangle.vertices[0]]*w0
-                            + self.values[triangle.vertices[1]]*w1
-                            + self.values[triangle.vertices[2]]*w2
-                        )
+            slice = canvas.interpolated[ymin:ymax, xmin:xmax]
+            x_slice = canvas.x[ymin:ymax, xmin:xmax]
+            y_slice = canvas.y[ymin:ymax, xmin:xmax]
+            w0 = (a0*(x_slice-co[2,1])+a1*(y_slice-co[2,0]))/div
+            w1 = (a2*(x_slice-co[2,1])+a3*(y_slice-co[2,0]))/div
+            w2 = sp.round_(1-w0-w1, 10)
+            slice = (
+                self.values[triangle.vertices[0]]*w0
+                + self.values[triangle.vertices[1]]*w1
+                + self.values[triangle.vertices[2]]*w2
+            )
+            mask = sp.logical_and(sp.logical_and(w0>=0, w1>=0), w2>=0)
+            # print(sp.ma.masked_where(mask==False, slice))
+            canvas.interpolated[ymin:ymax, xmin:xmax][mask] = slice[mask]
 
 
 # Calculate the distance between two points in the points list
@@ -322,5 +326,7 @@ def triangulate(canvas):
     plt.show()
     tri.interpolate(canvas)
     plt.imshow(canvas.interpolated, cmap=m2graphics.cmap)
-    # plt.triplot(tri.points[:, 1], tri.points[:, 0], [triangle.vertices for triangle in tri.triangles])
+    plt.show()
+    plt.imshow(canvas.interpolated, cmap=m2graphics.cmap)
+    plt.triplot(tri.points[:, 1], tri.points[:, 0], [triangle.vertices for triangle in tri.triangles])
     plt.show()
