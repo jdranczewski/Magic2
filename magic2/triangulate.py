@@ -39,7 +39,7 @@ class Triangulation:
     # Get a list of all the triangles. Each elements is a list of three indices
     # pointing to vertices in self.points
     def get_simplices(self):
-        return self.dt.simplices
+        return [triangle.vertices for triangle in self.triangles]
 
     def optimise(self):
         initial_len = len(self.flat_triangles)
@@ -321,12 +321,12 @@ def triangulate(canvas):
     print(tri.flat_triangles)
     # print(added_points)
     # plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
-    plt.triplot(tri.points[:, 1], tri.points[:, 0], [triangle.vertices for triangle in tri.triangles])
+    plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.get_simplices())
     plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
     plt.show()
     tri.interpolate(canvas)
     plt.imshow(sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated==-1024.0), canvas.interpolated), cmap=m2graphics.cmap)
     plt.show()
     plt.imshow(sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated==-1024.0), canvas.interpolated), cmap=m2graphics.cmap)
-    plt.triplot(tri.points[:, 1], tri.points[:, 0], [triangle.vertices for triangle in tri.triangles])
+    plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.get_simplices())
     plt.show()
