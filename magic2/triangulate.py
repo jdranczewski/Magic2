@@ -360,7 +360,7 @@ def triangulate(canvas):
     tri.optimise()
     print("Finished")
     plt.imshow(canvas.fringe_phases, cmap=m2graphics.cmap)
-    print(tri.flat_triangles)
+    # print(tri.flat_triangles)
     # print(added_points)
     # plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
     plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.get_simplices())
