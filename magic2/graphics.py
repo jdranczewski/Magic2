@@ -8,17 +8,32 @@ class Canvas():
     def __init__(self, filename):
         # An image is loaded, and only its first colour component is taken
         # out of red, green, blue, alpha.
-        # sThe .png images supplied are greyscale.
+        # The .png images supplied are greyscale.
         image = plt.imread(filename.name)[:, :, 0]
+        # Fringes are black, extract them from the image
         self.fringes_image = image == 0
+        # This will store only the labelled fringes, currently empty
         self.fringes_image_clean = sp.zeros_like(self.fringes_image)-0
+        # This is the user defined mask, it was grey (so neither black nor
+        # white, which is the condition we're using here)
         self.mask = sp.logical_or(image == 1, self.fringes_image)
         # -1024 indicates an area where there is no data
+        # Visual stores the fringe phases, but allows for width, making
+        # the fringes easier to display
         self.fringe_phases_visual = sp.zeros_like(self.fringes_image)-1024
+        # In fringe_phases all the fringes have their initial width
         self.fringe_phases = sp.zeros_like(self.fringes_image)-1024
+        # Indexing starts at 0, so -1 is a good choice for 'not an index'
         self.fringe_indices = sp.zeros_like(self.fringes_image)-1
-        self.x, self.y = sp.meshgrid(sp.arange(0, len(self.fringes_image[0])), sp.arange(0, len(self.fringes_image)))
+        # x and y are used during interpolation processes to make
+        # calculations easier, they store the x and y position of
+        # every pixel
+        self.x, self.y = sp.meshgrid(sp.arange(0, len(self.fringes_image[0])),
+                                     sp.arange(0, len(self.fringes_image)))
+        # Interpolated will store the interpolated version of the image
         self.interpolated = sp.zeros_like(self.fringes_image)-1024.0
+        # this parameter will store the object returned by matplotlib's
+        # imshow function, making it easy to change the data being displayed
         self.imshow = None
 
 
@@ -44,6 +59,8 @@ def render_fringes(fringes, canvas, width=0, indices=None):
                                      point[1]] = fringe.phase
                 canvas.fringe_indices[point[0],
                                       point[1]] = fringe.index
+                # fringes_image_clean contains only fringes that
+                # have been labelled
                 if fringe.phase != -2048:
                     canvas.fringes_image_clean[point[0],
                                                point[1]] = 1
@@ -63,5 +80,7 @@ def render_fringes(fringes, canvas, width=0, indices=None):
 # a white background.
 norm = Normalize(vmin=-0.5, clip=False)
 cmap = copy(plt.cm.get_cmap('jet'))
+# White is for masking
 cmap.set_bad('white', 1.0)
+# Black is for unlabelled fringes
 cmap.set_under('black', 1.0)

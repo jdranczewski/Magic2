@@ -120,7 +120,10 @@ def onpress(event, labeller, line_plot):
     if event.key == 'control':
         labeller.control = True
     elif event.key == 'backspace':
+        # This deletes the point that has been placed last
         labeller.points = labeller.points[:-1]
+        # If there are points to display, display them. If not,
+        # set the data to empty lists
         if len(labeller.points):
             points = sp.array(labeller.points)
             line_plot.set_data(points[:, 1], points[:, 0])

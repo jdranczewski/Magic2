@@ -20,9 +20,9 @@ class Triangulation:
         print("Starting triangulation")
         # Calculate the Delaunay triangulation
         self.dt = Delaunay(points)
-        # Two lists of Triangle objects, one for all of them and one for
-        # the flat ones
+        # A list of all the triangle objects
         self.triangles = []
+        # A list of the flat triangles' indices
         self.flat_triangles = []
         print("Building the data")
         # Create Triangle objects and add them to lists
@@ -33,8 +33,10 @@ class Triangulation:
             self.triangles.append(triangle)
         print("Finished")
         # Print out some stats
-        print(len(self.flat_triangles)/len(self.triangles))
-        print(len(self.flat_triangles), len(self.triangles))
+        print("Flat triangles are {:0.2f} percent of the data".format(
+            len(self.flat_triangles)/len(self.triangles)))
+        print(len(self.flat_triangles), "flat triangles,",
+              len(self.triangles), "triangles in total")
 
     # Get a list of all the triangles. Each elements is a list of three indices
     # pointing to vertices in self.points
@@ -42,6 +44,8 @@ class Triangulation:
         return [triangle.vertices for triangle in self.triangles]
 
     def optimise(self):
+        # Initial length of the flat triangle list is stored to keep track
+        # of our progress
         initial_len = len(self.flat_triangles)
         # This loop will run until no further changes are possible
         changes = 1
@@ -67,7 +71,6 @@ class Triangulation:
                 # will stay in self.flat_triangles, indicating that it is
                 # not fixable
                 if neighbour is None:
-                    # print("none")
                     i += 1
                 else:
                     # Calculate the areas of the two initial triangles, and the
@@ -101,15 +104,20 @@ class Triangulation:
                     # Check if the areas before and after are the same, and
                     # also whether the final areas aren't zero
                     if ai1 + ai2 == af1 + af2 and af1 != 0 and af2 != 0:
-                        # print("convex")
+                        # If convex, and the switch is possible, flip the edge
                         self.switch_triangles(triangle, neighbour, op1, op2)
+                        # We delete the triangle from the lits of flat
+                        # triangles once we're done with it...
                         del self.flat_triangles[i]
+                        # ...and increment the change counter
                         changes += 1
                     else:
-                        # print("concave")
+                        # Otherwise, add a point in the middle of the line
+                        # shared by the triangles
                         self.add_point(triangle, neighbour, op1, op2)
                         del self.flat_triangles[i]
                         changes += 1
+            # This indicates how many flat triangles we have processed
             print(1-len(self.flat_triangles)/initial_len)
 
     def switch_triangles(self, triangle, neighbour, op1, op2):
@@ -158,7 +166,7 @@ class Triangulation:
         new_point = sp.mean([triangle.vert_coordinates[(op1+1) % 3],
                              triangle.vert_coordinates[(op1+2) % 3]], 0)
         # print(triangle.vert_coordinates[(op1+1) % 3],
-        #                      triangle.vert_coordinates[(op1+2) % 3], new_point)
+        #       triangle.vert_coordinates[(op1+2) % 3], new_point)
         # added_points.append(new_point)
         # The point's value is calculated with a variation on linear
         # interpolation of George's design. It seems to produce
@@ -203,6 +211,8 @@ class Triangulation:
                 sp.argwhere(n_temp == neighbour.index)
             ] = n2.index
         # Now update the vertices
+        # A copy is created as we change the triangle's vertices, but we
+        # still need the original state for reference
         tv = triangle.vertices.copy()
         triangle.vertices[(op1+1) % 3] = new_index
         neighbour.vertices[
@@ -215,32 +225,55 @@ class Triangulation:
         # Finally mark the triangle as sloped
         triangle.flat = False
 
+    # Interpolate the data based on the calculated triangulation
     def interpolate(self, canvas):
+        # Iterate over all the triangles in the triangulation
         for triangle in self.triangles:
-            # print(triangle.vert_coordinates)
+            # Create a shortcut to the triangle's vertices
             co = triangle.vert_coordinates
+            # Calculate a few constants for the Barycentric Coordinates
+            # More info: https://codeplea.com/triangular-interpolation
             div = (co[1,0]-co[2,0])*(co[0,1]-co[2,1])+(co[2,1]-co[1,1])*(co[0,0]-co[2,0])
             a0 = (co[1, 0]-co[2, 0])
             a1 = (co[2, 1]-co[1, 1])
             a2 = (co[2, 0]-co[0, 0])
             a3 = (co[0, 1]-co[2, 1])
+            # Calculate the bounds of a rectangle that fully encloses
+            # the current triangle
             xmin = int(sp.amin(triangle.vert_coordinates[:,1]))
             xmax = int(sp.amax(triangle.vert_coordinates[:,1]))+1
             ymin = int(sp.amin(triangle.vert_coordinates[:,0]))
             ymax = int(sp.amax(triangle.vert_coordinates[:,0]))+1
-            slice = canvas.interpolated[ymin:ymax, xmin:xmax]
+            # Take out slices of the x and y arrays,
+            # containing the points' coordinates
             x_slice = canvas.x[ymin:ymax, xmin:xmax]
             y_slice = canvas.y[ymin:ymax, xmin:xmax]
+            # Use Barycentric Coordinates and the magic of numpy (scipy in this
+            # case) to perform the calculations with the C backend, instead
+            # of iterating on pixels with Python loops.
+            # If you have not worked with numpy arrays befor dear reader,
+            # the idea is that if x = [[0 1]
+            #                          [2 3]],
+            # then x*3+1 is a completely valid operation, returning
+            # x = [[1 4]
+            #      [7 10]]
+            # Basically, we can do maths on arrays as if they were variables.
+            # Convenient, and really fast!
             w0 = (a0*(x_slice-co[2,1])+a1*(y_slice-co[2,0]))/div
             w1 = (a2*(x_slice-co[2,1])+a3*(y_slice-co[2,0]))/div
             w2 = sp.round_(1-w0-w1, 10)
+            # Calculate the values for a rectangle enclosing our triangle
             slice = (
                 self.values[triangle.vertices[0]]*w0
                 + self.values[triangle.vertices[1]]*w1
                 + self.values[triangle.vertices[2]]*w2
             )
-            mask = sp.logical_and(sp.logical_and(w0>=0, w1>=0), w2>=0)
-            # print(sp.ma.masked_where(mask==False, slice))
+            # Make a mask (so that we only touch the points
+            # inside of the triangle).
+            # In Barycentric Coordinates the points outside of the triangle
+            # have at least one of the coefficients negative, so we use that
+            mask = sp.logical_and(sp.logical_and(w0 >= 0, w1 >= 0), w2 >= 0)
+            # Change the points in the actual canvas
             canvas.interpolated[ymin:ymax, xmin:xmax][mask] = slice[mask]
 
 
@@ -291,16 +324,25 @@ class Triangle:
                     return neighbour, i, int(
                         sp.argwhere(neighbour.neighbours == self.index)
                     )
-        # If no neighbour found, return None
+        # If no neighbour found, return None three times, to make the return
+        # length consistent
         return None, None, None
 
 
+# A copy of the Triangle class with a different constructor. Useful
+# when creating new triangles that do not relay on the Delaunay
+# triangulation
 class TriangleCopy(Triangle):
     def __init__(self, index, points, vertices, neighbours):
+        # Making copies is absolutely necessary due to the way Python
+        # handles lists - the variable is actually a pointer, so if we just
+        # used self.vertices = vertices.copy, we would be changing the original
+        # list every time we made changes to the new triangle
         self.vertices = vertices.copy()
         self.vert_coordinates = points[self.vertices]
         self.neighbours = neighbours.copy()
         self.index = index
+        # The created triangle will be sloped by definition
         self.flat = False
         self.long_edges = [True, True, True]
 
