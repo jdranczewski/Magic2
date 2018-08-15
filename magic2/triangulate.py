@@ -231,9 +231,13 @@ class Triangulation:
                 for y in range(int(sp.amin(triangle.vert_coordinates[:,0])), int(sp.amax(triangle.vert_coordinates[:,0]))+1):
                     w0 = (a0*(x-co[2,1])+a1*(y-co[2,0]))/div
                     w1 = (a2*(x-co[2,1])+a3*(y-co[2,0]))/div
-                    w2 = 1-w0-w1
+                    w2 = sp.round_(1-w0-w1, 10)
                     if w0 >= 0 and w1 >= 0 and w2 >= 0:
-                        canvas.interpolated[y, x] = 1
+                        canvas.interpolated[y, x] = (
+                            self.values[triangle.vertices[0]]*w0
+                            + self.values[triangle.vertices[1]]*w1
+                            + self.values[triangle.vertices[2]]*w2
+                        )
 
 
 # Calculate the distance between two points in the points list
@@ -317,6 +321,6 @@ def triangulate(canvas):
     plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
     plt.show()
     tri.interpolate(canvas)
-    plt.imshow(canvas.interpolated)
-    plt.triplot(tri.points[:, 1], tri.points[:, 0], [triangle.vertices for triangle in tri.triangles])
+    plt.imshow(canvas.interpolated, cmap=m2graphics.cmap)
+    # plt.triplot(tri.points[:, 1], tri.points[:, 0], [triangle.vertices for triangle in tri.triangles])
     plt.show()
