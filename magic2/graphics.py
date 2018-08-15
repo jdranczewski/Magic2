@@ -11,6 +11,7 @@ class Canvas():
         # sThe .png images supplied are greyscale.
         image = plt.imread(filename.name)[:, :, 0]
         self.fringes_image = image == 0
+        self.fringes_image_clean = sp.zeros_like(self.fringes_image)-0
         self.mask = sp.logical_or(image == 1, self.fringes_image)
         # -1024 indicates an area where there is no data
         self.fringe_phases_visual = sp.zeros_like(self.fringes_image)-1024
@@ -43,6 +44,9 @@ def render_fringes(fringes, canvas, width=0, indices=None):
                                      point[1]] = fringe.phase
                 canvas.fringe_indices[point[0],
                                       point[1]] = fringe.index
+                if fringe.phase != -2048:
+                    canvas.fringes_image_clean[point[0],
+                                               point[1]] = 1
             except IndexError:
                 pass
             # The width is used only for drawing the visual representation

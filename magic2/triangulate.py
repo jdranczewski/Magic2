@@ -307,9 +307,9 @@ class TriangleCopy(Triangle):
 
 def triangulate(canvas):
     tri = Triangulation(sp.transpose(
-                        sp.nonzero(canvas.fringes_image)),
+                        sp.nonzero(canvas.fringes_image_clean)),
                         canvas)
-    plt.imshow(canvas.fringe_phases, cmap=m2graphics.cmap)
+    plt.imshow(canvas.fringes_image_clean, cmap=m2graphics.cmap)
     plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.get_simplices())
     plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
     plt.show()
