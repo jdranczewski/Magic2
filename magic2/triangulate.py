@@ -4,6 +4,8 @@ from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 from . import graphics as m2graphics
 
+# added_points = []
+
 
 # This class is used to store triangulation data, including the initial
 # Delaunay triangulation, points that are used to create it, a list
@@ -106,8 +108,8 @@ class Triangulation:
                     else:
                         # print("concave")
                         self.add_point(triangle, neighbour, op1, op2)
-                        # del self.flat_triangles[i]
-                        i += 1
+                        del self.flat_triangles[i]
+                        changes += 1
             print(1-len(self.flat_triangles)/initial_len)
 
     def switch_triangles(self, triangle, neighbour, op1, op2):
@@ -151,7 +153,65 @@ class Triangulation:
         triangle.flat = False
 
     def add_point(self, triangle, neighbour, op1, op2):
-        pass
+        # The point is added in the middle of the line shared by
+        # the two triangles
+        new_point = sp.mean([triangle.vert_coordinates[(op1+1) % 3],
+                             triangle.vert_coordinates[(op1+2) % 3]], 0)
+        # print(triangle.vert_coordinates[(op1+1) % 3],
+        #                      triangle.vert_coordinates[(op1+2) % 3], new_point)
+        # added_points.append(new_point)
+        # The point's value is calculated with a variation on linear
+        # interpolation of George's design. It seems to produce
+        # reasonable values
+        d1 = sp.sqrt(sp.sum((new_point-sp.array(triangle.vert_coordinates[(op1+1)%3]))**2, 0))
+        d2 = sp.sqrt(sp.sum((new_point-sp.array(neighbour.vert_coordinates[op2]))**2, 0))
+        new_value = (d2*self.values[triangle.vertices[(op1+1) % 3]]
+                     + d1*self.values[neighbour.vertices[op2]])/(d1+d2)
+        new_index = len(self.points)
+        self.points = sp.append(self.points, [new_point], 0)
+        self.values = sp.append(self.values, [new_value], 0)
+        # Change the triangulation to include the new point
+        # Start by creating two new, placeholder triangles
+        t2 = TriangleCopy(len(self.triangles), self.points,
+                          triangle.vertices, triangle.neighbours)
+        self.triangles.append(t2)
+        n2 = TriangleCopy(len(self.triangles), self.points,
+                          neighbour.vertices, neighbour.neighbours)
+        self.triangles.append(n2)
+        # Now change the neighbours
+        triangle.neighbours[(op1+2) % 3] = t2.index
+        neighbour.neighbours[
+            sp.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3])
+        ] = n2.index
+        t2.neighbours[op1] = n2.index
+        t2.neighbours[(op1+1) % 3] = triangle.index
+        n2.neighbours[op2] = t2.index
+        n2.neighbours[
+            sp.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3])
+        ] = neighbour.index
+        if t2.neighbours[(op1+2) % 3] != -1:
+            n_temp = self.triangles[t2.neighbours[(op1+2) % 3]].neighbours
+            n_temp[
+                sp.argwhere(n_temp == triangle.index)
+            ] = t2.index
+        arg = int(sp.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3]))
+        if n2.neighbours[arg] != -1:
+            n_temp = self.triangles[t2.neighbours[arg]].neighbours
+            n_temp[
+                sp.argwhere(n_temp == neighbour.index)
+            ] = n2.index
+        # Now update the vertices
+        tv = triangle.vertices.copy()
+        nv = neighbour.vertices.copy()
+        triangle.vertices[(op1+1) % 3] = new_index
+        neighbour.vertices[
+            sp.argwhere(neighbour.vertices == tv[(op1+1) % 3])
+        ] = new_index
+        t2.vertices[(op1+2) % 3] = new_index
+        n2.vertices[
+            sp.argwhere(n2.vertices == tv[(op1+2) % 3])
+        ] = new_index
+        triangle.flat = False
 
 
 # Calculate the distance between two points in the points list
@@ -203,6 +263,16 @@ class Triangle:
         return None, None, None
 
 
+class TriangleCopy(Triangle):
+    def __init__(self, index, points, vertices, neighbours):
+        self.vertices = vertices.copy()
+        self.vert_coordinates = points[self.vertices]
+        self.neighbours = neighbours.copy()
+        self.index = index
+        self.flat = False
+        self.long_edges = [True, True, True]
+
+
 def triangulate(canvas):
     tri = Triangulation(sp.transpose(
                         sp.nonzero(canvas.fringes_image)),
@@ -217,6 +287,7 @@ def triangulate(canvas):
     print("Finished")
     plt.imshow(canvas.fringe_phases, cmap=m2graphics.cmap)
     print(tri.flat_triangles)
+    # print(added_points)
     # plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
     plt.triplot(tri.points[:, 1], tri.points[:, 0], [triangle.vertices for triangle in tri.triangles])
     plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
