@@ -171,6 +171,8 @@ class Triangulation:
         self.points = sp.append(self.points, [new_point], 0)
         self.values = sp.append(self.values, [new_value], 0)
         # Change the triangulation to include the new point
+        # A drawing is helpful in understanding what is happening here
+        # https://imgur.com/5uUkYz4
         # Start by creating two new, placeholder triangles
         t2 = TriangleCopy(len(self.triangles), self.points,
                           triangle.vertices, triangle.neighbours)
@@ -202,7 +204,6 @@ class Triangulation:
             ] = n2.index
         # Now update the vertices
         tv = triangle.vertices.copy()
-        nv = neighbour.vertices.copy()
         triangle.vertices[(op1+1) % 3] = new_index
         neighbour.vertices[
             sp.argwhere(neighbour.vertices == tv[(op1+1) % 3])
@@ -211,6 +212,7 @@ class Triangulation:
         n2.vertices[
             sp.argwhere(n2.vertices == tv[(op1+2) % 3])
         ] = new_index
+        # Finally mark the triangle as sloped
         triangle.flat = False
 
 
@@ -258,7 +260,9 @@ class Triangle:
                 # If the neighbour exists and isn't flat, return its index
                 if n_index != -1 and not tri.triangles[n_index].flat:
                     neighbour = tri.triangles[n_index]
-                    return neighbour, i, int(sp.argwhere(neighbour.neighbours == self.index))
+                    return neighbour, i, int(
+                        sp.argwhere(neighbour.neighbours == self.index)
+                    )
         # If no neighbour found, return None
         return None, None, None
 
