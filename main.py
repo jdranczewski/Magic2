@@ -77,6 +77,9 @@ def main():
     b = ttk.Button(operations_group, text="Interpolate",
                    command=lambda: m2callbacks.interpolate(options))
     b.pack()
+    b = ttk.Button(operations_group, text="Subtract",
+                   command=lambda: m2callbacks.subtract(options))
+    b.pack()
 
     options.status = m2status_bar.StatusBar(root)
     options.status.grid(row=1, columnspan=2, sticky=("W", "E"))

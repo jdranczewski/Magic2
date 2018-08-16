@@ -44,15 +44,6 @@ def open_image(options, env):
             options.status.set("Done", 100)
 
 
-def interpolate(options):
-    if options.current is None:
-        mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
-    else:
-        m2labelling.stop_labelling(options.fig, options.labeller)
-        m2triangulate.triangulate(options.objects[options.current]['canvas'],
-                                  options.ax, options.status)
-        options.fringes_or_map = 'map'
-
 def show_image(options):
     key = options.show.get().split("_")
     if options.objects[key[0]]['canvas'] is None:
@@ -101,7 +92,7 @@ def show_image(options):
             options.ax.clear()
             if options.labeller is not None:
                 m2labelling.stop_labelling(options.fig, options.labeller)
-            m2triangulate.triangulate(options.objects[options.current]['canvas'],
+            m2triangulate.triangulate(options.objects[key[0]]['canvas'],
                                       options.ax, options.status)
         elif options.current is not None:
             options.show.set(options.current + "_fringes")
@@ -109,3 +100,40 @@ def show_image(options):
             options.show.set("")
         canvas.imshow.figure.canvas.draw()
     options.mframe.canvas._tkcanvas.focus_set()
+
+
+def interpolate(options):
+    if options.current is None:
+        mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
+    else:
+        m2labelling.stop_labelling(options.fig, options.labeller)
+        m2triangulate.triangulate(options.objects[options.current]['canvas'],
+                                  options.ax, options.status)
+        options.fringes_or_map = 'map'
+        options.show.set(options.current + "_map")
+
+
+def subtract(options):
+    if options.objects['background']['canvas'] is None:
+        mb.showinfo("No background loaded", "You need to load, label, and interpolate a background interferogram file first in order to perform the subtraction.")
+    elif not options.objects['background']['canvas'].interpolation_done:
+        mb.showinfo("No background interpolation", "You need to perform an interpolation of the background fringes before the subtraction.")
+    elif options.objects['plasma']['canvas'] is None:
+        mb.showinfo("No background loaded", "You need to load, label, and interpolate a plasma interferogram file first in order to perform the subtraction.")
+    elif not options.objects['plasma']['canvas'].interpolation_done:
+        mb.showinfo("No background interpolation", "You need to perform an interpolation of the plasma fringes before the subtraction.")
+    else:
+        options.subtract = sp.ma.masked_where(
+            sp.logical_or(sp.logical_or(
+                options.objects['plasma']['canvas'].mask == False,
+                options.objects['plasma']['canvas'].interpolated == -1024.0),
+                options.objects['background']['canvas'].interpolated == -1024.0
+            ),
+            options.objects['background']['canvas'].interpolated
+            - options.objects['plasma']['canvas'].interpolated
+        )
+        options.ax.clear()
+        if options.labeller is not None:
+            m2labelling.stop_labelling(options.fig, options.labeller)
+        imshow = options.ax.imshow(options.subtract, cmap=m2graphics.cmap)
+        imshow.figure.canvas.draw()
