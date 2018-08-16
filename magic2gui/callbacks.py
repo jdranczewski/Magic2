@@ -9,7 +9,6 @@ import magic2.labelling as m2labelling
 
 
 def open_image(options, env):
-    stop = False
     if options.objects[env]['canvas'] is not None and not mb.askokcancel(
         "Overwrite?", "There is a " + env
         + "file open already. Opening a new one will "
@@ -18,13 +17,16 @@ def open_image(options, env):
         pass
     else:
         filename = fd.askopenfile(filetypes=[("PNG files", "*.png;*.PNG")])
-        if filename is not None and not stop:
+        if filename is not None:
+            options.status.set("Reading the file", 0)
             if options.objects[env]['canvas'] is not None:
                 del options.objects[env]['canvas']
                 del options.objects[env]['fringes']
             canvas = options.objects[env]['canvas'] = m2graphics.Canvas(filename)
+            options.status.set("Looking for fringes", 33)
             fringes = options.objects[env]['fringes'] = m2fringes.Fringes()
             m2fringes.read_fringes(fringes, canvas)
+            options.status.set("Rendering fringes", 66)
             m2graphics.render_fringes(fringes, canvas, width=3)
             options.ax.clear()
             if options.labeller is not None:
@@ -37,3 +39,4 @@ def open_image(options, env):
             canvas.imshow.figure.canvas.draw()
             options.labeller = m2labelling.label(fringes, canvas,
                                                  options.fig, options.ax)
+            options.status.set("Done", 100)

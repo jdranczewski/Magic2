@@ -22,6 +22,7 @@ class Options:
         self.fig = None
         self.ax = None
         self.labeller = None
+        self.status = None
 
 
 def main():
@@ -53,8 +54,8 @@ def main():
         print("button"))
     b.pack()
 
-    status = m2status_bar.StatusBar(root)
-    status.grid(row=1, columnspan=2, sticky=("W", "E"))
+    options.status = m2status_bar.StatusBar(root)
+    options.status.grid(row=1, columnspan=2, sticky=("W", "E"))
     # status.set("waiting",-1)
 
     root.mainloop()

@@ -7,15 +7,18 @@ class StatusBar(Tk.Frame):
         self.pb = ttk.Progressbar(self, orient='horizontal', mode='determinate')
         self.pb.pack(side=Tk.RIGHT)
         self.pb['value'] = 0
-        self.label = Tk.Label(self, text="Use the file menu to open a traced interferogram")
-        self.label.pack(side=Tk.RIGHT)
+        self.label = Tk.Label(self, text="Use the file menu to open a traced interferogram", anchor=Tk.E)
+        self.label.pack(side=Tk.RIGHT, fill='both')
 
     def set(self, text, value):
         if value == -1:
             self.pb['mode'] = 'indeterminate'
             self.pb.start(10)
         else:
+            self.pb['mode'] = 'determinate'
+            self.pb.stop()
             self.pb['value'] = value
         self.label['text'] = text
         self.pb.update_idletasks()
         self.label.update_idletasks()
+        self.update_idletasks()
