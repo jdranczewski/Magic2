@@ -12,11 +12,18 @@ import numpy as np
 class Options:
     def __init__(self):
         self.objects = {
-            "background": {},
-            "plasma": {}
+            "background": {
+                "canvas": None,
+                "fringes": None
+            },
+            "plasma": {
+                "canvas": None,
+                "fringes": None
+            }
         }
         self.fig = None
         self.ax = None
+        self.labeller = None
 
 
 def main():
@@ -31,7 +38,7 @@ def main():
     menu.add_cascade(label="File", menu=filemenu)
     filemenu.add_command(label="Open background image",
                          command=lambda:
-                         m2callbacks.open_background_image(options, imshow))
+                         m2callbacks.open_image(options, 'background'))
 
     options.fig = fig = Figure(figsize=(5, 4), dpi=100)
     options.ax = ax = fig.add_subplot(111)
@@ -48,6 +55,10 @@ def main():
         pass
 
     canvas.mpl_connect("key_press_event", on_key_press)
+
+    b = Tk.Button(root, text="showerror", command=lambda:
+        print("button"))
+    b.pack(side=Tk.BOTTOM)
 
     root.mainloop()
 

@@ -1,18 +1,39 @@
-import tkinter.filedialog
+import tkinter as Tk
+import tkinter.filedialog as fd
+import tkinter.messagebox as mb
+
 import scipy as sp
 import magic2.graphics as m2graphics
 import magic2.fringes as m2fringes
 import magic2.labelling as m2labelling
 
 
-def open_background_image(options, imshow):
-    filename = tkinter.filedialog.askopenfile(filetypes=[("PNG files", "*.png;*.PNG")])
-    if filename is not None:
-        canvas = options.objects['background']['canvas'] = m2graphics.Canvas(filename)
-        fringes = options.objects['background']['fringes'] = m2fringes.Fringes()
-        m2fringes.read_fringes(fringes, canvas)
-        m2graphics.render_fringes(fringes, canvas, width=3)
-        options.ax.clear()
-        canvas.imshow = options.ax.imshow(sp.ma.masked_where(canvas.fringe_phases_visual == -1024, canvas.fringe_phases_visual))
-        canvas.imshow.figure.canvas.draw()
-        m2labelling.label(fringes, canvas, options.fig, options.ax)
+def open_image(options, env):
+    stop = False
+    if options.objects[env]['canvas'] is not None and not mb.askokcancel(
+        "Overwrite?", "There is a " + env
+        + "file open already. Opening a new one will "
+        + "overwrite all changes made to it!"
+    ):
+        pass
+    else:
+        filename = fd.askopenfile(filetypes=[("PNG files", "*.png;*.PNG")])
+        if filename is not None and not stop:
+            if options.objects[env]['canvas'] is not None:
+                del options.objects[env]['canvas']
+                del options.objects[env]['fringes']
+            canvas = options.objects[env]['canvas'] = m2graphics.Canvas(filename)
+            fringes = options.objects[env]['fringes'] = m2fringes.Fringes()
+            m2fringes.read_fringes(fringes, canvas)
+            m2graphics.render_fringes(fringes, canvas, width=3)
+            options.ax.clear()
+            if options.labeller is not None:
+                m2labelling.stop_labelling(options.fig, options.labeller)
+            canvas.imshow = options.ax.imshow(
+                sp.ma.masked_where(canvas.fringe_phases_visual == -1024,
+                                   canvas.fringe_phases_visual),
+                cmap=m2graphics.cmap
+            )
+            canvas.imshow.figure.canvas.draw()
+            options.labeller = m2labelling.label(fringes, canvas,
+                                                 options.fig, options.ax)

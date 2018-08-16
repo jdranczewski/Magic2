@@ -10,6 +10,8 @@ class Labeller():
         self.points = []
         # Is the control key pressed?
         self.control = False
+        # IDs of the events attached to the figure
+        self.binds = []
 
 
 # This function is used to handle the user pressing a mouse key
@@ -142,12 +144,20 @@ def onrelease(event, labeller):
 def label(fringes, canvas, fig, ax):
     labeller = Labeller()
     line_plot, = ax.plot([], [], "--")
-    fig.canvas.mpl_connect('button_press_event',
-                           lambda event: onclick(event, labeller, line_plot,
+    b0 = fig.canvas.mpl_connect('button_press_event',
+                                lambda event: onclick(event, labeller, line_plot,
                                                  fringes, canvas, fig, ax))
-    fig.canvas.mpl_connect('motion_notify_event',
-                           lambda event: onmove(event, labeller, line_plot))
-    fig.canvas.mpl_connect('key_press_event',
-                           lambda event: onpress(event, labeller, line_plot))
-    fig.canvas.mpl_connect('key_release_event',
-                           lambda event: onrelease(event, labeller))
+    b1 = fig.canvas.mpl_connect('motion_notify_event',
+                                lambda event: onmove(event, labeller, line_plot))
+    b2 = fig.canvas.mpl_connect('key_press_event',
+                                lambda event: onpress(event, labeller, line_plot))
+    b3 = fig.canvas.mpl_connect('key_release_event',
+                                lambda event: onrelease(event, labeller))
+    labeller.binds = [b0, b1, b2, b3]
+    return labeller
+
+
+def stop_labelling(fig, labeller):
+    for bind in labeller.binds:
+        fig.canvas.mpl_disconnect(bind)
+    del labeller
