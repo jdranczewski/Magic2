@@ -47,16 +47,11 @@ def open_image(options, env):
 def show_image(options):
     key = options.show.get().split("_")
     if options.objects[key[0]]['canvas'] is None:
-        if mb.askyesno(
-            "Load file?", "There is no " + key[0]
-            + " file open yet. Would you like to open a new one?"
-        ):
-            open_image(options, key[0])
-            options.show.set(key[0] + "_fringes")
-        elif options.current is not None:
+        if options.current is not None:
             options.show.set(options.current + "_" + options.fringes_or_map)
         else:
             options.show.set("")
+        open_image(options, key[0])
     else:
         canvas = options.objects[key[0]]['canvas']
         fringes = options.objects[key[0]]['fringes']
