@@ -38,6 +38,9 @@ class GraphFrame(Tk.Frame):
             def on_key_press(event):
                 key_press_handler(event, self.canvas, toolbar)
             self.canvas.mpl_connect("key_press_event", on_key_press)
+        # Set focus back to canvas after clicking it
+        self.canvas.mpl_connect('button_press_event',
+                                lambda event: self.canvas._tkcanvas.focus_set())
 
     # Redraw the canvas to show new data (if updated)
     def draw(self):
