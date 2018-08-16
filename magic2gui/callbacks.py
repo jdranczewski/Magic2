@@ -1,11 +1,10 @@
-import tkinter as Tk
 import tkinter.filedialog as fd
 import tkinter.messagebox as mb
-
 import scipy as sp
 import magic2.graphics as m2graphics
 import magic2.fringes as m2fringes
 import magic2.labelling as m2labelling
+import magic2.triangulate as m2triangulate
 
 
 def open_image(options, env):
@@ -39,4 +38,12 @@ def open_image(options, env):
             canvas.imshow.figure.canvas.draw()
             options.labeller = m2labelling.label(fringes, canvas,
                                                  options.fig, options.ax)
+            options.current = env
             options.status.set("Done", 100)
+
+def interpolate(options):
+    if options.current is None:
+        mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
+    else:
+        m2labelling.stop_labelling(options.fig, options.labeller)
+        m2triangulate.triangulate(options.objects[options.current]['canvas'], options.ax, options.status)

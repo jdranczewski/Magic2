@@ -13,37 +13,48 @@ from . import graphics as m2graphics
 # of all the triangles (for triplot for example) and an optimise function
 # that clears up flat fetures
 class Triangulation:
-    def __init__(self, points, canvas):
+    def __init__(self, points, canvas, status=None):
+        if status is not None:
+            status.set("Performing Delaunay triangulation",0)
+        else:
+            print("Performing Delaunay triangulation")
         # Store the points and their values
         self.points = points
         self.values = [canvas.fringe_phases[p[0], p[1]] for p in self.points]
-        print("Starting triangulation")
         # Calculate the Delaunay triangulation
         self.dt = Delaunay(points)
         # A list of all the triangle objects
         self.triangles = []
         # A list of the flat triangles' indices
         self.flat_triangles = []
-        print("Building the data")
+        if status is not None:
+            status.set("Building data structures", 5)
+        else:
+            print("Building the data")
         # Create Triangle objects and add them to lists
         for i in range(len(self.dt.simplices)):
             triangle = Triangle(self.dt, i, self.points, self.values)
             if triangle.flat:
                 self.flat_triangles.append(i)
             self.triangles.append(triangle)
-        print("Finished")
         # Print out some stats
-        print("Flat triangles are {:0.2f} percent of the data".format(
-            len(self.flat_triangles)/len(self.triangles)))
-        print(len(self.flat_triangles), "flat triangles,",
-              len(self.triangles), "triangles in total")
+        if status is None:
+            print("Finished")
+            print("Flat triangles are {:0.2f} percent of the data".format(
+                len(self.flat_triangles)/len(self.triangles)))
+            print(len(self.flat_triangles), "flat triangles,",
+                  len(self.triangles), "triangles in total")
 
     # Get a list of all the triangles. Each elements is a list of three indices
     # pointing to vertices in self.points
     def get_simplices(self):
         return [triangle.vertices for triangle in self.triangles]
 
-    def optimise(self):
+    def optimise(self, status=None):
+        if status is not None:
+            status.set("Removing flat triangles", 15)
+        else:
+            print("Removing flat triangles")
         # Initial length of the flat triangle list is stored to keep track
         # of our progress
         initial_len = len(self.flat_triangles)
@@ -118,7 +129,10 @@ class Triangulation:
                         del self.flat_triangles[i]
                         changes += 1
             # This indicates how many flat triangles we have processed
-            print(1-len(self.flat_triangles)/initial_len)
+            if status is not None:
+                status.set("Removing flat triangles", 15+55*(1-len(self.flat_triangles)/initial_len))
+            else:
+                print(1-len(self.flat_triangles)/initial_len)
 
     def switch_triangles(self, triangle, neighbour, op1, op2):
         # print("switching", triangle.index, neighbour.index,
@@ -226,7 +240,11 @@ class Triangulation:
         triangle.flat = False
 
     # Interpolate the data based on the calculated triangulation
-    def interpolate(self, canvas):
+    def interpolate(self, canvas, status):
+        if status is not None:
+            status.set("Performing the interpolation", 70)
+        else:
+            print("Performing the interpolation")
         # Iterate over all the triangles in the triangulation
         for triangle in self.triangles:
             # Create a shortcut to the triangle's vertices
@@ -346,8 +364,19 @@ class TriangleCopy(Triangle):
         self.flat = False
         self.long_edges = [True, True, True]
 
+def triangulate(canvas, ax, status):
+    tri = Triangulation(sp.transpose(
+                        sp.nonzero(canvas.fringes_image_clean)),
+                        canvas, status)
+    tri.optimise(status)
+    tri.interpolate(canvas, status)
+    ax.clear()
+    imshow = ax.imshow(sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated==-1024.0), canvas.interpolated), cmap=m2graphics.cmap)
+    imshow.figure.canvas.draw()
+    status.set("Done", 100)
 
-def triangulate(canvas):
+
+def triangulate_debug(canvas):
     tri = Triangulation(sp.transpose(
                         sp.nonzero(canvas.fringes_image_clean)),
                         canvas)

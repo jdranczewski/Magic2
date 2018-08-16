@@ -23,6 +23,7 @@ class Options:
         self.ax = None
         self.labeller = None
         self.status = None
+        self.current = None
 
 
 def main():
@@ -39,7 +40,7 @@ def main():
                          command=lambda:
                          m2callbacks.open_image(options, 'background'))
 
-    mframe = m2mframe.GraphFrame(root, show_toolbar=True)
+    mframe = m2mframe.GraphFrame(root, bind_keys=True, show_toolbar=True)
     root.grid_columnconfigure(0, weight=1)
     root.grid_rowconfigure(0, weight=1)
     mframe.grid(row=0, column=0, sticky=("N", "S", "E", "W"))
@@ -50,8 +51,8 @@ def main():
     display_group = Tk.LabelFrame(root, text="Display", padx=5, pady=5)
     display_group.grid(row=0, column=1, padx=5, pady=5, sticky="N")
 
-    b = ttk.Button(display_group, text="showerror", command=lambda:
-        print("button"))
+    b = ttk.Button(display_group, text="Interpolate",
+                   command=lambda: m2callbacks.interpolate(options))
     b.pack()
 
     options.status = m2status_bar.StatusBar(root)
