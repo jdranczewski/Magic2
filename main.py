@@ -5,6 +5,7 @@ import magic2gui.matplotlib_frame as m2mframe
 import magic2gui.status_bar as m2status_bar
 from matplotlib.pyplot import imread
 import numpy as np
+import pickle
 
 
 class Options:
@@ -26,6 +27,9 @@ class Options:
         self.current = None
         self.fringes_or_map = 'fringes'
         self.show = None
+
+    def load(self, objects):
+        self.objects = objects
 
 
 def main():
@@ -63,7 +67,9 @@ def main():
         ("Background fringes", "background_fringes"),
         ("Background map", "background_map"),
         ("Plasma fringes", "plasma_fringes"),
-        ("Plasma map", "plasma_map")
+        ("Plasma map", "plasma_map"),
+        ("Subtracted map", "subtracted_map"),
+        ("Phase map", "phase_map")
     ]
     options.show = Tk.StringVar()
     for name, key in display_modes:
@@ -79,6 +85,17 @@ def main():
     b.pack()
     b = ttk.Button(operations_group, text="Subtract",
                    command=lambda: m2callbacks.subtract(options))
+    b.pack()
+    def make_pickle():
+        print("Making pickle")
+        pickle.dump(options.objects, open("save.p", "wb"))
+    b = ttk.Button(operations_group, text="Pickle",
+                   command=make_pickle)
+    b.pack()
+    def unpickle():
+        options.load(pickle.load(open("save.p", "rb")))
+    b = ttk.Button(operations_group, text="Unpickle",
+                   command=unpickle)
     b.pack()
 
     options.status = m2status_bar.StatusBar(root)
