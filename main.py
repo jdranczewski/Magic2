@@ -1,10 +1,6 @@
 import tkinter as Tk
 import magic2gui.callbacks as m2callbacks
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2TkAgg)
-# Implement the default Matplotlib key bindings.
-from matplotlib.backend_bases import key_press_handler
-from matplotlib.figure import Figure
+import magic2gui.matplotlib_frame as m2mframe
 from matplotlib.pyplot import imread
 import numpy as np
 
@@ -40,25 +36,15 @@ def main():
                          command=lambda:
                          m2callbacks.open_image(options, 'background'))
 
-    options.fig = fig = Figure(figsize=(5, 4), dpi=100)
-    options.ax = ax = fig.add_subplot(111)
-    imshow = ax.imshow(imread('logo.png'))
-    canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
-    canvas.draw()
-    canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
-
-    toolbar = NavigationToolbar2TkAgg(canvas, root)
-    toolbar.update()
-    canvas._tkcanvas.pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
-
-    def on_key_press(event):
-        pass
-
-    canvas.mpl_connect("key_press_event", on_key_press)
+    mframe = m2mframe.GraphFrame(root, show_toolbar=True)
+    mframe.pack(fill=Tk.BOTH, expand=1)
+    options.fig = mframe.fig
+    options.ax = mframe.ax
+    options.ax.imshow(imread('logo.png'))
 
     b = Tk.Button(root, text="showerror", command=lambda:
         print("button"))
-    b.pack(side=Tk.BOTTOM)
+    b.pack(side=Tk.RIGHT)
 
     root.mainloop()
 
