@@ -101,6 +101,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
     m2graphics.render_fringes(fringes, canvas, width=3, indices=fix_indices)
     canvas.imshow.set_data(sp.ma.masked_where(canvas.fringe_phases_visual == -1024, canvas.fringe_phases_visual))
     canvas.imshow.set_clim(0, fringes.max)
+    canvas.imshow.figure.canvas.draw()
     # This (when uncommented) allows one to see the pixels the labelling line
     # went through. Useful for debugging
     # ax.plot(x,y)

@@ -293,6 +293,7 @@ class Triangulation:
             mask = sp.logical_and(sp.logical_and(w0 >= 0, w1 >= 0), w2 >= 0)
             # Change the points in the actual canvas
             canvas.interpolated[ymin:ymax, xmin:xmax][mask] = slice[mask]
+        canvas.interpolation_done = True
 
 
 # Calculate the distance between two points in the points list

@@ -31,6 +31,7 @@ class Canvas():
         self.x, self.y = sp.meshgrid(sp.arange(0, len(self.fringes_image[0])),
                                      sp.arange(0, len(self.fringes_image)))
         # Interpolated will store the interpolated version of the image
+        self.interpolation_done = False
         self.interpolated = sp.zeros_like(self.fringes_image)-1024.0
         # this parameter will store the object returned by matplotlib's
         # imshow function, making it easy to change the data being displayed

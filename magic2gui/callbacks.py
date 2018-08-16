@@ -39,11 +39,73 @@ def open_image(options, env):
             options.labeller = m2labelling.label(fringes, canvas,
                                                  options.fig, options.ax)
             options.current = env
+            options.fringes_or_map = 'fringes'
+            options.show.set(env+"_fringes")
             options.status.set("Done", 100)
+
 
 def interpolate(options):
     if options.current is None:
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
     else:
         m2labelling.stop_labelling(options.fig, options.labeller)
-        m2triangulate.triangulate(options.objects[options.current]['canvas'], options.ax, options.status)
+        m2triangulate.triangulate(options.objects[options.current]['canvas'],
+                                  options.ax, options.status)
+        options.fringes_or_map = 'map'
+
+def show_image(options):
+    key = options.show.get().split("_")
+    if options.objects[key[0]]['canvas'] is None:
+        if mb.askyesno(
+            "Load file?", "There is no " + key[0]
+            + " file open yet. Would you like to open a new one?"
+        ):
+            open_image(options, key[0])
+            options.show.set(key[0] + "_fringes")
+        elif options.current is not None:
+            options.show.set(options.current + "_" + options.fringes_or_map)
+        else:
+            options.show.set("")
+    else:
+        canvas = options.objects[key[0]]['canvas']
+        fringes = options.objects[key[0]]['fringes']
+        if key[1] == "fringes":
+            options.current = key[0]
+            options.fringes_or_map = key[1]
+            options.ax.clear()
+            if options.labeller is not None:
+                m2labelling.stop_labelling(options.fig, options.labeller)
+            canvas.imshow = options.ax.imshow(
+                sp.ma.masked_where(canvas.fringe_phases_visual == -1024,
+                                   canvas.fringe_phases_visual),
+                cmap=m2graphics.cmap
+            )
+            canvas.imshow.set_clim(0, fringes.max)
+            options.labeller = m2labelling.label(fringes, canvas,
+                                                 options.fig, options.ax)
+        elif canvas.interpolation_done:
+            options.current = key[0]
+            options.fringes_or_map = key[1]
+            options.ax.clear()
+            if options.labeller is not None:
+                m2labelling.stop_labelling(options.fig, options.labeller)
+            canvas.imshow = options.ax.imshow(
+                sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated == -1024.0),
+                                   canvas.interpolated),
+                cmap=m2graphics.cmap
+            )
+        elif mb.askyesno(
+            "Interpolate?", "The interferogram for " + key[0]
+            + " has not been interpolated yet. Would you like to do that now?"
+        ):
+            options.ax.clear()
+            if options.labeller is not None:
+                m2labelling.stop_labelling(options.fig, options.labeller)
+            m2triangulate.triangulate(options.objects[options.current]['canvas'],
+                                      options.ax, options.status)
+        elif options.current is not None:
+            options.show.set(options.current + "_fringes")
+        else:
+            options.show.set("")
+        canvas.imshow.figure.canvas.draw()
+    options.mframe.canvas._tkcanvas.focus_set()

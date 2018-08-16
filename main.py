@@ -24,6 +24,8 @@ class Options:
         self.labeller = None
         self.status = None
         self.current = None
+        self.fringes_or_map = 'fringes'
+        self.show = None
 
 
 def main():
@@ -39,19 +41,40 @@ def main():
     filemenu.add_command(label="Open background image",
                          command=lambda:
                          m2callbacks.open_image(options, 'background'))
+    filemenu.add_command(label="Open plasma image",
+                         command=lambda:
+                         m2callbacks.open_image(options, 'plasma'))
 
-    mframe = m2mframe.GraphFrame(root, bind_keys=True, show_toolbar=True)
+    options.mframe = m2mframe.GraphFrame(root, bind_keys=True, show_toolbar=True)
     root.grid_columnconfigure(0, weight=1)
     root.grid_rowconfigure(0, weight=1)
-    mframe.grid(row=0, column=0, sticky=("N", "S", "E", "W"))
-    options.fig = mframe.fig
-    options.ax = mframe.ax
+    options.mframe.grid(row=0, column=0, sticky=("N", "S", "E", "W"))
+    options.fig = options.mframe.fig
+    options.ax = options.mframe.ax
     options.ax.imshow(imread('logo.png'))
 
-    display_group = Tk.LabelFrame(root, text="Display", padx=5, pady=5)
-    display_group.grid(row=0, column=1, padx=5, pady=5, sticky="N")
+    side_frame = Tk.Frame(root)
+    side_frame.grid(row=0, column=1, padx=5, pady=5, sticky="N")
 
-    b = ttk.Button(display_group, text="Interpolate",
+    display_group = Tk.LabelFrame(side_frame, text="Display", padx=5, pady=5)
+    display_group.pack(fill=Tk.BOTH)
+
+    display_modes = [
+        ("Background fringes", "background_fringes"),
+        ("Background map", "background_map"),
+        ("Plasma fringes", "plasma_fringes"),
+        ("Plasma map", "plasma_map")
+    ]
+    options.show = Tk.StringVar()
+    for name, key in display_modes:
+        b = ttk.Radiobutton(display_group, text=name, variable=options.show,
+                            value=key, command=lambda: m2callbacks.show_image(options))
+        b.pack(anchor=Tk.W)
+
+    operations_group = Tk.LabelFrame(side_frame, text="Operations", padx=5, pady=5)
+    operations_group.pack(fill=Tk.BOTH)
+
+    b = ttk.Button(operations_group, text="Interpolate",
                    command=lambda: m2callbacks.interpolate(options))
     b.pack()
 
