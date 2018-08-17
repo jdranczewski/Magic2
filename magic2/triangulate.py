@@ -371,9 +371,6 @@ def triangulate(canvas, ax, status):
                         canvas, status)
     tri.optimise(status)
     tri.interpolate(canvas, status)
-    ax.clear()
-    imshow = ax.imshow(sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated==-1024.0), canvas.interpolated), cmap=m2graphics.cmap)
-    imshow.figure.canvas.draw()
     status.set("Done", 100)
 
 

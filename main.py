@@ -23,10 +23,11 @@ class Options:
         self.fig = None
         self.ax = None
         self.labeller = None
+        # The status bar
         self.status = None
-        self.current = None
-        self.fringes_or_map = 'fringes'
-        self.show = None
+        self.show_var = None
+        self.mode = None
+        self.subtracted = None
 
     def load(self, objects):
         self.objects = objects
@@ -68,13 +69,13 @@ def main():
         ("Background map", "background_map"),
         ("Plasma fringes", "plasma_fringes"),
         ("Plasma map", "plasma_map"),
-        ("Subtracted map", "subtracted_map"),
-        ("Phase map", "phase_map")
+        ("Subtracted map", "subtracted_graph"),
+        ("Plasma density", "phase_graph")
     ]
-    options.show = Tk.StringVar()
+    options.show_var = Tk.StringVar()
     for name, key in display_modes:
-        b = ttk.Radiobutton(display_group, text=name, variable=options.show,
-                            value=key, command=lambda: m2callbacks.show_image(options))
+        b = ttk.Radiobutton(display_group, text=name, variable=options.show_var,
+                            value=key, command=lambda: m2callbacks.show_radio(options))
         b.pack(anchor=Tk.W)
 
     operations_group = Tk.LabelFrame(side_frame, text="Operations", padx=5, pady=5)
