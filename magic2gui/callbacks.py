@@ -24,6 +24,8 @@ def open_image(options, env):
             if options.objects[env]['canvas'] is not None:
                 del options.objects[env]['canvas']
                 del options.objects[env]['fringes']
+                del options.subtracted
+                options.subtracted = None
             # Create a canvas object
             canvas = options.objects[env]['canvas'] = m2graphics.Canvas(filename)
             options.status.set("Looking for fringes", 33)
@@ -65,7 +67,7 @@ def show_radio(options):
                 "Interpolate?", "The interferogram for " + key[0]
                 + " has not been interpolated yet. Would you like to do that now?"
             ):
-                interpolate(options)
+                interpolate(options, key[0])
     # If the user wants the subtracted map, show it or calculate it and show it
     # (the calculation is a quick process, so it doesn't make sense to ask
     # the user for permission)
@@ -126,7 +128,7 @@ def set_mode(options):
 # This performs some checks and then starts off the triangulation for
 # either the background or plasma fringes, depending on which one is
 # currently displayed
-def interpolate(options):
+def interpolate(options, env=None):
     if options.mode is None:
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
     elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
@@ -134,10 +136,15 @@ def interpolate(options):
     else:
         # If the above checks are passed, perform the triangulation and let
         # set_mode render it
-        m2triangulate.triangulate(options.objects[options.mode.split("_")[0]]['canvas'],
-                                  options.ax, options.status)
-        options.mode = options.mode.split("_")[0] + "_map"
-        set_mode(options)
+        if env is None:
+            env = options.mode.split("_")[0]
+        tri = m2triangulate.triangulate(options.objects[env]['canvas'],
+                                        options.ax, options.status)
+        if tri is None:
+            mb.showerror("Triangulation failed", "No points detected, so the triangulation failed. Have you labelled the fringes?")
+        else:
+            options.mode = env + "_map"
+            set_mode(options)
 
 
 # This function subtracts the interpolated images for plasma and the background

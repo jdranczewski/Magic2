@@ -22,7 +22,12 @@ class Triangulation:
         self.points = points
         self.values = [canvas.fringe_phases[p[0], p[1]] for p in self.points]
         # Calculate the Delaunay triangulation
-        self.dt = Delaunay(points)
+        self.error = False
+        try:
+            self.dt = Delaunay(points)
+        except ValueError:
+            self.error = True
+            return None
         # A list of all the triangle objects
         self.triangles = []
         # A list of the flat triangles' indices
@@ -369,9 +374,13 @@ def triangulate(canvas, ax, status):
     tri = Triangulation(sp.transpose(
                         sp.nonzero(canvas.fringes_image_clean)),
                         canvas, status)
-    tri.optimise(status)
-    tri.interpolate(canvas, status)
-    status.set("Done", 100)
+    if tri.error:
+        return None
+    else:
+        tri.optimise(status)
+        tri.interpolate(canvas, status)
+        status.set("Done", 100)
+        return True
 
 
 def triangulate_debug(canvas):
