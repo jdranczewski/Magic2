@@ -7,6 +7,7 @@ import magic2.labelling as m2labelling
 import magic2.triangulate as m2triangulate
 
 
+# Open and image for either the background or foreground fringes
 def open_image(options, env):
     if options.objects[env]['canvas'] is not None and not mb.askokcancel(
         "Overwrite?", "There is a " + env
@@ -15,42 +16,59 @@ def open_image(options, env):
     ):
         pass
     else:
+        # Display a window for chooisng the file
         filename = fd.askopenfile(filetypes=[("PNG files", "*.png;*.PNG")])
         if filename is not None:
             options.status.set("Reading the file", 0)
+            # Delete the old objects if we are overwriting
             if options.objects[env]['canvas'] is not None:
                 del options.objects[env]['canvas']
                 del options.objects[env]['fringes']
+            # Create a canvas object
             canvas = options.objects[env]['canvas'] = m2graphics.Canvas(filename)
             options.status.set("Looking for fringes", 33)
+            # Extract fringe information from the file
             fringes = options.objects[env]['fringes'] = m2fringes.Fringes()
             m2fringes.read_fringes(fringes, canvas)
             options.status.set("Rendering fringes", 66)
+            # Render the fringes onto the canvas
             m2graphics.render_fringes(fringes, canvas, width=3)
+            # Set the mode (the set_mode function handles rendering)
             options.mode = env + "_fringes"
             set_mode(options)
             options.status.set("Done", 100)
 
 
+# Handle the user choosing one of the radio buttons
 def show_radio(options):
+    # Give the focus back to the graph
     options.mframe.canvas._tkcanvas.focus_set()
+    # Store the mode info from the buttons
     key = options.show_var.get().split("_")
+    # Set the buttons to the previous state, in case the user cancels
     options.show_var.set(options.mode)
     if key[0] == 'background' or key[0] == 'plasma':
+        # If the fringe image has not been loaded yet, open one
         if options.objects[key[0]]['canvas'] is None:
             open_image(options, key[0])
+        # If the user wants fringes, show them
         elif key[1] == 'fringes':
             options.mode = "_".join(key)
             set_mode(options)
+        # If the user wants the interpolated map, check if it exists...
         elif key[1] == 'map':
             if options.objects[key[0]]['canvas'].interpolation_done:
                 options.mode = "_".join(key)
                 set_mode(options)
+            # ...if not, give the user the option to generate one
             elif mb.askyesno(
                 "Interpolate?", "The interferogram for " + key[0]
                 + " has not been interpolated yet. Would you like to do that now?"
             ):
                 interpolate(options)
+    # If the user wants the subtracted map, show it or calculate it and show it
+    # (the calculation is a quick process, so it doesn't make sense to ask
+    # the user for permission)
     elif key[0] == 'subtracted':
         if options.subtracted is None:
             print("Performing")
@@ -62,14 +80,18 @@ def show_radio(options):
         pass
 
 
+# Render the correct image on the graph's canvas
 def set_mode(options):
     key = options.mode.split("_")
+    # Clear the axes and all labellers/event handlers attached to them
+    # (if they exist)
     options.ax.clear()
     if options.labeller is not None:
         m2labelling.stop_labelling(options.fig, options.labeller)
     if key[1] == 'fringes':
         canvas = options.objects[key[0]]['canvas']
         fringes = options.objects[key[0]]['fringes']
+        # The fringes image is masked where there is no data
         canvas.imshow = options.ax.imshow(
             sp.ma.masked_where(canvas.fringe_phases_visual == -1024,
                                canvas.fringe_phases_visual),
@@ -80,31 +102,46 @@ def set_mode(options):
                                              options.fig, options.ax)
     elif key[1] == 'map':
         canvas = options.objects[key[0]]['canvas']
+        # The map image is masked where there is no interpolation data and
+        # on the user-defined mask
         canvas.imshow = options.ax.imshow(
             sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated == -1024.0),
                                canvas.interpolated),
             cmap=m2graphics.cmap
         )
     elif key[0] == 'subtracted':
+        # Show the subtracted image
+        # note: this function works on the assumption that the things it is
+        # attempting to show have been generated previously. It is the burden
+        # of event handlers to check whether this is corrct
         options.ax.imshow(options.subtracted, cmap=m2graphics.cmap)
     elif key[0] == 'plasma':
         pass
+    # Refresh the graph's canvas
     options.fig.canvas.draw()
+    # Set the radio buttons to the correct position
     options.show_var.set(options.mode)
 
 
+# This performs some checks and then starts off the triangulation for
+# either the background or plasma fringes, depending on which one is
+# currently displayed
 def interpolate(options):
     if options.mode is None:
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
     elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
-        mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the rihght!")
+        mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
     else:
+        # If the above checks are passed, perform the triangulation and let
+        # set_mode render it
         m2triangulate.triangulate(options.objects[options.mode.split("_")[0]]['canvas'],
                                   options.ax, options.status)
         options.mode = options.mode.split("_")[0] + "_map"
         set_mode(options)
 
 
+# This function subtracts the interpolated images for plasma and the background
+# after checking they exist and showing the appropriate alert if they don't
 def subtract(options):
     if options.objects['background']['canvas'] is None:
         mb.showinfo("No background loaded", "You need to load, label, and interpolate a background interferogram file first in order to perform the subtraction.")
@@ -115,6 +152,9 @@ def subtract(options):
     elif not options.objects['plasma']['canvas'].interpolation_done:
         mb.showinfo("No background interpolation", "You need to perform an interpolation of the plasma fringes before the subtraction.")
     else:
+        # Subtract the interferograms, masking them with the user-defined mask,
+        # as well as the regions that couldn't be interpolated for both
+        # background and plasma images
         options.subtracted = sp.ma.masked_where(
             sp.logical_or(sp.logical_or(
                 options.objects['plasma']['canvas'].mask == False,
@@ -124,5 +164,6 @@ def subtract(options):
             options.objects['background']['canvas'].interpolated
             - options.objects['plasma']['canvas'].interpolated
         )
+        # Let set_mode do the rendering
         options.mode = "subtracted_graph"
         set_mode(options)
