@@ -4,6 +4,7 @@ import tkinter.ttk as ttk
 class StatusBar(Tk.Frame):
     def __init__(self, master):
         Tk.Frame.__init__(self, master, bd=2, relief=Tk.SUNKEN)
+        self.master = master
         self.pb = ttk.Progressbar(self, orient='horizontal', mode='determinate')
         self.pb.pack(side=Tk.RIGHT)
         self.pb['value'] = 0
@@ -22,3 +23,4 @@ class StatusBar(Tk.Frame):
         self.pb.update_idletasks()
         self.label.update_idletasks()
         self.update_idletasks()
+        self.master.update()

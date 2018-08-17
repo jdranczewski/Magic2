@@ -12,6 +12,7 @@ from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2TkAgg)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
+from matplotlib import rcParams
 
 
 class GraphFrame(Tk.Frame):
@@ -37,6 +38,7 @@ class GraphFrame(Tk.Frame):
         if bind_keys:
             def on_key_press(event):
                 key_press_handler(event, self.canvas, toolbar)
+            rcParams['keymap.back'] = ['left', 'c']
             self.canvas.mpl_connect("key_press_event", on_key_press)
         # Set focus back to canvas after clicking it
         self.canvas.mpl_connect('button_press_event',

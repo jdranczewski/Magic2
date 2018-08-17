@@ -94,6 +94,7 @@ def main():
     b.pack()
     def unpickle():
         options.load(pickle.load(open("save.p", "rb")))
+        print("Opened")
     b = ttk.Button(operations_group, text="Unpickle",
                    command=unpickle)
     b.pack()
