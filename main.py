@@ -27,6 +27,7 @@ class Options:
         # matplotlib's objects used to manipulate the main graph
         self.fig = None
         self.ax = None
+        self.imshow = None
         # A Labeller object. Its existence is an indication of being in
         # labelling mode and having to disattach event listeners when
         # switching the graph display
@@ -76,6 +77,10 @@ def main():
         options.objects = pickle.load(open("save.p", "rb"))
         print("Opened")
     filemenu.add_command(label="Unpickle", command=unpickle)
+    filemenu.add_separator()
+    filemenu.add_command(label="Export the current view's data as .csv",
+                         command=lambda:
+                         m2callbacks.export(options))
     # Create the process submenu
     processmenu = Tk.Menu(menu)
     menu.add_cascade(label="Process", menu=processmenu)

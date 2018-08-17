@@ -41,6 +41,13 @@ def open_image(options, env):
             options.status.set("Done", 100)
 
 
+def export(options):
+    if options.mode.split("_")[1] == 'fringes':
+        sp.savetxt("foo.csv", sp.ma.filled(options.objects[options.mode.split("_")[0]]['canvas'].fringe_phases,fill_value=-1024), delimiter=",")
+    else:
+        sp.savetxt("foo.csv", sp.ma.filled(options.imshow.get_array(),fill_value=-1024), delimiter=",")
+
+
 # Handle the user choosing one of the radio buttons
 def show_radio(options):
     # Give the focus back to the graph
@@ -94,7 +101,7 @@ def set_mode(options):
         canvas = options.objects[key[0]]['canvas']
         fringes = options.objects[key[0]]['fringes']
         # The fringes image is masked where there is no data
-        canvas.imshow = options.ax.imshow(
+        options.imshow = canvas.imshow = options.ax.imshow(
             sp.ma.masked_where(canvas.fringe_phases_visual == -1024,
                                canvas.fringe_phases_visual),
             cmap=m2graphics.cmap
@@ -106,7 +113,7 @@ def set_mode(options):
         canvas = options.objects[key[0]]['canvas']
         # The map image is masked where there is no interpolation data and
         # on the user-defined mask
-        canvas.imshow = options.ax.imshow(
+        options.imshow = canvas.imshow = options.ax.imshow(
             sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated == -1024.0),
                                canvas.interpolated),
             cmap=m2graphics.cmap
@@ -116,7 +123,7 @@ def set_mode(options):
         # note: this function works on the assumption that the things it is
         # attempting to show have been generated previously. It is the burden
         # of event handlers to check whether this is corrct
-        options.ax.imshow(options.subtracted, cmap=m2graphics.cmap)
+        options.imshow = options.ax.imshow(options.subtracted, cmap=m2graphics.cmap)
     elif key[0] == 'plasma':
         pass
     # Refresh the graph's canvas
