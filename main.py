@@ -67,6 +67,24 @@ def main():
     filemenu.add_command(label="Open plasma image",
                          command=lambda:
                          m2callbacks.open_image(options, 'plasma'))
+    filemenu.add_separator()
+    def make_pickle():
+        print("Making pickle")
+        pickle.dump(options.objects, open("save.p", "wb"))
+    filemenu.add_command(label="Pickle", command=make_pickle)
+    def unpickle():
+        options.objects = pickle.load(open("save.p", "rb"))
+        print("Opened")
+    filemenu.add_command(label="Unpickle", command=unpickle)
+    # Create the process submenu
+    processmenu = Tk.Menu(menu)
+    menu.add_cascade(label="Process", menu=processmenu)
+    processmenu.add_command(label="Interpolate",
+                         command=lambda:
+                         m2callbacks.interpolate(options))
+    processmenu.add_command(label="Subtract",
+                         command=lambda:
+                         m2callbacks.subtract(options))
 
     # Create the matplotlib widget
     options.mframe = m2mframe.GraphFrame(root, bind_keys=True, show_toolbar=True)
@@ -98,27 +116,6 @@ def main():
         b = ttk.Radiobutton(display_group, text=name, variable=options.show_var,
                             value=key, command=lambda: m2callbacks.show_radio(options))
         b.pack(anchor=Tk.W)
-    # create a group for operations that can be performed
-    operations_group = Tk.LabelFrame(side_frame, text="Operations", padx=5, pady=5)
-    operations_group.pack(fill=Tk.BOTH)
-    b = ttk.Button(operations_group, text="Interpolate",
-                   command=lambda: m2callbacks.interpolate(options))
-    b.pack()
-    b = ttk.Button(operations_group, text="Subtract",
-                   command=lambda: m2callbacks.subtract(options))
-    b.pack()
-    def make_pickle():
-        print("Making pickle")
-        pickle.dump(options.objects, open("save.p", "wb"))
-    b = ttk.Button(operations_group, text="Pickle",
-                   command=make_pickle)
-    b.pack()
-    def unpickle():
-        options.objects = pickle.load(open("save.p", "rb"))
-        print("Opened")
-    b = ttk.Button(operations_group, text="Unpickle",
-                   command=unpickle)
-    b.pack()
 
     # Create a status bar and place it at the bottom of the window.
     options.status = m2status_bar.StatusBar(root)
