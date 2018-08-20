@@ -30,6 +30,7 @@ class Canvas():
         # every pixel
         self.x, self.y = sp.meshgrid(sp.arange(0, len(self.fringes_image[0])),
                                      sp.arange(0, len(self.fringes_image)))
+        self.xy = sp.transpose([self.y.ravel(), self.x.ravel()])
         # Interpolated will store the interpolated version of the image
         self.interpolation_done = False
         self.interpolated = sp.zeros_like(self.fringes_image)-1024.0

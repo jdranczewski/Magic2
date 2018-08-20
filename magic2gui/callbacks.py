@@ -177,17 +177,31 @@ def interpolate(options, env=None):
     elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
     else:
-        # If the above checks are passed, perform the triangulation and let
-        # set_mode render it
-        if env is None:
-            env = options.mode.split("_")[0]
-        tri = m2triangulate.triangulate(options.objects[env]['canvas'],
-                                        options.ax, options.status)
-        if tri is None:
-            mb.showerror("Triangulation failed", "No points detected, so the triangulation failed. Have you labelled the fringes?")
-        else:
-            options.mode = env + "_map"
-            set_mode(options)
+        ans = mb.askyesnocancel("Fast or exact?", "Would you remove flat triangles from the triangulation? This is slower, but more exact..")
+        if ans:
+            # If the above checks are passed, perform the triangulation and let
+            # set_mode render it
+            if env is None:
+                env = options.mode.split("_")[0]
+            tri = m2triangulate.triangulate(options.objects[env]['canvas'],
+                                            options.ax, options.status)
+            if tri is None:
+                mb.showerror("Triangulation failed", "No points detected, so the triangulation failed. Have you labelled the fringes?")
+            else:
+                options.mode = env + "_map"
+                set_mode(options)
+        elif ans is not None:
+            # If the above checks are passed, perform the triangulation and let
+            # set_mode render it
+            if env is None:
+                env = options.mode.split("_")[0]
+            tri = m2triangulate.fast_tri(options.objects[env]['canvas'],
+                                         options.ax, options.status)
+            if tri is None:
+                mb.showerror("Triangulation failed", "No points detected, so the triangulation failed. Have you labelled the fringes?")
+            else:
+                options.mode = env + "_map"
+                set_mode(options)
 
 
 # This function subtracts the interpolated images for plasma and the background

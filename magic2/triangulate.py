@@ -1,6 +1,6 @@
 import scipy as sp
 from scipy.spatial import Delaunay
-from scipy.spatial import ConvexHull
+from scipy.interpolate import LinearNDInterpolator
 import matplotlib.pyplot as plt
 from . import graphics as m2graphics
 
@@ -370,6 +370,7 @@ class TriangleCopy(Triangle):
         self.flat = False
         self.long_edges = [True, True, True]
 
+
 def triangulate(canvas, ax, status):
     tri = Triangulation(sp.transpose(
                         sp.nonzero(canvas.fringes_image_clean)),
@@ -381,6 +382,16 @@ def triangulate(canvas, ax, status):
         tri.interpolate(canvas, status)
         status.set("Done", 100)
         return True
+
+def fast_tri(canvas, ax, status):
+    points = sp.transpose(sp.nonzero(canvas.fringes_image_clean))
+    try:
+        interpolation = LinearNDInterpolator(points, [canvas.fringe_phases[p[0], p[1]] for p in points])
+        canvas.interpolated = sp.reshape(interpolation.__call__([canvas.xy]), canvas.fringes_image.shape)
+        canvas.interpolation_done = True
+        return True
+    except ValueError:
+        return None
 
 
 def triangulate_debug(canvas):
