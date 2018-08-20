@@ -118,7 +118,7 @@ def set_mode(options):
         canvas.imshow.set_clim(fringes.min, fringes.max)
         options.labeller = m2labelling.label(fringes, canvas,
                                              options.fig, options.ax,
-                                             options.direction_var)
+                                             options)
     elif key[1] == 'map':
         canvas = options.objects[key[0]]['canvas']
         # The map image is masked where there is no interpolation data and
