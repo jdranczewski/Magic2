@@ -5,13 +5,16 @@ from . import graphics as m2graphics
 
 # This class stores some data about the current labelling operation
 class Labeller():
-    def __init__(self):
+    def __init__(self, direction_var=None):
         # List of the points of the line being drawn
         self.points = []
         # Is the control key pressed?
         self.control = False
         # IDs of the events attached to the figure
         self.binds = []
+        # A tkinter variable corresponding to the labelling direction
+        # (phase up / phase down)
+        self.direction_var = direction_var
 
 
 # This function is used to handle the user pressing a mouse key
@@ -58,7 +61,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
                                                    labeller.points[i][0],
                                                    resolution)))
     # Prepare for labelling. Phase and prev_index are temporarily set to -1
-    phase = -1
+    phase = -1024
     prev_index = -1
     # This is an array of all the changed fringes, used to render only the
     # necessary fringes (as this is the operation that incurs the most
@@ -79,8 +82,11 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         # If the index is not -1 and not the same as the previous one, assign
         # a calculated phase to a fringe
         if index >= 0 and index != prev_index:
-            if phase >= 0:
-                phase += 1
+            if phase > -1024:
+                if labeller.direction_var is not None:
+                    phase += labeller.direction_var.get()
+                else:
+                    phase += 1
                 fringes.list[index].phase = phase
             else:
                 # This takes the value of the first fringe encountered.
@@ -95,12 +101,20 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
             prev_index = index
     # If the maximum phase reached in this labelling series is higher than
     # the one stored, update that. This is used to update the colour range
-    if phase > fringes.max:
-        fringes.max = phase
+    if labeller.direction_var is not None:
+        if labeller.direction_var.get() == 1:
+            if phase > fringes.max:
+                fringes.max = phase
+        elif labeller.direction_var.get() == -1:
+            if phase < fringes.min:
+                fringes.min = phase
+    else:
+        if phase > fringes.max:
+            fringes.max = phase
     # Render and show the changed fringes
     m2graphics.render_fringes(fringes, canvas, width=3, indices=fix_indices)
     canvas.imshow.set_data(sp.ma.masked_where(canvas.fringe_phases_visual == -1024, canvas.fringe_phases_visual))
-    canvas.imshow.set_clim(0, fringes.max)
+    canvas.imshow.set_clim(fringes.min, fringes.max)
     canvas.imshow.figure.canvas.draw()
     # This (when uncommented) allows one to see the pixels the labelling line
     # went through. Useful for debugging
@@ -142,8 +156,8 @@ def onrelease(event, labeller):
 
 # This sets up the labeller object, the line that is drawn, as well as
 # attaches all the event handlers
-def label(fringes, canvas, fig, ax):
-    labeller = Labeller()
+def label(fringes, canvas, fig, ax, direction_var=None):
+    labeller = Labeller(direction_var)
     line_plot, = ax.plot([], [], "--")
     b0 = fig.canvas.mpl_connect('button_press_event',
                                 lambda event: onclick(event, labeller, line_plot,

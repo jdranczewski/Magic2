@@ -122,6 +122,23 @@ def main():
                             value=key, command=lambda: m2callbacks.show_radio(options))
         b.pack(anchor=Tk.W)
 
+    # Create a group for labelling options
+    direction_group = Tk.LabelFrame(side_frame, text="Labelling", padx=5, pady=5)
+    direction_group.pack(fill=Tk.BOTH)
+    # Create radio buttons for display modes
+    display_modes = [
+        ("Increasing phase", 1),
+        ("Constant phase", 0),
+        ("Decreasing phase", -1),
+    ]
+    options.direction_var = Tk.IntVar()
+    options.direction_var.set(1)
+    for name, key in display_modes:
+        b = ttk.Radiobutton(direction_group, text=name,
+                            variable=options.direction_var, value=key,
+                            command=lambda: options.mframe.canvas._tkcanvas.focus_set())
+        b.pack(anchor=Tk.W)
+
     # Create a status bar and place it at the bottom of the window.
     options.status = m2status_bar.StatusBar(root)
     options.status.grid(row=1, columnspan=2, sticky=("W", "E"))

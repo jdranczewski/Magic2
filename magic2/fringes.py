@@ -5,8 +5,10 @@ import matplotlib.pyplot as plt
 
 class Fringes():
     def __init__(self):
-        # Max is the maximum phase index
+        # Max is the maximum phase
         self.max = 0
+        # Min is the minimum phase
+        self.min = 0
         # List is a list of pointers to particular fringes
         self.list = []
 
