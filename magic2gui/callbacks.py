@@ -217,3 +217,14 @@ def subtract(options):
         # Let set_mode do the rendering
         options.mode = "subtracted_graph"
         set_mode(options)
+
+def cosine(options):
+    if options.mode.split("_")[1] == 'map':
+        options.ax.imshow(sp.cos(options.imshow.get_array()*2*sp.pi))
+        # Refresh the graph's canvas
+        options.fig.canvas.draw()
+        # Set the radio buttons to the correct position
+        options.show_var.set("cosine_graph")
+        options.mode = "cosine_graph"
+    else:
+        mb.showinfo("Open a map", "Taking the cosine is possible only for interpolated phase maps.")

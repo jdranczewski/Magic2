@@ -90,6 +90,9 @@ def main():
     processmenu.add_command(label="Subtract",
                          command=lambda:
                          m2callbacks.subtract(options))
+    processmenu.add_command(label="Cosine",
+                          command=lambda:
+                          m2callbacks.cosine(options))
 
     # Create the matplotlib widget
     options.mframe = m2mframe.GraphFrame(root, bind_keys=True, show_toolbar=True)
