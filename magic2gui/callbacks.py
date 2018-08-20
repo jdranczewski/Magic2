@@ -42,10 +42,19 @@ def open_image(options, env):
 
 
 def export(options):
-    if options.mode.split("_")[1] == 'fringes':
-        sp.savetxt("foo.csv", sp.ma.filled(options.objects[options.mode.split("_")[0]]['canvas'].fringe_phases,fill_value=-1024), delimiter=",")
+    if options.mode is not None:
+        filename = fd.asksaveasfilename(filetypes=[(".csv file", "*.csv"),
+                                                   ("All files", "*")],
+                                        defaultextension=".csv")
+        if filename != '':
+            options.status.set("Exporting", 0)
+            if options.mode.split("_")[1] == 'fringes':
+                sp.savetxt(filename, sp.ma.filled(options.objects[options.mode.split("_")[0]]['canvas'].fringe_phases,fill_value=-1024), delimiter=",")
+            else:
+                sp.savetxt(filename, sp.ma.filled(options.imshow.get_array(),fill_value=-1024), delimiter=",")
+            options.status.set("Done", 100)
     else:
-        sp.savetxt("foo.csv", sp.ma.filled(options.imshow.get_array(),fill_value=-1024), delimiter=",")
+        mb.showinfo("No mode chosen", "Please choose one of the display modes from the menu on the right!")
 
 
 # Handle the user choosing one of the radio buttons

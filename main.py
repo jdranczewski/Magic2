@@ -78,7 +78,7 @@ def main():
         print("Opened")
     filemenu.add_command(label="Unpickle", command=unpickle)
     filemenu.add_separator()
-    filemenu.add_command(label="Export the current view's data as .csv",
+    filemenu.add_command(label="Export the current view's data",
                          command=lambda:
                          m2callbacks.export(options))
     # Create the process submenu
