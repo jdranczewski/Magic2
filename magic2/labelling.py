@@ -25,13 +25,13 @@ def onclick(event, labeller, line_plot, fringes, canvas, fig, ax):
         points = sp.array(labeller.points)
         line_plot.set_data(points[:, 1], points[:, 0])
         line_plot.figure.canvas.draw()
-    # If the event was a double click, label the fringes and clear the data
-    # related to the current labelling operation
-    if event.button == 3:
-        label_fringes(labeller, fringes, canvas, fig, ax)
-        labeller.points = []
-        line_plot.set_data([], [])
-        line_plot.figure.canvas.draw()
+        # If the event was a double click, label the fringes and clear the data
+        # related to the current labelling operation
+        if event.button == 3:
+            label_fringes(labeller, fringes, canvas, fig, ax)
+            labeller.points = []
+            line_plot.set_data([], [])
+            line_plot.figure.canvas.draw()
 
 
 # This uses the set of points chosen by the user to label the fringes
