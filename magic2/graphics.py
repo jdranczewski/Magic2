@@ -84,7 +84,7 @@ def clear_visual(canvas):
 # matplotlib's imshow to show phase in a good looking way and on
 # a white background.
 norm = Normalize(vmin=-0.5, clip=False)
-cmap = copy(plt.cm.get_cmap('jet'))
+cmap = copy(plt.cm.get_cmap('plasma'))
 # White is for masking
 cmap.set_bad('white', 1.0)
 # Black is for unlabelled fringes
