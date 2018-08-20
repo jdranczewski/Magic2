@@ -76,6 +76,10 @@ def render_fringes(fringes, canvas, width=0, indices=None):
                 pass
 
 
+def clear_visual(canvas):
+    canvas.fringe_phases_visual = sp.zeros_like(canvas.fringes_image)-1024
+
+
 # Define a normalization and a colour map that can be used with
 # matplotlib's imshow to show phase in a good looking way and on
 # a white background.

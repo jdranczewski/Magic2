@@ -34,7 +34,7 @@ def open_image(options, env):
             m2fringes.read_fringes(fringes, canvas)
             options.status.set("Rendering fringes", 66)
             # Render the fringes onto the canvas
-            m2graphics.render_fringes(fringes, canvas, width=3)
+            m2graphics.render_fringes(fringes, canvas, width=options.width_var.get())
             # Set the mode (the set_mode function handles rendering)
             options.mode = env + "_fringes"
             set_mode(options)
@@ -140,6 +140,32 @@ def set_mode(options):
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position
     options.show_var.set(options.mode)
+
+
+def lower_width(options):
+    if options.mode is None or options.mode.split("_")[1] != "fringes":
+        mb.showinfo("Not in fringe display mode", "You need to be in a fringe display mode to change the width setting.")
+    else:
+        if options.width_var.get() > 0:
+            options.width_var.set(options.width_var.get() - 1)
+            if options.objects['background']['canvas'] is not None:
+                m2graphics.clear_visual(options.objects['background']['canvas'])
+                m2graphics.render_fringes(options.objects['background']['fringes'], options.objects['background']['canvas'], width=options.width_var.get())
+            if options.objects['plasma']['canvas'] is not None:
+                m2graphics.clear_visual(options.objects['plasma']['canvas'])
+                m2graphics.render_fringes(options.objects['plasma']['fringes'], options.objects['plasma']['canvas'], width=options.width_var.get())
+            set_mode(options)
+
+def higher_width(options):
+    if options.mode is None or options.mode.split("_")[1] != "fringes":
+        mb.showinfo("Not in fringe display mode", "You need to be in a fringe display mode to change the width setting.")
+    else:
+        options.width_var.set(options.width_var.get() + 1)
+        if options.objects['background']['canvas'] is not None:
+            m2graphics.render_fringes(options.objects['background']['fringes'], options.objects['background']['canvas'], width=options.width_var.get())
+        if options.objects['plasma']['canvas'] is not None:
+            m2graphics.render_fringes(options.objects['plasma']['fringes'], options.objects['plasma']['canvas'], width=options.width_var.get())
+        set_mode(options)
 
 
 # This performs some checks and then starts off the triangulation for

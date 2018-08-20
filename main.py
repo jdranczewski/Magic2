@@ -121,6 +121,18 @@ def main():
         b = ttk.Radiobutton(display_group, text=name, variable=options.show_var,
                             value=key, command=lambda: m2callbacks.show_radio(options))
         b.pack(anchor=Tk.W)
+    width_frame = Tk.Frame(display_group)
+    width_frame.pack()
+    b = Tk.Button(width_frame, text="<", command=lambda: m2callbacks.lower_width(options))
+    b.pack(side=Tk.LEFT)
+    l = Tk.Label(width_frame, text="width:")
+    l.pack(side=Tk.LEFT)
+    options.width_var = Tk.IntVar()
+    options.width_var.set(2)
+    l = Tk.Label(width_frame, textvar=options.width_var)
+    l.pack(side=Tk.LEFT)
+    b = Tk.Button(width_frame, text=">", command=lambda: m2callbacks.higher_width(options))
+    b.pack(side=Tk.LEFT)
 
     # Create a group for labelling options
     direction_group = Tk.LabelFrame(side_frame, text="Labelling", padx=5, pady=5)
