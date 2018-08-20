@@ -5,16 +5,15 @@ from . import graphics as m2graphics
 
 # This class stores some data about the current labelling operation
 class Labeller():
-    def __init__(self, direction_var=None):
+    def __init__(self, options=None):
         # List of the points of the line being drawn
         self.points = []
         # Is the control key pressed?
         self.control = False
         # IDs of the events attached to the figure
         self.binds = []
-        # A tkinter variable corresponding to the labelling direction
-        # (phase up / phase down)
-        self.direction_var = direction_var
+        # The app's options
+        self.options = options
 
 
 # This function is used to handle the user pressing a mouse key
@@ -83,8 +82,8 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         # a calculated phase to a fringe
         if index >= 0 and index != prev_index:
             if phase > -1024:
-                if labeller.direction_var is not None:
-                    phase += labeller.direction_var.get()
+                if labeller.options.direction_var is not None:
+                    phase += labeller.options.direction_var.get()
                 else:
                     phase += 1
                 fringes.list[index].phase = phase
@@ -101,18 +100,18 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
             prev_index = index
     # If the maximum phase reached in this labelling series is higher than
     # the one stored, update that. This is used to update the colour range
-    if labeller.direction_var is not None:
-        if labeller.direction_var.get() == 1:
+    if labeller.options.direction_var is not None:
+        if labeller.options.direction_var.get() == 1:
             if phase > fringes.max:
                 fringes.max = phase
-        elif labeller.direction_var.get() == -1:
+        elif labeller.options.direction_var.get() == -1:
             if phase < fringes.min:
                 fringes.min = phase
     else:
         if phase > fringes.max:
             fringes.max = phase
     # Render and show the changed fringes
-    m2graphics.render_fringes(fringes, canvas, width=3, indices=fix_indices)
+    m2graphics.render_fringes(fringes, canvas, width=labeller.options.width_var.get(), indices=fix_indices)
     canvas.imshow.set_data(sp.ma.masked_where(canvas.fringe_phases_visual == -1024, canvas.fringe_phases_visual))
     canvas.imshow.set_clim(fringes.min, fringes.max)
     canvas.imshow.figure.canvas.draw()
