@@ -27,7 +27,7 @@ def onclick(event, labeller, line_plot, fringes, canvas, fig, ax):
         line_plot.figure.canvas.draw()
     # If the event was a double click, label the fringes and clear the data
     # related to the current labelling operation
-    elif event.dblclick:
+    if event.button == 3:
         label_fringes(labeller, fringes, canvas, fig, ax)
         labeller.points = []
         line_plot.set_data([], [])
