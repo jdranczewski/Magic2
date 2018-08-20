@@ -384,11 +384,15 @@ def triangulate(canvas, ax, status):
         return True
 
 def fast_tri(canvas, ax, status):
+    if status is not None:
+        status.set("Creating the interpolant", 0)
     points = sp.transpose(sp.nonzero(canvas.fringes_image_clean))
     try:
-        interpolation = LinearNDInterpolator(points, [canvas.fringe_phases[p[0], p[1]] for p in points])
+        interpolation = LinearNDInterpolator(points, [canvas.fringe_phases[p[0], p[1]] for p in points], fill_value=-1024.0)
+        status.set("Calculating values for points on canvas", 60)
         canvas.interpolated = sp.reshape(interpolation.__call__([canvas.xy]), canvas.fringes_image.shape)
         canvas.interpolation_done = True
+        status.set("Done", 100)
         return True
     except ValueError:
         return None

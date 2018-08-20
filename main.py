@@ -84,12 +84,17 @@ def main():
     # Create the process submenu
     processmenu = Tk.Menu(menu)
     menu.add_cascade(label="Process", menu=processmenu)
-    processmenu.add_command(label="Interpolate",
+    processmenu.add_command(label="Exact interpolation",
                          command=lambda:
-                         m2callbacks.interpolate(options))
+                         m2callbacks.interpolate_exact(options))
+    processmenu.add_command(label="Fast interpolation",
+                         command=lambda:
+                         m2callbacks.interpolate_fast(options))
+    processmenu.add_separator()
     processmenu.add_command(label="Subtract",
                          command=lambda:
                          m2callbacks.subtract(options))
+    processmenu.add_separator()
     processmenu.add_command(label="Cosine",
                           command=lambda:
                           m2callbacks.cosine(options))

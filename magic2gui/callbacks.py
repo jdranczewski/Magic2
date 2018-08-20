@@ -79,11 +79,13 @@ def show_radio(options):
                 options.mode = "_".join(key)
                 set_mode(options)
             # ...if not, give the user the option to generate one
-            elif mb.askyesno(
-                "Interpolate?", "The interferogram for " + key[0]
-                + " has not been interpolated yet. Would you like to do that now?"
-            ):
-                interpolate(options, key[0])
+            else:
+                ans = mb.askyesnocancel("Fast or exact?", "Would you like to remove flat triangles from the triangulation that is used when interpolating? This is slower, but more exact.")
+                if ans:
+                    interpolate_exact(options, key[0])
+                elif ans is not None:
+                    interpolate_fast(options, key[0])
+
     # If the user wants the subtracted map, show it or calculate it and show it
     # (the calculation is a quick process, so it doesn't make sense to ask
     # the user for permission)
@@ -171,37 +173,42 @@ def higher_width(options):
 # This performs some checks and then starts off the triangulation for
 # either the background or plasma fringes, depending on which one is
 # currently displayed
-def interpolate(options, env=None):
+def interpolate_exact(options, env=None):
     if options.mode is None:
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
     elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
     else:
-        ans = mb.askyesnocancel("Fast or exact?", "Would you remove flat triangles from the triangulation? This is slower, but more exact..")
-        if ans:
-            # If the above checks are passed, perform the triangulation and let
-            # set_mode render it
-            if env is None:
-                env = options.mode.split("_")[0]
-            tri = m2triangulate.triangulate(options.objects[env]['canvas'],
-                                            options.ax, options.status)
-            if tri is None:
-                mb.showerror("Triangulation failed", "No points detected, so the triangulation failed. Have you labelled the fringes?")
-            else:
-                options.mode = env + "_map"
-                set_mode(options)
-        elif ans is not None:
-            # If the above checks are passed, perform the triangulation and let
-            # set_mode render it
-            if env is None:
-                env = options.mode.split("_")[0]
-            tri = m2triangulate.fast_tri(options.objects[env]['canvas'],
-                                         options.ax, options.status)
-            if tri is None:
-                mb.showerror("Triangulation failed", "No points detected, so the triangulation failed. Have you labelled the fringes?")
-            else:
-                options.mode = env + "_map"
-                set_mode(options)
+        # If the above checks are passed, perform the triangulation and let
+        # set_mode render it
+        if env is None:
+            env = options.mode.split("_")[0]
+        tri = m2triangulate.triangulate(options.objects[env]['canvas'],
+                                        options.ax, options.status)
+        if tri is None:
+            mb.showerror("Triangulation failed", "No points detected, so the triangulation failed. Have you labelled the fringes?")
+        else:
+            options.mode = env + "_map"
+            set_mode(options)
+
+
+def interpolate_fast(options, env=None):
+    if options.mode is None:
+        mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
+    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
+        mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
+    else:
+        # If the above checks are passed, perform the triangulation and let
+        # set_mode render it
+        if env is None:
+            env = options.mode.split("_")[0]
+        tri = m2triangulate.fast_tri(options.objects[env]['canvas'],
+                                     options.ax, options.status)
+        if tri is None:
+            mb.showerror("Triangulation failed", "No points detected, so the triangulation failed. Have you labelled the fringes?")
+        else:
+            options.mode = env + "_map"
+            set_mode(options)
 
 
 # This function subtracts the interpolated images for plasma and the background
