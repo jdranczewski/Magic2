@@ -245,7 +245,7 @@ class Triangulation:
         triangle.flat = False
 
     # Interpolate the data based on the calculated triangulation
-    def interpolate(self, canvas, status):
+    def interpolate(self, canvas, status = None):
         if status is not None:
             status.set("Performing the interpolation", 70)
         else:

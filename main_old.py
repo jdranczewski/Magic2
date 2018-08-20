@@ -25,7 +25,7 @@ def main():
     m2labelling.label(fringes, canvas, fig, ax)
     plt.show()
 
-    m2triangulate.triangulate(canvas)
+    m2triangulate.triangulate_debug(canvas)
 
 
 if __name__ == "__main__":
