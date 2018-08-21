@@ -51,7 +51,6 @@ class GraphFrame(Tk.Frame):
                     self.ax.set_xlim([xlim[0]+0.1*diffx, xlim[1]-0.1*diffx])
                     self.fig.canvas.draw()
                 elif event.key == 'z':
-                    print("Doi")
                     ylim = self.ax.get_ylim()
                     xlim = self.ax.get_xlim()
                     diffy = self.ax.get_ylim()[1] - self.ax.get_ylim()[0]
@@ -78,6 +77,11 @@ class GraphFrame(Tk.Frame):
                         self.ax.set_ylim([ylim[0]+0.3*diffy*dy, ylim[1]+0.3*diffy*dy])
                         self.ax.set_xlim([xlim[0]+0.3*diffx*dx, xlim[1]+0.3*diffx*dx])
                         self.fig.canvas.draw()
+                def new_home():
+                    print("New home")
+                    self.ax.autoscale()
+                    self.fig.canvas.draw()
+                toolbar.home = new_home
             self.canvas.mpl_connect("key_press_event", on_key_press)
         # Set focus back to canvas after clicking it
         self.canvas.mpl_connect('button_press_event',
