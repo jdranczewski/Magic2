@@ -37,9 +37,47 @@ class GraphFrame(Tk.Frame):
         self.canvas._tkcanvas.pack(side=Tk.BOTTOM, fill=Tk.BOTH, expand=1)
         # Bind keyboard shortcuts
         if bind_keys:
+            rcParams['keymap.back'] = ['left', 'c']
+            rcParams['keymap.save'] = ['ctrl+s']
             def on_key_press(event):
                 key_press_handler(event, self.canvas, toolbar)
-            rcParams['keymap.back'] = ['left', 'c']
+                # Keyboard navigation
+                if event.key == 'x':
+                    ylim = self.ax.get_ylim()
+                    xlim = self.ax.get_xlim()
+                    diffy = self.ax.get_ylim()[1] - self.ax.get_ylim()[0]
+                    diffx = self.ax.get_xlim()[1] - self.ax.get_xlim()[0]
+                    self.ax.set_ylim([ylim[0]+0.1*diffy, ylim[1]-0.1*diffy])
+                    self.ax.set_xlim([xlim[0]+0.1*diffx, xlim[1]-0.1*diffx])
+                    self.fig.canvas.draw()
+                elif event.key == 'z':
+                    print("Doi")
+                    ylim = self.ax.get_ylim()
+                    xlim = self.ax.get_xlim()
+                    diffy = self.ax.get_ylim()[1] - self.ax.get_ylim()[0]
+                    diffx = self.ax.get_xlim()[1] - self.ax.get_xlim()[0]
+                    self.ax.set_ylim([ylim[0]-0.1*diffy, ylim[1]+0.1*diffy])
+                    self.ax.set_xlim([xlim[0]-0.1*diffx, xlim[1]+0.1*diffx])
+                    self.fig.canvas.draw()
+                else:
+                    dx = 0
+                    dy = 0
+                    if event.key == 'w':
+                        dy = 1
+                    elif event.key == 'a':
+                        dx = -1
+                    elif event.key == 's':
+                        dy = -1
+                    elif event.key == 'd':
+                        dx = 1
+                    if dx != 0 or dy != 0:
+                        ylim = self.ax.get_ylim()
+                        xlim = self.ax.get_xlim()
+                        diffy = self.ax.get_ylim()[1] - self.ax.get_ylim()[0]
+                        diffx = self.ax.get_xlim()[1] - self.ax.get_xlim()[0]
+                        self.ax.set_ylim([ylim[0]+0.3*diffy*dy, ylim[1]+0.3*diffy*dy])
+                        self.ax.set_xlim([xlim[0]+0.3*diffx*dx, xlim[1]+0.3*diffx*dx])
+                        self.fig.canvas.draw()
             self.canvas.mpl_connect("key_press_event", on_key_press)
         # Set focus back to canvas after clicking it
         self.canvas.mpl_connect('button_press_event',
