@@ -108,6 +108,12 @@ def set_mode(options):
     options.ax.clear()
     if options.labeller is not None:
         m2labelling.stop_labelling(options.fig, options.labeller)
+    if options.cbar is not None:
+        # The whole figure is cleaned, as simply deleting the colorbar
+        # resulted in the graph being shifted to the right
+        options.fig.clear()
+        options.ax = options.fig.add_subplot(111)
+        options.cbar = None
     if key[1] == 'fringes':
         canvas = options.objects[key[0]]['canvas']
         fringes = options.objects[key[0]]['fringes']
@@ -136,6 +142,8 @@ def set_mode(options):
         # attempting to show have been generated previously. It is the burden
         # of event handlers to check whether this is corrct
         options.imshow = options.ax.imshow(options.subtracted, cmap=m2graphics.cmap)
+        options.cbar = options.fig.colorbar(options.imshow)
+        options.cbar.ax.set_ylabel('Fringe shift', rotation=270)
     elif key[0] == 'plasma':
         pass
     # Refresh the graph's canvas

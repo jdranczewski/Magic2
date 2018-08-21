@@ -43,6 +43,8 @@ class Options:
         self.mode = None
         # An image of the two interpolations subtracted
         self.subtracted = None
+        # The colorbar
+        self.cbar = None
 
 
 def main():

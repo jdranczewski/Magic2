@@ -22,6 +22,7 @@ class GraphFrame(Tk.Frame):
         Tk.Frame.__init__(self, parent)
         # Create a matplotlib Figure
         self.fig = Figure(figsize=figsize, dpi=dpi)
+        self.fig.set_tight_layout(True)
         # Create a matplotlib subplot
         self.ax = self.fig.add_subplot(111)
         # Create and draw a canvas
