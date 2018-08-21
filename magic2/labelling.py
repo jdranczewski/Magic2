@@ -52,7 +52,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         #             ###
         #                ##
         resolution = int(sp.amax([abs(labeller.points[i-1][1]-labeller.points[i][1]),
-                                  abs(labeller.points[i-1][0]-labeller.points[i][0])]))
+                                  abs(labeller.points[i-1][0]-labeller.points[i][0])])) + 1
         x = sp.append(x, special.round(sp.linspace(labeller.points[i-1][1],
                                                    labeller.points[i][1],
                                                    resolution)))
