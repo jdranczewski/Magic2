@@ -301,6 +301,21 @@ def interpolate_fast(options, env=None):
             set_mode(options)
 
 
+def interpolate_debug(options, env=None):
+    if options.mode is None:
+        mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
+    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
+        mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
+    elif mb.askokcancel("Debug triangulation", "You are about to perform a debug mode interpolation. This shows the output of every step in a separate graph window. Flat triangles are usually highlighted green. Look for error messages and progress reports in the terminal. Do not interact with the main Magic2 window, as who knows what happens then?\n\nThere is a very much non-zero risk of crashing. You may loose your work (so save it)."):
+        # If the above checks are passed, perform the triangulation and let
+        # set_mode render it
+        if env is None:
+            env = options.mode.split("_")[0]
+        m2triangulate.triangulate_debug(options.objects[env]['canvas'])
+        options.mode = env + "_map"
+        set_mode(options)
+
+
 # This function subtracts the interpolated images for plasma and the background
 # after checking they exist and showing the appropriate alert if they don't
 def subtract(options):

@@ -100,6 +100,9 @@ def main():
     processmenu.add_command(label="Fast interpolation",
                             command=lambda:
                             m2callbacks.interpolate_fast(options))
+    processmenu.add_command(label="Exact interpolation (debug mode)",
+                            command=lambda:
+                            m2callbacks.interpolate_debug(options))
     processmenu.add_separator()
     processmenu.add_command(label="Subtract",
                             command=lambda:

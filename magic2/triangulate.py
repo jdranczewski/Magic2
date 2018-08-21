@@ -383,6 +383,7 @@ def triangulate(canvas, ax, status):
         status.set("Done", 100)
         return True
 
+
 def fast_tri(canvas, ax, status):
     if status is not None:
         status.set("Creating the interpolant", 0)
