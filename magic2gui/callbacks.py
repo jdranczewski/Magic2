@@ -345,6 +345,64 @@ def subtract(options):
         set_mode(options)
 
 
+class PlasmaDialog(m2dialog.Dialog):
+    def __init__(self, parent, options, title=None):
+        self.options = options
+        m2dialog.Dialog.__init__(self, parent, title)
+
+    def body(self, master):
+        master.grid_rowconfigure((0,1,2), pad=5)
+        # Resolution
+        ttk.Label(master, text="Resolution:").grid(row=0, sticky=Tk.E)
+        self.e_resolution = ttk.Entry(master)
+        if self.options.resolution is not None:
+            self.e_resolution.insert(0, self.options.resolution)
+        self.e_resolution.grid(row=0, column=1)
+        ttk.Label(master, text="pixels per mm").grid(row=0, column=2, sticky=Tk.W)
+        # Depth
+        ttk.Label(master, text="Depth of the object:").grid(row=1, sticky=Tk.E)
+        self.e_depth = ttk.Entry(master)
+        if self.options.depth is not None:
+            self.e_depth.insert(0, self.options.depth)
+        self.e_depth.grid(row=1, column=1)
+        ttk.Label(master, text="mm").grid(row=1, column=2, sticky=Tk.W)
+        # Wavelength
+        ttk.Label(master, text="Wavelength:").grid(row=2, sticky=Tk.E)
+        self.e_wavelength = ttk.Entry(master)
+        if self.options.wavelength is not None:
+            self.e_wavelength.insert(0, self.options.wavelength)
+        self.e_wavelength.grid(row=2, column=1)
+        ttk.Label(master, text="nm").grid(row=2, column=2, sticky=Tk.W)
+        # Double fringes
+        self.double_var = Tk.BooleanVar()
+        if self.options.double is not None:
+            self.double_var.set(self.options.double)
+        self.cb = ttk.Checkbutton(master, text="Double", variable=self.double_var)
+        self.cb.grid(row=3, columnspan=3)
+        # Return the default input box
+        return self.e_resolution
+
+    def validate(self):
+        try:
+            float(self.e_resolution.get())
+            float(self.e_depth.get())
+            float(self.e_wavelength.get())
+            return 1
+        except ValueError:
+            mb.showerror("Error", "All values need to be floats or integers!")
+            return 0
+
+    def apply(self):
+        self.options.resolution = float(self.e_resolution.get())
+        self.options.depth = float(self.e_depth.get())
+        self.options.wavelength = float(self.e_wavelength.get())
+        self.options.double = self.double_var.get()
+
+
+def shot_options(options):
+    dialog = PlasmaDialog(options.root, options, title="Shot details")
+
+
 def cosine(options):
     if options.mode.split("_")[1] == 'map':
         options.ax.imshow(sp.cos(options.imshow.get_array()*2*sp.pi), cmap="Greys")

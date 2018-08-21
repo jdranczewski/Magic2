@@ -50,6 +50,11 @@ class Options:
         self.subtracted = None
         # The colorbar
         self.cbar = None
+        # Shot properties
+        self.resolution = None
+        self.depth = None
+        self.wavelength = None
+        self.double = None
 
 
 def main():
@@ -107,6 +112,13 @@ def main():
     processmenu.add_command(label="Subtract",
                             command=lambda:
                             m2callbacks.subtract(options))
+    processmenu.add_separator()
+    processmenu.add_command(label="Calculate plasma density",
+                            command=lambda:
+                            m2callbacks.plasma_density(options))
+    processmenu.add_command(label="Set shot details",
+                            command=lambda:
+                            m2callbacks.shot_options(options))
     processmenu.add_separator()
     processmenu.add_command(label="Cosine",
                             command=lambda:
