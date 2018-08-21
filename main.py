@@ -24,6 +24,8 @@ class Options:
                 "fringes": None
             }
         }
+        # tkinter's root
+        self.root = None
         # matplotlib's objects used to manipulate the main graph
         self.fig = None
         self.ax = None
@@ -48,15 +50,15 @@ class Options:
 
 
 def main():
+    # Create an Options object for storing settings and other objects
+    options = Options()
     # Create a root tkinter object and set its title
-    root = Tk.Tk()
+    options.root = root = Tk.Tk()
     root.wm_title("Magic2")
     # Set the first row and column in root's grid layout to resize.
     # This way the graph will fit all the available space
     root.grid_columnconfigure(0, weight=1)
     root.grid_rowconfigure(0, weight=1)
-    # Create an Options object for storing settings and other objects
-    options = Options()
 
     # Create the menu
     menu = Tk.Menu(root)
@@ -83,6 +85,9 @@ def main():
     filemenu.add_command(label="Export the current view's data",
                          command=lambda:
                          m2callbacks.export(options))
+    filemenu.add_command(label="Save the graph as an image",
+                         command=lambda:
+                         m2callbacks.export_image(options))
     # Create the process submenu
     processmenu = Tk.Menu(menu)
     menu.add_cascade(label="Process", menu=processmenu)

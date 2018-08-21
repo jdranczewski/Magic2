@@ -1,6 +1,8 @@
 import tkinter.filedialog as fd
 import tkinter.messagebox as mb
+import tkinter.ttk as ttk
 import scipy as sp
+import magic2gui.dialog as m2dialog
 import magic2.graphics as m2graphics
 import magic2.fringes as m2fringes
 import magic2.labelling as m2labelling
@@ -55,6 +57,36 @@ def export(options):
             options.status.set("Done", 100)
     else:
         mb.showinfo("No mode chosen", "Please choose one of the display modes from the menu on the right!")
+
+
+class DpiDialog(m2dialog.Dialog):
+    def body(self, master):
+        ttk.Label(master, text="DPI:").grid(row=0)
+        self.e = ttk.Entry(master)
+        self.e.insert(0, 300)
+        self.e.grid(row=0, column=1)
+        return self.e
+
+    def validate(self):
+        try:
+            int(self.e.get())
+            return 1
+        except ValueError:
+            mb.showerror("Error", "The value needs to be an integer!")
+            return 0
+
+    def apply(self):
+        self.result = int(self.e.get())
+
+
+def export_image(options):
+    dialog = DpiDialog(options.root)
+    if dialog.result is not None:
+        filename = fd.asksaveasfilename(filetypes=[("PNG files", "*.png;*.PNG"),
+                                                   ("All files", "*")],
+                                        defaultextension=".png")
+        if filename != '':
+            options.fig.savefig(filename, dpi=dialog.result)
 
 
 # Handle the user choosing one of the radio buttons
