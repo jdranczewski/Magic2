@@ -178,8 +178,13 @@ def show_radio(options):
         else:
             options.mode = "_".join(key)
             set_mode(options)
-    elif key[0] == 'plasma':
-        pass
+    elif key[0] == 'density':
+        if options.density is None:
+            print("Perf")
+            plasma_density(options)
+        else:
+            options.mode = "_".join(key)
+            set_mode(options)
 
 
 # Render the correct image on the graph's canvas
@@ -226,8 +231,10 @@ def set_mode(options):
         options.imshow = options.ax.imshow(options.subtracted, cmap=options.cmap)
         options.cbar = options.fig.colorbar(options.imshow)
         options.cbar.ax.set_ylabel('Fringe shift', rotation=270)
-    elif key[0] == 'plasma':
-        pass
+    elif key[0] == 'density':
+        options.imshow = options.ax.imshow(options.density, cmap=options.cmap)
+        options.cbar = options.fig.colorbar(options.imshow)
+        options.cbar.ax.set_ylabel('Fringe shift', rotation=270)
     # Refresh the graph's canvas
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position
@@ -397,10 +404,23 @@ class PlasmaDialog(m2dialog.Dialog):
         self.options.depth = float(self.e_depth.get())
         self.options.wavelength = float(self.e_wavelength.get())
         self.options.double = self.double_var.get()
+        self.result = True
 
 
 def shot_options(options):
     dialog = PlasmaDialog(options.root, options, title="Shot details")
+    return dialog.result is not None
+
+
+def plasma_density(options):
+    if (
+        (options.resolution is not None and options.depth is not None
+         and options.wavelength is not None and options.double is not None)
+        or shot_options(options)
+    ):
+        options.density = options.subtracted * 10
+        options.mode = "density_graph"
+        set_mode(options)
 
 
 def cosine(options):

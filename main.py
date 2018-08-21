@@ -48,6 +48,8 @@ class Options:
         self.cmap = m2graphics.cmap
         # An image of the two interpolations subtracted
         self.subtracted = None
+        # An image of the plasma density
+        self.density = None
         # The colorbar
         self.cbar = None
         # Shot properties
@@ -153,7 +155,7 @@ def main():
         ("Plasma fringes", "plasma_fringes"),
         ("Plasma map", "plasma_map"),
         ("Subtracted map", "subtracted_graph"),
-        ("Plasma density", "phase_graph")
+        ("Plasma density", "density_graph")
     ]
     options.show_var = Tk.StringVar()
     for name, key in display_modes:
