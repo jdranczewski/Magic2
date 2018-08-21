@@ -1,5 +1,6 @@
 import tkinter as Tk
 import tkinter.ttk as ttk
+import magic2.graphics as m2graphics
 import magic2gui.callbacks as m2callbacks
 import magic2gui.matplotlib_frame as m2mframe
 import magic2gui.status_bar as m2status_bar
@@ -43,6 +44,8 @@ class Options:
         # mode is a variable storing the state in which the programme is,
         # like background_fringes
         self.mode = None
+        # Colormap setting for matplotlib
+        self.cmap = m2graphics.cmap
         # An image of the two interpolations subtracted
         self.subtracted = None
         # The colorbar
@@ -92,19 +95,25 @@ def main():
     processmenu = Tk.Menu(menu)
     menu.add_cascade(label="Process", menu=processmenu)
     processmenu.add_command(label="Exact interpolation",
-                         command=lambda:
-                         m2callbacks.interpolate_exact(options))
+                            command=lambda:
+                            m2callbacks.interpolate_exact(options))
     processmenu.add_command(label="Fast interpolation",
-                         command=lambda:
-                         m2callbacks.interpolate_fast(options))
+                            command=lambda:
+                            m2callbacks.interpolate_fast(options))
     processmenu.add_separator()
     processmenu.add_command(label="Subtract",
-                         command=lambda:
-                         m2callbacks.subtract(options))
+                            command=lambda:
+                            m2callbacks.subtract(options))
     processmenu.add_separator()
     processmenu.add_command(label="Cosine",
-                          command=lambda:
-                          m2callbacks.cosine(options))
+                            command=lambda:
+                            m2callbacks.cosine(options))
+    # Create the display submenu
+    displaymenu = Tk.Menu(menu)
+    menu.add_cascade(label="Display", menu=displaymenu)
+    displaymenu.add_command(label="Set colormap",
+                            command=lambda:
+                            m2callbacks.set_colormap(options))
 
     # Create the matplotlib widget
     options.mframe = m2mframe.GraphFrame(root, bind_keys=True, show_toolbar=True)

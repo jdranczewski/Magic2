@@ -1,7 +1,11 @@
 import tkinter.filedialog as fd
 import tkinter.messagebox as mb
+import tkinter as Tk
 import tkinter.ttk as ttk
 import scipy as sp
+from copy import copy
+from matplotlib.pyplot import cm
+
 import magic2gui.dialog as m2dialog
 import magic2.graphics as m2graphics
 import magic2.fringes as m2fringes
@@ -80,13 +84,59 @@ class DpiDialog(m2dialog.Dialog):
 
 
 def export_image(options):
-    dialog = DpiDialog(options.root)
+    dialog = DpiDialog(options.root, title="Choose quality")
     if dialog.result is not None:
         filename = fd.asksaveasfilename(filetypes=[("PNG files", "*.png;*.PNG"),
                                                    ("All files", "*")],
                                         defaultextension=".png")
         if filename != '':
             options.fig.savefig(filename, dpi=dialog.result)
+
+
+class CmapDialog(m2dialog.Dialog):
+    def __init__(self, parent, options, title=None):
+        self.options = options
+        m2dialog.Dialog.__init__(self, parent, title)
+
+    def body(self, master):
+        ttk.Label(master, text="Colormap:").grid(row=0)
+        self.var = Tk.StringVar(master)
+        choice = ('--perceptually uniform--', 'plasma', 'viridis', 'inferno',
+                  'magma', '--the classic--', 'jet', '--sequnetial--',
+                  'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
+                  'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
+                  'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn',
+                  'binary', 'gist_yarg', 'gist_gray', 'gray', 'bone', 'pink',
+                  'spring', 'summer', 'autumn', 'winter', 'cool', 'Wistia',
+                  'hot', 'afmhot', 'gist_heat', 'copper', '--misc--', 'ocean',
+                  'gist_earth', 'terrain', 'gist_stern', 'gnuplot',
+                  'gnuplot2', 'CMRmap', 'cubehelix', 'brg', 'hsv',
+                  'gist_rainbow', 'rainbow', 'nipy_spectral', 'gist_ncar')
+        self.e = ttk.OptionMenu(master, self.var, self.options.cmap.name, *choice)
+        self.e.grid(row=0, column=1)
+        return self.e
+
+    def validate(self):
+        if self.var.get()[:2] != "--":
+            return 1
+        else:
+            mb.showerror("Error", "Choose a valid colormap.")
+            return 0
+
+    def apply(self):
+        self.result = self.var.get()
+
+
+def set_colormap(options):
+    dialog = CmapDialog(options.root, options)
+    if dialog.result is not None:
+        options.cmap = copy(cm.get_cmap(dialog.result))
+        # White is for masking
+        options.cmap.set_bad('white', 1.0)
+        # Black is for unlabelled fringes
+        options.cmap.set_under('black', 1.0)
+        if options.mode is not None:
+            set_mode(options)
 
 
 # Handle the user choosing one of the radio buttons
@@ -153,7 +203,7 @@ def set_mode(options):
         options.imshow = canvas.imshow = options.ax.imshow(
             sp.ma.masked_where(canvas.fringe_phases_visual == -1024,
                                canvas.fringe_phases_visual),
-            cmap=m2graphics.cmap
+            cmap=options.cmap
         )
         canvas.imshow.set_clim(fringes.min, fringes.max)
         options.labeller = m2labelling.label(fringes, canvas,
@@ -166,14 +216,14 @@ def set_mode(options):
         options.imshow = canvas.imshow = options.ax.imshow(
             sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated == -1024.0),
                                canvas.interpolated),
-            cmap=m2graphics.cmap
+            cmap=options.cmap
         )
     elif key[0] == 'subtracted':
         # Show the subtracted image
         # note: this function works on the assumption that the things it is
         # attempting to show have been generated previously. It is the burden
         # of event handlers to check whether this is corrct
-        options.imshow = options.ax.imshow(options.subtracted, cmap=m2graphics.cmap)
+        options.imshow = options.ax.imshow(options.subtracted, cmap=options.cmap)
         options.cbar = options.fig.colorbar(options.imshow)
         options.cbar.ax.set_ylabel('Fringe shift', rotation=270)
     elif key[0] == 'plasma':
