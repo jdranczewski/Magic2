@@ -114,6 +114,9 @@ def main():
     processmenu.add_command(label="Subtract",
                             command=lambda:
                             m2callbacks.subtract(options))
+    processmenu.add_command(label="Set zero shift point",
+                            command=lambda:
+                            m2callbacks.set_zero(options))
     processmenu.add_separator()
     processmenu.add_command(label="Calculate plasma density",
                             command=lambda:

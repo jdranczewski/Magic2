@@ -364,6 +364,75 @@ def subtract(options):
             mb.showinfo("Wrong shape", "The shapes of the background and plasma images are different ({} and {}). They need to be the same for the subtraction to be performed!".format(options.objects['background']['canvas'].interpolated.shape, options.objects['plasma']['canvas'].interpolated.shape))
 
 
+# Functions related to setting the zero fringe shift point:
+# A handler for when the graph is cliced
+def set_zero_onclick(event, options, control, binds):
+    # get out of the zero-setting mode if the display mode has changed
+    if options.mode != "subtracted_graph":
+        for bind in binds:
+            options.fig.canvas.mpl_disconnect(bind)
+        options.status.set("Done", 100)
+    elif control[0] and options.subtracted[int(event.ydata), int(event.xdata)] != "--":
+        # Take the value under the mouse cursor and offset the subtracted
+        # data by it
+        options.subtracted = options.subtracted - options.subtracted[int(event.ydata), int(event.xdata)]
+        set_mode(options)
+
+
+# Two handlers for keypresses
+def set_zero_keypress(event, options, control, binds):
+    # This keeps track of the control key being pressed
+    if event.key == 'control':
+        control[0] = True
+    # This goes out of the zero-zero seting mode when esc is pressed
+    elif event.key == 'escape':
+        for bind in binds:
+            options.fig.canvas.mpl_disconnect(bind)
+        options.status.set("Done", 100)
+
+
+def set_zero_keyrelease(event, control):
+    if event.key == 'control':
+        control[0] = False
+
+
+# The main function for zero-setting
+def set_zero(options):
+    # Check if mode is correct
+    if options.mode == "subtracted_graph":
+        ans =  mb.askyesnocancel("Set zero shift point", "Would you like to set the zero shift point automatically? This will set the smallest shift (possibly a negative one) as the zero shift point, essentialy marking the place as having zero plasma density.\n\nAlternatively, you can press 'No' to enter manual mode. Ctrl+click anywhere on the graph to set the point as having zero fringe shift.\n\nTo reset the zero point, recalculate the subtraction.")
+        # A choice is offered here. The zero point can be set automatically
+        # or by hand
+        if ans:
+            # Offset the subtracted data by its minimum
+            options.subtracted = options.subtracted - sp.amin(options.subtracted)
+            set_mode(options)
+        elif ans is not None:
+            # Add some event bindings for the manual mode
+            options.status.set("Press esc to finish setting zero shift point", 0)
+            # Making 'control' a list is a sneaky way of passing by reference
+            control = [False]
+            binds = []
+            b0 = options.fig.canvas.mpl_connect('button_press_event',
+                                                lambda event: set_zero_onclick(
+                                                    event, options, control, binds))
+            binds.append(b0)
+            b1 = options.fig.canvas.mpl_connect('key_press_event',
+                                                lambda event:
+                                                    set_zero_keypress(event,
+                                                                      options,
+                                                                      control,
+                                                                      binds))
+            binds.append(b1)
+            b2 = options.fig.canvas.mpl_connect('key_release_event',
+                                                lambda event:
+                                                    set_zero_keyrelease(event,
+                                                                        control))
+            binds.append(b2)
+    else:
+        mb.showinfo("Not in subtracted mode", "You need to be in the subtracted map mode to set the zero shift point.")
+
+
 class PlasmaDialog(m2dialog.Dialog):
     def __init__(self, parent, options, title=None):
         self.options = options
