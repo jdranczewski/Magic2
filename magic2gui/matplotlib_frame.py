@@ -1,8 +1,7 @@
 # The GraphFrame class implements a matplotlib graph in an easy to use way.
 # It inherits from tkinter's Frame and thus behaves like any other widget,
-# but it also exposes a single subplot (self.subplot) which can be used
-# like any other subplot in normal matplotlib Python code. A convenient
-# toolbar can also be attached to the graph.
+# but it also exposes a few things like .ax and .cax which can be used
+# for plotting (like normal matplotlib subplots).
 # init arguments are the parent frame, the figure's size, its dpi, a boolean
 # variable that allows for simple binding of matplotlib's default key bindings,
 # and a boolean variable that determines whether to show a toolbar.
@@ -26,6 +25,10 @@ class GraphFrame(Tk.Frame):
         self.fig.set_tight_layout(True)
         # Create a matplotlib subplot
         self.ax = self.fig.add_subplot(111)
+        # Create a subplot for the colorbar and hide it.
+        # The make_lens_locatable function allows us to attach this
+        # subplot to the main subplot and makes the colorbar stick
+        # to the main graph nicely
         divider = make_axes_locatable(self.ax)
         self.cax = divider.append_axes("right", size="5%", pad=0.05)
         self.cax.axis('off')
@@ -41,12 +44,16 @@ class GraphFrame(Tk.Frame):
         self.canvas._tkcanvas.pack(side=Tk.BOTTOM, fill=Tk.BOTH, expand=1)
         # Bind keyboard shortcuts
         if bind_keys:
+            # Delete default keyboard shortcuts that we will be using elsewhere
             rcParams['keymap.back'] = ['left', 'c']
             rcParams['keymap.save'] = ['ctrl+s']
+
             def on_key_press(event):
+                # The default keypress handler
                 key_press_handler(event, self.canvas, toolbar)
                 # Keyboard navigation
                 if event.key == 'x':
+                    # Zoom in
                     ylim = self.ax.get_ylim()
                     xlim = self.ax.get_xlim()
                     diffy = self.ax.get_ylim()[1] - self.ax.get_ylim()[0]
@@ -55,6 +62,7 @@ class GraphFrame(Tk.Frame):
                     self.ax.set_xlim([xlim[0]+0.1*diffx, xlim[1]-0.1*diffx])
                     self.fig.canvas.draw()
                 elif event.key == 'z':
+                    # Zoom out
                     ylim = self.ax.get_ylim()
                     xlim = self.ax.get_xlim()
                     diffy = self.ax.get_ylim()[1] - self.ax.get_ylim()[0]
@@ -63,6 +71,7 @@ class GraphFrame(Tk.Frame):
                     self.ax.set_xlim([xlim[0]-0.1*diffx, xlim[1]+0.1*diffx])
                     self.fig.canvas.draw()
                 else:
+                    # Move
                     dx = 0
                     dy = 0
                     if event.key == 'w':
@@ -81,6 +90,9 @@ class GraphFrame(Tk.Frame):
                         self.ax.set_ylim([ylim[0]+0.3*diffy*dy, ylim[1]+0.3*diffy*dy])
                         self.ax.set_xlim([xlim[0]+0.3*diffx*dx, xlim[1]+0.3*diffx*dx])
                         self.fig.canvas.draw()
+                # Our wasd navigation messes up the views stack matplotlib
+                # normally uses, so we define our own home function,
+                # accessible by pressing 'h'
                 def new_home():
                     print("New home")
                     self.ax.autoscale()

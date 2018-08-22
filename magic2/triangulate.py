@@ -371,39 +371,60 @@ class TriangleCopy(Triangle):
         self.long_edges = [True, True, True]
 
 
+# This is the main interpolation method, using a special algorithm to
+# remove all flat triangles that are possible to remove
 def triangulate(canvas, ax, status):
+    # Create a Triangulation object
     tri = Triangulation(sp.transpose(
                         sp.nonzero(canvas.fringes_image_clean)),
                         canvas, status)
+    # Check if an error has been encountered (this would be due to the
+    # user not labelling any fringes)
     if tri.error:
         return None
     else:
+        # If the triangulation was succesfull, optimise it...
         tri.optimise(status)
+        # ...and perform the interpolation
         tri.interpolate(canvas, status)
         status.set("Done", 100)
         return True
 
 
+# This is a quick interpolation method that does not bother with fixing
+# flat triangles. It uses standard scipy functions, which makes it faster
 def fast_tri(canvas, ax, status):
     if status is not None:
         status.set("Creating the interpolant", 0)
+    # Create a list of the points for the triangulation
     points = sp.transpose(sp.nonzero(canvas.fringes_image_clean))
     try:
+        # Create an interpolation object. The second argument is a list
+        # of values for all the supplied points
         interpolation = LinearNDInterpolator(points, [canvas.fringe_phases[p[0], p[1]] for p in points], fill_value=-1024.0)
         status.set("Calculating values for points on canvas", 60)
+        # This calls the interpolant's calculating function and returns values
+        # for every point on the canvas. This is then reshaped to fit the
+        # original image
         canvas.interpolated = sp.reshape(interpolation.__call__([canvas.xy]), canvas.fringes_image.shape)
         canvas.interpolation_done = True
         status.set("Done", 100)
         return True
     except ValueError:
+        # This will happen if no fringes were labelled
         return None
 
 
+# Here be dragons
+# On a more serious note, this function was used while creating this software.
+# It didn't have a GUI, so this just displays output in separate matplotlib
+# windows. Potentially useful for debugging purposes, so left as an option.
 def triangulate_debug(canvas):
     tri = Triangulation(sp.transpose(
                         sp.nonzero(canvas.fringes_image_clean)),
                         canvas)
     plt.imshow(canvas.fringes_image_clean, cmap=m2graphics.cmap)
+    # Plot the triangulation. Flat triangles will be green
     plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.get_simplices())
     plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
     plt.show()
@@ -411,6 +432,7 @@ def triangulate_debug(canvas):
     print("Optimisation")
     tri.optimise()
     print("Finished")
+    # Plot the optimised triangulation. Flat triangles will be green
     plt.imshow(canvas.fringe_phases, cmap=m2graphics.cmap)
     # print(tri.flat_triangles)
     # print(added_points)
@@ -418,6 +440,8 @@ def triangulate_debug(canvas):
     plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.get_simplices())
     plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
     plt.show()
+    # Perform interpolation
+    print("Interpolating")
     tri.interpolate(canvas)
     plt.imshow(sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated==-1024.0), canvas.interpolated), cmap=m2graphics.cmap)
     plt.show()

@@ -13,7 +13,8 @@ import magic2.labelling as m2labelling
 import magic2.triangulate as m2triangulate
 
 
-# Open and image for either the background or foreground fringes
+# Open and image for either the background or plasma fringes (determined
+# by the env variable)
 def open_image(options, env):
     if options.objects[env]['canvas'] is not None and not mb.askokcancel(
         "Overwrite?", "There is a " + env
@@ -51,6 +52,7 @@ def open_image(options, env):
             options.status.set("Done", 100)
 
 
+# Export the data from the current view
 def export(options):
     if options.mode is not None:
         filename = fd.asksaveasfilename(filetypes=[(".csv file", "*.csv"),
@@ -58,6 +60,7 @@ def export(options):
                                         defaultextension=".csv")
         if filename != '':
             options.status.set("Exporting", 0)
+            # The mask is filled with -1024 to make the masking uniform
             if options.mode.split("_")[1] == 'fringes':
                 sp.savetxt(filename, sp.ma.filled(options.objects[options.mode.split("_")[0]]['canvas'].fringe_phases,fill_value=-1024), delimiter=",")
             else:
@@ -67,8 +70,11 @@ def export(options):
         mb.showinfo("No mode chosen", "Please choose one of the display modes from the menu on the right!")
 
 
+# This dialog is used for exporting the graph as an image.
+# It allows the user to choose a resolution
 class DpiDialog(m2dialog.Dialog):
     def body(self, master):
+        # Create a simple body
         ttk.Label(master, text="DPI:").grid(row=0)
         self.e = ttk.Entry(master)
         self.e.insert(0, 300)
@@ -76,6 +82,7 @@ class DpiDialog(m2dialog.Dialog):
         return self.e
 
     def validate(self):
+        # Check if the value entered is an integer
         try:
             int(self.e.get())
             return 1
@@ -84,46 +91,59 @@ class DpiDialog(m2dialog.Dialog):
             return 0
 
     def apply(self):
+        # Save the value from the text field as .result
         self.result = int(self.e.get())
 
 
+# This function exports the current graph as an image
 def export_image(options):
     dialog = DpiDialog(options.root, title="Choose quality")
     if dialog.result is not None:
+        # Ask for a file name
         filename = fd.asksaveasfilename(filetypes=[("PNG files", "*.png;*.PNG"),
                                                    ("All files", "*")],
                                         defaultextension=".png")
         if filename != '':
+            # Save the graph, using the dpi obtained with the dialog
             options.fig.savefig(filename, dpi=dialog.result)
 
 
+# This dialog is used by the function that sets the colormap
 class CmapDialog(m2dialog.Dialog):
     def __init__(self, parent, options, title=None):
+        # We need to save the options, which would not be accepted as an
+        # argument by the original Dialog class, so we override __init__
         self.options = options
         m2dialog.Dialog.__init__(self, parent, title)
 
     def body(self, master):
         ttk.Label(master, text="Colormap:").grid(row=0)
-        self.var = Tk.StringVar(master)
-        choice = ('--perceptually uniform--', 'plasma', 'viridis', 'inferno',
-                  'magma', '--the classic--', 'jet', '--sequnetial--',
+        self.var = Tk.StringVar()
+        # This is a list of all reasonable colourmaps in matplotlib,
+        # reasonable meaning that they're rather smooth and not the
+        # flag of France
+        choice = ('## perceptually uniform ##', 'plasma', 'viridis', 'inferno',
+                  'magma', '## the classic ##', 'jet', '## sequnetial ##',
                   'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
                   'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
                   'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn',
                   'binary', 'gist_yarg', 'gist_gray', 'gray', 'bone', 'pink',
                   'spring', 'summer', 'autumn', 'winter', 'cool', 'Wistia',
-                  'hot', 'afmhot', 'gist_heat', 'copper', '--misc--', 'ocean',
+                  'hot', 'afmhot', 'gist_heat', 'copper', '## misc ##', 'ocean',
                   'gist_earth', 'terrain', 'gist_stern', 'gnuplot',
                   'gnuplot2', 'CMRmap', 'cubehelix', 'brg', 'hsv',
                   'gist_rainbow', 'rainbow', 'nipy_spectral', 'gist_ncar')
+        # The star (*) unpacks the above tuple, as ttk.OptionMenu takes options
+        # as just a lot of arguments
         self.e = ttk.OptionMenu(master, self.var, self.options.cmap.name, *choice)
         self.e.grid(row=0, column=1)
         return self.e
 
     def validate(self):
-        if self.var.get()[:2] != "--":
+        if self.var.get()[:2] != "##":
             return 1
         else:
+            # This is necessary as not all things on the list are colormaps
             mb.showerror("Error", "Choose a valid colormap.")
             return 0
 
@@ -131,6 +151,7 @@ class CmapDialog(m2dialog.Dialog):
         self.result = self.var.get()
 
 
+# This function sets a chosen colormap
 def set_colormap(options):
     dialog = CmapDialog(options.root, options)
     if dialog.result is not None:
@@ -139,6 +160,7 @@ def set_colormap(options):
         options.cmap.set_bad('white', 1.0)
         # Black is for unlabelled fringes
         options.cmap.set_under('black', 1.0)
+        # Refresh the graph if needed
         if options.mode is not None:
             set_mode(options)
 
@@ -182,6 +204,7 @@ def show_radio(options):
         else:
             options.mode = "_".join(key)
             set_mode(options)
+    # Similarly for the density map
     elif key[0] == 'density':
         if options.density is None:
             print("Perf")
@@ -191,12 +214,16 @@ def show_radio(options):
             set_mode(options)
 
 
+# Allow for quick recomputing of whatever is being right-clicked on
+# the radio buttons on the right
 def recompute(event, options):
     key = event.widget['value'].split("_")
     if key[1] == 'map':
         options.show_var.set(event.widget['value'])
         if options.objects[key[0]]['canvas'] is not None:
             options.objects[key[0]]['canvas'].interpolation_done = False
+        # Let the show_radio function handle all the logic and dialogs
+        # that are needed here
         show_radio(options)
     elif key[0] == 'subtracted':
         subtract(options)
@@ -205,6 +232,7 @@ def recompute(event, options):
 
 
 # Render the correct image on the graph's canvas
+# Also used for refreshing
 def set_mode(options):
     key = options.mode.split("_")
     # Clear the axes and all labellers/event handlers attached to them
@@ -213,12 +241,9 @@ def set_mode(options):
     if options.labeller is not None:
         m2labelling.stop_labelling(options.fig, options.labeller)
     if options.cbar is not None:
-        # The whole figure is cleaned, as simply deleting the colorbar
-        # resulted in the graph being shifted to the right
+        # If there exists a colorbar, clean it and hide it
         options.mframe.cax.clear()
         options.mframe.cax.axis('off')
-        # options.ax = options.fig.add_subplot(111)
-        # options.cbar.remove()
         options.cbar = None
     if key[1] == 'fringes':
         canvas = options.objects[key[0]]['canvas']
@@ -248,8 +273,12 @@ def set_mode(options):
         # attempting to show have been generated previously. It is the burden
         # of event handlers to check whether this is corrct
         options.imshow = options.ax.imshow(options.subtracted, cmap=options.cmap)
+        # Add a colorbar using its own subplot
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
+        # Unhide the colorbar's subplot
         options.mframe.cax.axis('on')
+        # Add a label. Rotation is os that it's easier to read, labelpad
+        # stops it from touching the colorbar's ticks' labels
         options.cbar.ax.set_ylabel('Fringe shift', rotation=270, labelpad=20)
     elif key[0] == 'density':
         options.imshow = options.ax.imshow(options.density, cmap=options.cmap)
@@ -262,13 +291,19 @@ def set_mode(options):
     options.show_var.set(options.mode)
 
 
+# Decrease the width of the rendered fringes
 def lower_width(options):
     if options.mode is None or options.mode.split("_")[1] != "fringes":
         mb.showinfo("Not in fringe display mode", "You need to be in a fringe display mode to change the width setting.")
     else:
+        # Check if the decreasing is possible
         if options.width_var.get() > 0:
             options.width_var.set(options.width_var.get() - 1)
             if options.objects['background']['canvas'] is not None:
+                # We need to clear the canvas, as the new rendering is always
+                # on top. This saves time when only some fringe were relabelled
+                # by not rendering it all, but here it would mean that the
+                # smaller fringes appear inside the larger ones
                 m2graphics.clear_visual(options.objects['background']['canvas'])
                 m2graphics.render_fringes(options.objects['background']['fringes'], options.objects['background']['canvas'], width=options.width_var.get())
             if options.objects['plasma']['canvas'] is not None:
@@ -282,6 +317,8 @@ def higher_width(options):
     else:
         options.width_var.set(options.width_var.get() + 1)
         if options.objects['background']['canvas'] is not None:
+            # We don't need to clear the canvas here, the new drawings are
+            # wider and will therefore cover the old ones
             m2graphics.render_fringes(options.objects['background']['fringes'], options.objects['background']['canvas'], width=options.width_var.get())
         if options.objects['plasma']['canvas'] is not None:
             m2graphics.render_fringes(options.objects['plasma']['fringes'], options.objects['plasma']['canvas'], width=options.width_var.get())
@@ -297,8 +334,8 @@ def interpolate_exact(options, env=None):
     elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
     else:
-        # If the above checks are passed, perform the triangulation and let
-        # set_mode render it
+        # If the above checks are passed, perform the triangulation and
+        # interpolation, and let set_mode render it
         if env is None:
             env = options.mode.split("_")[0]
         tri = m2triangulate.triangulate(options.objects[env]['canvas'],
@@ -310,14 +347,16 @@ def interpolate_exact(options, env=None):
             set_mode(options)
 
 
+# This performs a fast version of the interpolation, which does not fix
+# flat triangles
 def interpolate_fast(options, env=None):
     if options.mode is None:
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
     elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
     else:
-        # If the above checks are passed, perform the triangulation and let
-        # set_mode render it
+        # If the above checks are passed, perform the triangulation and
+        # interpolation, and let set_mode render it
         if env is None:
             env = options.mode.split("_")[0]
         tri = m2triangulate.fast_tri(options.objects[env]['canvas'],
@@ -329,14 +368,17 @@ def interpolate_fast(options, env=None):
             set_mode(options)
 
 
+# This performs the interpolation in debug mode, meaning feedback is in
+# instead of the status bar, and output of every step is displayed in
+# a separate window
 def interpolate_debug(options, env=None):
     if options.mode is None:
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
     elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
     elif mb.askokcancel("Debug triangulation", "You are about to perform a debug mode interpolation. This shows the output of every step in a separate graph window. Flat triangles are usually highlighted green. Look for error messages and progress reports in the terminal. Do not interact with the main Magic2 window, as who knows what happens then?\n\nThere is a very much non-zero risk of crashing. You may loose your work (so save it)."):
-        # If the above checks are passed, perform the triangulation and let
-        # set_mode render it
+        # The above confirmation dialog is unwieldy, but necessary to explain
+        # the risks and advantages to the user
         if env is None:
             env = options.mode.split("_")[0]
         m2triangulate.triangulate_debug(options.objects[env]['canvas'])
@@ -377,8 +419,9 @@ def subtract(options):
             mb.showinfo("Wrong shape", "The shapes of the background and plasma images are different ({} and {}). They need to be the same for the subtraction to be performed!".format(options.objects['background']['canvas'].interpolated.shape, options.objects['plasma']['canvas'].interpolated.shape))
 
 
-# Functions related to setting the zero fringe shift point:
-# A handler for when the graph is cliced
+# //Functions related to setting the zero fringe shift point:
+
+# A handler for when the graph is clicked
 def set_zero_onclick(event, options, control, binds):
     # get out of the zero-setting mode if the display mode has changed
     if options.mode != "subtracted_graph":
@@ -470,6 +513,8 @@ def invert(options):
             return True
     mb.showerror("Not available in this mode", "To invert data you have to be viewing an interpolation, subtraction or a plasma density map.")
 
+
+# This dialog is used to obtain/display the shot details
 class PlasmaDialog(m2dialog.Dialog):
     def __init__(self, parent, options, title=None):
         self.options = options
@@ -509,6 +554,7 @@ class PlasmaDialog(m2dialog.Dialog):
 
     def validate(self):
         try:
+            # All the inputs should be floats or integers
             float(self.e_resolution.get())
             float(self.e_depth.get())
             float(self.e_wavelength.get())
@@ -525,41 +571,56 @@ class PlasmaDialog(m2dialog.Dialog):
         self.result = True
 
 
+# This function shows the above dialog
 def shot_options(options):
     dialog = PlasmaDialog(options.root, options, title="Shot details")
     return dialog.result is not None
 
 
+# This function calculates the plasma density map
 def plasma_density(options):
     if options.subtracted is None and subtract(options) is None:
         return False
+    # This checks whether the options are all set - if not, it asks for them
     if (
         (options.resolution is not None and options.depth is not None
          and options.wavelength is not None and options.double is not None)
         or shot_options(options)
     ):
+        # Speed of light
         c = 3e8
+        # Electron charge
         e = 1.602e-19
+        # Electron mass
         me = 9.109e-31
+        # Permittivity of free space
         e0 = 8.854e-12
+        # Sample depth in meters
         d = options.depth * 1e-3
+        # Wavelength in meters
         wavelength = options.wavelength * 1e-9
+        # If the double option was chosen, one traced fringe corresponds
+        # to half a fringe shift
         if options.double:
             multiplier = 0.5
         else:
             multiplier = 1
+        # Calculate the density map
         options.density = (multiplier * options.subtracted * 8
                            * (sp.pi * c / e)**2 * me * e0 / d / wavelength)
+        # Let set_mode render the map
         options.mode = "density_graph"
         set_mode(options)
 
 
+# Take the cosine of a phase map. It should look very similar to the picture
+# from which the fringe lines were traced
 def cosine(options):
     if options.mode.split("_")[1] == 'map':
         options.ax.imshow(sp.cos(options.imshow.get_array()*2*sp.pi), cmap="Greys")
-        # Refresh the graph's canvas
+        # This mode is a spetial little snowflake, in that it doesn't have
+        # a radio button or a set_mode if clause. We handle it ourselves here
         options.fig.canvas.draw()
-        # Set the radio buttons to the correct position
         options.show_var.set("cosine_graph")
         options.mode = "cosine_graph"
     else:

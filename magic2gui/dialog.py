@@ -68,7 +68,7 @@ class Dialog(Tk.Toplevel):
     # Override to validate
     def validate(self):
         return 1
-        
+
     # Override to apply
     def apply(self):
         pass

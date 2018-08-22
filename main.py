@@ -73,6 +73,7 @@ def main():
     # Create the menu
     menu = Tk.Menu(root)
     root.config(menu=menu)
+
     # Create the file submenu
     filemenu = Tk.Menu(menu)
     menu.add_cascade(label="File", menu=filemenu)
@@ -98,6 +99,7 @@ def main():
     filemenu.add_command(label="Save the graph as an image",
                          command=lambda:
                          m2callbacks.export_image(options))
+
     # Create the process submenu
     processmenu = Tk.Menu(menu)
     menu.add_cascade(label="Process", menu=processmenu)
@@ -132,6 +134,7 @@ def main():
     processmenu.add_command(label="Cosine",
                             command=lambda:
                             m2callbacks.cosine(options))
+
     # Create the display submenu
     displaymenu = Tk.Menu(menu)
     menu.add_cascade(label="Display", menu=displaymenu)
@@ -152,6 +155,7 @@ def main():
     # Create the side menu
     side_frame = Tk.Frame(root)
     side_frame.grid(row=0, column=1, padx=5, pady=5, sticky="N")
+
     # Create a group for display options
     display_group = Tk.LabelFrame(side_frame, text="Display", padx=5, pady=5)
     display_group.pack(fill=Tk.BOTH)
@@ -168,8 +172,10 @@ def main():
     for name, key in display_modes:
         b = ttk.Radiobutton(display_group, text=name, variable=options.show_var,
                             value=key, command=lambda: m2callbacks.show_radio(options))
+        # A right-click triggers a recompute
         b.bind('<Button-3>', lambda event: m2callbacks.recompute(event, options))
         b.pack(anchor=Tk.W)
+    # Create a frame for the width setitngs
     width_frame = Tk.Frame(display_group)
     width_frame.pack()
     b = Tk.Button(width_frame, text="<", command=lambda: m2callbacks.lower_width(options))
