@@ -84,6 +84,13 @@ def main():
                          command=lambda:
                          m2callbacks.open_image(options, 'plasma'))
     filemenu.add_separator()
+    filemenu.add_command(label="Save .m2",
+                         command=lambda:
+                         m2callbacks.m_save(options))
+    filemenu.add_command(label="Open .m2",
+                         command=lambda:
+                         m2callbacks.m_open(options))
+    filemenu.add_separator()
     def make_pickle():
         print("Making pickle")
         pickle.dump(options.objects, open("save.p", "wb"))

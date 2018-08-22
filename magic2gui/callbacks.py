@@ -4,6 +4,8 @@ import tkinter as Tk
 import tkinter.ttk as ttk
 import scipy as sp
 from copy import copy
+import pickle
+import gzip
 from matplotlib.pyplot import cm
 
 import magic2gui.dialog as m2dialog
@@ -51,6 +53,31 @@ def open_image(options, env):
             options.density = None
             options.status.set("Done", 100)
 
+
+def m_save(options):
+    dump = (
+        options.objects['background']['canvas'].fringes_image,
+        options.objects['background']['canvas'].mask,
+        [fringe.phase for fringe in options.objects['background']['fringes'].list],
+        options.objects['plasma']['canvas'].fringes_image,
+        options.objects['plasma']['canvas'].mask,
+        [fringe.phase for fringe in options.objects['plasma']['fringes'].list],
+        options.resolution,
+        options.depth,
+        options.wavelength,
+        options.double
+    )
+    with gzip.open('test.m2', 'wb') as f:
+        pickle.dump(dump, f)
+
+
+def m_open(options):
+    with gzip.open('test.m2', 'rb') as f:
+        dump = pickle.load(f)
+        options.resolution = dump[-4]
+        options.depth = dump[-3]
+        options.wavelength = dump[-2]
+        options.double = dump[-1]
 
 # Export the data from the current view
 def export(options):
