@@ -191,6 +191,19 @@ def show_radio(options):
             set_mode(options)
 
 
+def recompute(event, options):
+    key = event.widget['value'].split("_")
+    if key[1] == 'map':
+        options.show_var.set(event.widget['value'])
+        if options.objects[key[0]]['canvas'] is not None:
+            options.objects[key[0]]['canvas'].interpolation_done = False
+        show_radio(options)
+    elif key[0] == 'subtracted':
+        subtract(options)
+    elif key[0] == 'density':
+        plasma_density(options)
+
+
 # Render the correct image on the graph's canvas
 def set_mode(options):
     key = options.mode.split("_")
@@ -237,12 +250,12 @@ def set_mode(options):
         options.imshow = options.ax.imshow(options.subtracted, cmap=options.cmap)
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         options.mframe.cax.axis('on')
-        options.cbar.ax.set_ylabel('Fringe shift', rotation=270)
+        options.cbar.ax.set_ylabel('Fringe shift', rotation=270, labelpad=20)
     elif key[0] == 'density':
         options.imshow = options.ax.imshow(options.density, cmap=options.cmap)
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         options.mframe.cax.axis('on')
-        options.cbar.ax.set_ylabel('Electron density / $m^{-3}$', labelpad=20)
+        options.cbar.ax.set_ylabel('Electron density / $m^{-3}$', rotation=270, labelpad=20)
     # Refresh the graph's canvas
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position

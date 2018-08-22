@@ -164,6 +164,7 @@ def main():
     for name, key in display_modes:
         b = ttk.Radiobutton(display_group, text=name, variable=options.show_var,
                             value=key, command=lambda: m2callbacks.show_radio(options))
+        b.bind('<Button-3>', lambda event: m2callbacks.recompute(event, options))
         b.pack(anchor=Tk.W)
     width_frame = Tk.Frame(display_group)
     width_frame.pack()
