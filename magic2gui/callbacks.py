@@ -44,6 +44,10 @@ def open_image(options, env):
             # Set the mode (the set_mode function handles rendering)
             options.mode = env + "_fringes"
             set_mode(options)
+            # Make the software go over the subtraction and plasma density
+            # calculation again, as the data has changed
+            options.subtracted = None
+            options.density = None
             options.status.set("Done", 100)
 
 
@@ -342,19 +346,22 @@ def subtract(options):
         # Subtract the interferograms, masking them with the user-defined mask,
         # as well as the regions that couldn't be interpolated for both
         # background and plasma images
-        options.subtracted = sp.ma.masked_where(
-            sp.logical_or(sp.logical_or(
-                options.objects['plasma']['canvas'].mask == False,
-                options.objects['plasma']['canvas'].interpolated == -1024.0),
-                options.objects['background']['canvas'].interpolated == -1024.0
-            ),
-            options.objects['background']['canvas'].interpolated
-            - options.objects['plasma']['canvas'].interpolated
-        )
-        # Let set_mode do the rendering
-        options.mode = "subtracted_graph"
-        set_mode(options)
-        return True
+        try:
+            options.subtracted = sp.ma.masked_where(
+                sp.logical_or(sp.logical_or(
+                    options.objects['plasma']['canvas'].mask == False,
+                    options.objects['plasma']['canvas'].interpolated == -1024.0),
+                    options.objects['background']['canvas'].interpolated == -1024.0
+                ),
+                options.objects['background']['canvas'].interpolated
+                - options.objects['plasma']['canvas'].interpolated
+            )
+            # Let set_mode do the rendering
+            options.mode = "subtracted_graph"
+            set_mode(options)
+            return True
+        except ValueError:
+            mb.showinfo("Wrong shape", "The shapes of the background and plasma images are different ({} and {}). They need to be the same for the subtraction to be performed!".format(options.objects['background']['canvas'].interpolated.shape, options.objects['plasma']['canvas'].interpolated.shape))
 
 
 class PlasmaDialog(m2dialog.Dialog):
