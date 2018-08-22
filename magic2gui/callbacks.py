@@ -238,7 +238,7 @@ def set_mode(options):
         options.imshow = options.ax.imshow(options.density, cmap=options.cmap)
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         options.mframe.cax.axis('on')
-        options.cbar.ax.set_ylabel('Electron density / m^3', rotation=270)
+        options.cbar.ax.set_ylabel('Electron density / $m^{-3}$', labelpad=20)
     # Refresh the graph's canvas
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position
