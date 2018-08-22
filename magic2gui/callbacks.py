@@ -198,8 +198,10 @@ def set_mode(options):
     if options.cbar is not None:
         # The whole figure is cleaned, as simply deleting the colorbar
         # resulted in the graph being shifted to the right
-        options.fig.clear()
-        options.ax = options.fig.add_subplot(111)
+        options.mframe.cax.clear()
+        options.mframe.cax.axis('off')
+        # options.ax = options.fig.add_subplot(111)
+        # options.cbar.remove()
         options.cbar = None
     if key[1] == 'fringes':
         canvas = options.objects[key[0]]['canvas']
@@ -229,12 +231,14 @@ def set_mode(options):
         # attempting to show have been generated previously. It is the burden
         # of event handlers to check whether this is corrct
         options.imshow = options.ax.imshow(options.subtracted, cmap=options.cmap)
-        options.cbar = options.fig.colorbar(options.imshow)
+        options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
+        options.mframe.cax.axis('on')
         options.cbar.ax.set_ylabel('Fringe shift', rotation=270)
     elif key[0] == 'density':
         options.imshow = options.ax.imshow(options.density, cmap=options.cmap)
-        options.cbar = options.fig.colorbar(options.imshow)
-        options.cbar.ax.set_ylabel('Fringe shift', rotation=270)
+        options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
+        options.mframe.cax.axis('on')
+        options.cbar.ax.set_ylabel('Electron density / m^3', rotation=270)
     # Refresh the graph's canvas
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position

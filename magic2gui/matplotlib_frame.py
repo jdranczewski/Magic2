@@ -12,6 +12,7 @@ from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2TkAgg)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import rcParams
 
 
@@ -25,6 +26,9 @@ class GraphFrame(Tk.Frame):
         self.fig.set_tight_layout(True)
         # Create a matplotlib subplot
         self.ax = self.fig.add_subplot(111)
+        divider = make_axes_locatable(self.ax)
+        self.cax = divider.append_axes("right", size="5%", pad=0.05)
+        self.cax.axis('off')
         # Create and draw a canvas
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.draw()
