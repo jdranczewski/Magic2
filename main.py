@@ -118,6 +118,10 @@ def main():
                             command=lambda:
                             m2callbacks.set_zero(options))
     processmenu.add_separator()
+    processmenu.add_command(label="Invert",
+                            command=lambda:
+                            m2callbacks.invert(options))
+    processmenu.add_separator()
     processmenu.add_command(label="Calculate plasma density",
                             command=lambda:
                             m2callbacks.plasma_density(options))

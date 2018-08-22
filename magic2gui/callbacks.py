@@ -446,6 +446,30 @@ def set_zero(options):
         mb.showinfo("Not in subtracted mode", "You need to be in the subtracted map mode to set the zero shift point.")
 
 
+# This function inverts the currently displayed view
+def invert(options):
+    if options.mode is not None:
+        key = options.mode.split("_")
+        if key[1] == 'map':
+            interpolated = options.objects[key[0]]['canvas'].interpolated
+            # Using a mask ensures we do not touch the -1024 pixels
+            # (they indicate that no data is available)
+            mask = interpolated != -1024.0
+            interpolated[mask] = -interpolated[mask]
+            set_mode(options)
+            # This return is a convenient way of escaping the function before
+            # The error message is shown
+            return True
+        elif key[0] == 'subtracted':
+            options.subtracted = -options.subtracted
+            set_mode(options)
+            return True
+        elif key[0] == 'density':
+            options.density = -options.density
+            set_mode(options)
+            return True
+    mb.showerror("Not available in this mode", "To invert data you have to be viewing an interpolation, subtraction or a plasma density map.")
+
 class PlasmaDialog(m2dialog.Dialog):
     def __init__(self, parent, options, title=None):
         self.options = options
