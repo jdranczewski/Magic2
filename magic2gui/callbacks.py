@@ -350,6 +350,7 @@ def subtract(options):
         # Let set_mode do the rendering
         options.mode = "subtracted_graph"
         set_mode(options)
+        return True
 
 
 class PlasmaDialog(m2dialog.Dialog):
@@ -413,12 +414,25 @@ def shot_options(options):
 
 
 def plasma_density(options):
+    if options.subtracted is None and subtract(options) is None:
+        return False
     if (
         (options.resolution is not None and options.depth is not None
          and options.wavelength is not None and options.double is not None)
         or shot_options(options)
     ):
-        options.density = options.subtracted * 10
+        c = 3e8
+        e = 1.602e-19
+        me = 9.109e-31
+        e0 = 8.854e-12
+        d = options.depth * 1e-3
+        wavelength = options.wavelength * 1e-9
+        if options.double:
+            multiplier = 0.5
+        else:
+            multiplier = 1
+        options.density = (multiplier * options.subtracted * 8
+                           * (sp.pi * c / e)**2 * me * e0 / d / wavelength)
         options.mode = "density_graph"
         set_mode(options)
 
