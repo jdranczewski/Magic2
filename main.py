@@ -191,6 +191,7 @@ def main():
         ("Increasing phase", 1),
         ("Constant phase", 0),
         ("Decreasing phase", -1),
+        ("Reset to 0", 2)
     ]
     options.direction_var = Tk.IntVar()
     options.direction_var.set(1)

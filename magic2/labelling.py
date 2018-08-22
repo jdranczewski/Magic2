@@ -66,6 +66,15 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
     # necessary fringes (as this is the operation that incurs the most
     # overhead here)
     fix_indices = []
+    # Get the increment from a radio button variable if available
+    if labeller.options.direction_var is not None:
+        increment = labeller.options.direction_var.get()
+    else:
+        increment = 1
+    if increment == 2:
+        increment = 0
+        phase = 0
+
     # Iterate over all the points calculated previously
     for i in range(len(x)):
         # Check a range of points to make sure we are not slipping through
@@ -82,10 +91,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         # a calculated phase to a fringe
         if index >= 0 and index != prev_index:
             if phase > -1024:
-                if labeller.options.direction_var is not None:
-                    phase += labeller.options.direction_var.get()
-                else:
-                    phase += 1
+                phase += increment
                 fringes.list[index].phase = phase
             else:
                 # This takes the value of the first fringe encountered.
