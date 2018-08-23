@@ -61,72 +61,79 @@ def open_image(options, env):
 # and a list of all the assigned phases. As the fringe-reading process is
 # completely deterministic, the labelling will be assigned in the correct order
 def m_save(options):
-    dump = (
-        options.objects['background']['canvas'].fringes_image,
-        options.objects['background']['canvas'].mask,
-        [fringe.phase for fringe in options.objects['background']['fringes'].list],
-        options.objects['plasma']['canvas'].fringes_image,
-        options.objects['plasma']['canvas'].mask,
-        [fringe.phase for fringe in options.objects['plasma']['fringes'].list],
-        options.resolution,
-        options.depth,
-        options.wavelength,
-        options.double
-    )
-    # We use gzip to make the file smaller. Normal pickling produced files
-    # that were around 30MB, while the compressed version of the same data
-    # is 188KB
-    with gzip.open('test.m2', 'wb') as f:
-        pickle.dump(dump, f)
+    filename = fd.asksaveasfilename(filetypes=[("Magic2 file", "*.m2")],
+                                    defaultextension=".m2")
+    if filename != '':
+        options.status.set("Exporting", 0)
+        dump = (
+            options.objects['background']['canvas'].fringes_image,
+            options.objects['background']['canvas'].mask,
+            [fringe.phase for fringe in options.objects['background']['fringes'].list],
+            options.objects['plasma']['canvas'].fringes_image,
+            options.objects['plasma']['canvas'].mask,
+            [fringe.phase for fringe in options.objects['plasma']['fringes'].list],
+            options.resolution,
+            options.depth,
+            options.wavelength,
+            options.double
+        )
+        # We use gzip to make the file smaller. Normal pickling produced files
+        # that were around 30MB, while the compressed version of the same data
+        # is 188KB
+        with gzip.open(filename, 'wb') as f:
+            pickle.dump(dump, f)
+        options.status.set("Done", 100)
 
 
 # This function reads data seaved with m_save
 def m_open(options):
     if (options.objects['background']['canvas'] is not None or options.objects['plasma']['canvas'] is not None) and not mb.askokcancel("Discard data?", "Discard current data? Opening an .m2 file will overwrite any data you are currently working on."):
         return False
-    # We need to use gzip to decompress the .m2 file
-    with gzip.open('test.m2', 'rb') as f:
-        options.status.set("Loading file", 0)
-        dump = pickle.load(f)
-        for env, i in (('background', 0), ('plasma', 3)):
-            if dump[i] is not None:
-                # Delete the old data
-                if options.objects[env]['canvas'] is not None:
-                    del options.objects[env]['canvas']
-                    del options.objects[env]['fringes']
-                    del options.subtracted
-                options.status.set("Reading "+env+" canvas", i%2*45 + 10)
-                # Create a new Canvas object
-                canvas = options.objects[env]['canvas'] = m2graphics.Canvas('dump', fi=dump[i], m=dump[i+1])
-                options.status.set("Finding "+env+" fringes", i%2*45 + 20)
-                # Create a new fringes object
-                fringes = options.objects[env]['fringes'] = m2fringes.Fringes()
-                # Set the max and min for the colormap to have a correct scale
-                fringes.min = sp.amin([phase for phase in dump[i+2] if phase != -2048.0])
-                fringes.max = sp.amax([phase for phase in dump[i+2] if phase != -2048.0])
-                # Read the fringes, assigning phases as we go
-                m2fringes.read_fringes(fringes, canvas, phases=dump[i+2])
-                options.status.set("Rendering "+env+" fringes", i%2*45 + 35)
-                # Render the fringes
-                m2graphics.render_fringes(fringes, canvas, width=options.width_var.get())
-                # Indicate that the subtracted and density maps need to be
-                # recalculated
-                options.subtracted = None
-                options.density = None
-        # Set the shot options
-        options.resolution = dump[-4]
-        options.depth = dump[-3]
-        options.wavelength = dump[-2]
-        options.double = dump[-1]
-        options.status.set("Done", 100)
-        # If data is available for either background or plasma fringes,
-        # display them
-        if dump[0] is not None:
-            options.mode = "background_fringes"
-            set_mode(options)
-        elif dump[3] is not None:
-            options.mode = "plasma_fringes"
-            set_mode(options)
+    filename = fd.askopenfile(filetypes=[("Magic2 files", "*.m2")])
+    if filename is not None:
+        # We need to use gzip to decompress the .m2 file
+        with gzip.open(filename.name, 'rb') as f:
+            options.status.set("Loading file", 0)
+            dump = pickle.load(f)
+            for env, i in (('background', 0), ('plasma', 3)):
+                if dump[i] is not None:
+                    # Delete the old data
+                    if options.objects[env]['canvas'] is not None:
+                        del options.objects[env]['canvas']
+                        del options.objects[env]['fringes']
+                        del options.subtracted
+                    options.status.set("Reading "+env+" canvas", i%2*45 + 10)
+                    # Create a new Canvas object
+                    canvas = options.objects[env]['canvas'] = m2graphics.Canvas('dump', fi=dump[i], m=dump[i+1])
+                    options.status.set("Finding "+env+" fringes", i%2*45 + 20)
+                    # Create a new fringes object
+                    fringes = options.objects[env]['fringes'] = m2fringes.Fringes()
+                    # Set the max and min for the colormap to have a correct scale
+                    fringes.min = sp.amin([phase for phase in dump[i+2] if phase != -2048.0])
+                    fringes.max = sp.amax([phase for phase in dump[i+2] if phase != -2048.0])
+                    # Read the fringes, assigning phases as we go
+                    m2fringes.read_fringes(fringes, canvas, phases=dump[i+2])
+                    options.status.set("Rendering "+env+" fringes", i%2*45 + 35)
+                    # Render the fringes
+                    m2graphics.render_fringes(fringes, canvas, width=options.width_var.get())
+                    # Indicate that the subtracted and density maps need to be
+                    # recalculated
+                    options.subtracted = None
+                    options.density = None
+            # Set the shot options
+            options.resolution = dump[-4]
+            options.depth = dump[-3]
+            options.wavelength = dump[-2]
+            options.double = dump[-1]
+            options.status.set("Done", 100)
+            # If data is available for either background or plasma fringes,
+            # display them
+            if dump[0] is not None:
+                options.mode = "background_fringes"
+                set_mode(options)
+            elif dump[3] is not None:
+                options.mode = "plasma_fringes"
+                set_mode(options)
 
 # Export the data from the current view
 def export(options):
@@ -275,7 +282,6 @@ def show_radio(options):
     # the user for permission)
     elif key[0] == 'subtracted':
         if options.subtracted is None:
-            print("Performing")
             subtract(options)
         else:
             options.mode = "_".join(key)
@@ -283,7 +289,6 @@ def show_radio(options):
     # Similarly for the density map
     elif key[0] == 'density':
         if options.density is None:
-            print("Perf")
             plasma_density(options)
         else:
             options.mode = "_".join(key)

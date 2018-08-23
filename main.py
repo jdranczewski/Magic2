@@ -91,15 +91,6 @@ def main():
                          command=lambda:
                          m2callbacks.m_open(options))
     filemenu.add_separator()
-    def make_pickle():
-        print("Making pickle")
-        pickle.dump(options.objects, open("save.p", "wb"))
-    filemenu.add_command(label="Pickle", command=make_pickle)
-    def unpickle():
-        options.objects = pickle.load(open("save.p", "rb"))
-        print("Opened")
-    filemenu.add_command(label="Unpickle", command=unpickle)
-    filemenu.add_separator()
     filemenu.add_command(label="Export the current view's data",
                          command=lambda:
                          m2callbacks.export(options))
@@ -143,11 +134,20 @@ def main():
                             m2callbacks.cosine(options))
 
     # Create the display submenu
-    displaymenu = Tk.Menu(menu)
-    menu.add_cascade(label="Display", menu=displaymenu)
-    displaymenu.add_command(label="Set colormap",
+    othermenu = Tk.Menu(menu)
+    menu.add_cascade(label="Other", menu=othermenu)
+    othermenu.add_command(label="Set colormap",
                             command=lambda:
                             m2callbacks.set_colormap(options))
+    othermenu.add_separator()
+    def make_pickle():
+        print("Making pickle")
+        pickle.dump(options.objects, open("save.p", "wb"))
+    othermenu.add_command(label="Pickle", command=make_pickle)
+    def unpickle():
+        options.objects = pickle.load(open("save.p", "rb"))
+        print("Opened")
+    othermenu.add_command(label="Unpickle", command=unpickle)
 
     # Create the matplotlib widget
     options.mframe = m2mframe.GraphFrame(root, bind_keys=True, show_toolbar=True)
