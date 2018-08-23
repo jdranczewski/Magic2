@@ -29,7 +29,7 @@ class Fringe():
 # pixels) and an optional graph parameter that determines whether
 # results should be plotted (useful for debugging). Filter is the
 # minimum length a fringe should have to be detected
-def read_fringes(fringes, canvas, graph=False, filter=5):
+def read_fringes(fringes, canvas, graph=False, filter=5, phases=None):
     # Pad the image with zeroes on each edge. This solves the issue
     # of searching for neighbours and reaching beyond the edges
     # without being too complicated. This is later accounted for
@@ -87,6 +87,10 @@ def read_fringes(fringes, canvas, graph=False, filter=5):
         if len(points) >= 5:
             fringe_index += 1
             fringe = Fringe(points, fringe_index)
+            # This uses a previously created phase list (for example from
+            # an .m2 file)
+            if phases is not None:
+                fringe.phase = phases[fringe_index]
             fringes.list.append(fringe)
             if graph:
                 points = sp.array(points)

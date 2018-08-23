@@ -5,18 +5,23 @@ from copy import copy
 
 
 class Canvas():
-    def __init__(self, filename, imshow=None):
+    def __init__(self, filename, fi=None, m=None, imshow=None):
         # An image is loaded, and only its first colour component is taken
         # out of red, green, blue, alpha.
         # The .png images supplied are greyscale.
-        image = plt.imread(filename.name)[:, :, 0]
-        # Fringes are black, extract them from the image
-        self.fringes_image = image == 0
+        if filename != 'dump' and fi is None:
+            image = plt.imread(filename.name)[:, :, 0]
+            # Fringes are black, extract them from the image
+            self.fringes_image = image == 0
+            # This is the user defined mask, it was grey (so neither black nor
+            # white, which is the condition we're using here)
+            self.mask = sp.logical_or(image == 1, self.fringes_image)
+        else:
+            # This uses a provide mask and image (for example from an .m2 file)
+            self.fringes_image = fi
+            self.mask = m
         # This will store only the labelled fringes, currently empty
         self.fringes_image_clean = sp.zeros_like(self.fringes_image)-0
-        # This is the user defined mask, it was grey (so neither black nor
-        # white, which is the condition we're using here)
-        self.mask = sp.logical_or(image == 1, self.fringes_image)
         # -1024 indicates an area where there is no data
         # Visual stores the fringe phases, but allows for width, making
         # the fringes easier to display
