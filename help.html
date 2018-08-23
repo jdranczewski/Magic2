@@ -73,3 +73,37 @@ all the subsequent fringes the line has encountered.
 Unlabelled fringes will be shown as black and ignored while
 <a>interpolating</a>.
 </p>
+
+<h2 id="h2_interpolation">Interpolation</h2>
+<h3 id="h3_interpolation_idea">The idea of interpolation</h3>
+<p>
+Once all the fringes are labelled, we need to find phase values in the empty
+spaces between them. This is what interpolation is used for. There are two
+interpolation methods in Magic2. They can be invoked by choosing an option from
+<a href="h3_menu">the menu</a> or by clicking a map option in <a
+href="h3_sidebar">the sidebar</a>. There is also a debug mode, which displays
+the output of all stages of the interpolation. It can be invoked from <a
+href="h3_menu">the menu</a> and has a lengthy warning message that explains its
+functionality.
+</p>
+<h3 id="h3_fast_interpolation">Fast interpolation</h3>
+<p>
+The fast interpolation method can be used on simple interferograms or to check
+whether your fringe labelling is going in the right direction. It is quicker,
+but does not account for flat triangles in the triangulation of the
+interferogram, meaning that it can produce non-physical artefacts in the output
+and should be used mostly for reference.
+</p>
+<h3 id="h3_exact_interpolation">Exact interpolation</h3>
+<p>
+The exact interpolation method is a custom one written for this sogtware and
+based on the work George has done with Magic, as well as <a
+href="https://doi.org/10.1016/S0098-3004(97)00088-5" target=_blank>this paper
+</a>.
+</p>
+<p>
+The method's advantage is that it removes invalid flat triangles from the
+triangulation that is used to interpolate the phase. This takes more time,
+but is often worth it, as it represents complicated features of the
+interferograms much better.
+</p>
