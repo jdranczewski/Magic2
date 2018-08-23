@@ -294,6 +294,11 @@ def show_radio(options):
 # the radio buttons on the right
 def recompute(event, options):
     key = event.widget['value'].split("_")
+    if key[1] == 'fringes':
+        phases = [fringe.phase for fringe in options.objects[key[0]]['fringes'].list]
+        options.objects[key[0]]['fringes'].min = sp.amin([phase for phase in phases if phase != -2048.0])
+        options.objects[key[0]]['fringes'].max = sp.amax([phase for phase in phases if phase != -2048.0])
+        set_mode(options)
     if key[1] == 'map':
         options.show_var.set(event.widget['value'])
         if options.objects[key[0]]['canvas'] is not None:
