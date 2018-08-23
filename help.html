@@ -107,3 +107,35 @@ triangulation that is used to interpolate the phase. This takes more time,
 but is often worth it, as it represents complicated features of the
 interferograms much better.
 </p>
+
+<h2 id="h2_subtract_plasma">Subtraction and plasma density calculation</h2>
+<h3 id="h3_subtraction">Performing the subtraction</h3>
+<p>
+To perform a subtraction of the plasma and background you can either click the
+"Subtracted map" option in <a href="h3_sidebar">the sidebar</a> (or right-click
+it if you want to recompute), or use the <b>Process -> Subtract</b> option in <a
+href="h3_menu">the menu</a>.
+</p>
+<h3 id="h3_zero_shift">Setting the zero fringe shift point</h3>
+<p>
+If you would like to adjust the zero fringe shift point, use the <b>Process -> Set
+zero shift point</b> option. This will allow you to either automatically select
+this point as the one that has the lowest fringe shift value, or to use your
+mouse and control+click the point that is supposed to have zero fringe shift.
+When in the manual mode, press the <b>escape (esc)</b> key to exit it.
+</p>
+<h3 id="h3_plasma_density">Calculating the plasma density</h3>
+<p>
+To calculate the plasma density based on the subtracted map, you can either
+click the "Plasma density" option in <a href="h3_sidebar">the sidebar</a> (or
+right-click it if you want to recompute), or use the <b>Process -> Calculate
+plasma density</b> option in <a href="h3_menu">the menu</a>.
+</p>
+<p>
+If you have not done so before, Magic2 will ask you to specify the shot
+details. Those are the resolution of the interferogram, depth of the object,
+wavelength of the laser, and whether the interferograms were traced 'doubly'
+(meaning that a distance between two traced lines represents half a fringe
+shift). You can always set those options by going to <b>Process -> Set shot
+details</b>.
+</p>
