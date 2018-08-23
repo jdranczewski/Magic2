@@ -41,3 +41,35 @@ whole fringe loading, labelling, interpolating and subtracting process. The
 options that can be found in the menus will be discussed in different section
 below.
 </p>
+
+<h2 id="h2_fringes">Working with traced interferograms</h2>
+<h3 id="h3_interferogram_structure">Structure of the files</h3>
+<p>
+The files for the background and plasma shot interferograms should be .png files
+of the same resolution. The fringes are indicated with black pixels. A mask can
+be applied by painting grey pixels on the images.
+</p>
+<h3 id="h3_opening_fringes">Opening fringe images</h3>
+<p>
+You can open a fringe image either by using the File menu, or by clicking the
+corresponding option in <a href="#h3_sidebar">the sidebar</a>. A dialog will
+open, prompting you to choose a .png file. It will then be processed, and the
+fringes will be displayed in <a href="#h3_graphing_area">the graphing area</a>.
+</p>
+<h3 id="h3_labelling">Labelling fringes</h3>
+<p>
+Once a fringe image is open, you can label the fringes to indicate the phase
+associated with them. You can do it by clicking anywhere within <a
+href="#h3_graphing_area">the graphing area</a> while holding down the
+<b>control (Ctrl)</b> key on your keyboard. This will start a line. You can add
+points to this line by further control+clicking. To confirm, right click within
+<a href="#h3_graphing_area">the graphing area</a> while holding down control.
+This will go through all the fringes your line has crossed. It will take the
+phase of the first one, and depending on the setting in <a
+href="#h3_sidebar">the sidebar</a> assign a higher, lower, or constant phase to
+all the subsequent fringes the line has encountered.
+</p>
+<p>
+Unlabelled fringes will be shown as black and ignored while
+<a>interpolating</a>.
+</p>
