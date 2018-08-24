@@ -128,13 +128,13 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
 
 # If the mouse moves in the graph area and a line has begun, make a part
 # of the line move after the mouse
-def onmove(event, labeller, line_plot):
-    if len(labeller.points) and event.ydata:
+def onmove(event, labeller, line_plot, ax):
+    if len(labeller.points) and event.inaxes == ax:
         # Note that we are not actually modifying labeller.points here
         points = sp.append(sp.array(labeller.points),
                            [[event.ydata, event.xdata]], 0)
         line_plot.set_data(points[:, 1], points[:, 0])
-        line_plot.figure.canvas.draw()
+        line_plot.figure.canvas.draw_idle()
 
 
 # Store whether the control key is pressed
@@ -151,7 +151,7 @@ def onpress(event, labeller, line_plot):
             line_plot.set_data(points[:, 1], points[:, 0])
         else:
             line_plot.set_data([], [])
-        line_plot.figure.canvas.draw()
+        # line_plot.figure.canvas.draw_idle()
 
 
 def onrelease(event, labeller):
@@ -168,7 +168,7 @@ def label(fringes, canvas, fig, ax, direction_var=None):
                                 lambda event: onclick(event, labeller, line_plot,
                                                  fringes, canvas, fig, ax))
     b1 = fig.canvas.mpl_connect('motion_notify_event',
-                                lambda event: onmove(event, labeller, line_plot))
+                                lambda event: onmove(event, labeller, line_plot, ax))
     b2 = fig.canvas.mpl_connect('key_press_event',
                                 lambda event: onpress(event, labeller, line_plot))
     b3 = fig.canvas.mpl_connect('key_release_event',
