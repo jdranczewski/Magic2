@@ -75,18 +75,27 @@ def m_save(options):
                                     initialfile=options.namecore)
     if filename != '':
         options.status.set("Exporting", 0)
-        dump = (
-            options.objects['background']['canvas'].fringes_image,
-            options.objects['background']['canvas'].mask,
-            [fringe.phase for fringe in options.objects['background']['fringes'].list],
-            options.objects['plasma']['canvas'].fringes_image,
-            options.objects['plasma']['canvas'].mask,
-            [fringe.phase for fringe in options.objects['plasma']['fringes'].list],
-            options.resolution,
-            options.depth,
-            options.wavelength,
-            options.double
-        )
+        dump = []
+        try:
+            dump.append(options.objects['background']['canvas'].fringes_image)
+            dump.append(options.objects['background']['canvas'].mask)
+            dump.append([fringe.phase for fringe in options.objects['background']['fringes'].list])
+        except AttributeError:
+            dump = [None, None, None]
+        try:
+            dump.append(options.objects['plasma']['canvas'].fringes_image)
+            dump.append(options.objects['plasma']['canvas'].mask)
+            dump.append([fringe.phase for fringe in options.objects['plasma']['fringes'].list])
+        except AttributeError:
+            dump = dump[:3]
+            dump.append(None)
+            dump.append(None)
+            dump.append(None)
+        dump.append(options.namecore)
+        dump.append(options.resolution)
+        dump.append(options.depth)
+        dump.append(options.wavelength)
+        dump.append(options.double)
         # We use gzip to make the file smaller. Normal pickling produced files
         # that were around 30MB, while the compressed version of the same data
         # is 188KB
@@ -131,6 +140,8 @@ def m_open(options):
                     options.subtracted = None
                     options.density = None
             # Set the shot options
+            options.namecore = dump[-5]
+            options.status.set_name_label(options.namecore)
             options.resolution = dump[-4]
             options.depth = dump[-3]
             options.wavelength = dump[-2]
