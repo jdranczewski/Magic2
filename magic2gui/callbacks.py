@@ -154,9 +154,12 @@ def export(options):
             options.status.set("Exporting", 0)
             # The mask is filled with -1024 to make the masking uniform
             if options.mode.split("_")[1] == 'fringes':
-                sp.savetxt(filename, sp.ma.filled(options.objects[options.mode.split("_")[0]]['canvas'].fringe_phases,fill_value=-1024), delimiter=",")
+                fringe_phases = options.objects[options.mode.split("_")[0]]['canvas'].fringe_phases.astype(float)
+                sp.savetxt(filename, sp.ma.filled(
+                    sp.ma.masked_where(fringe_phases==-1024.0, fringe_phases),
+                    fill_value=sp.nan), delimiter=",", fmt="%.0f")
             else:
-                sp.savetxt(filename, sp.ma.filled(options.imshow.get_array(),fill_value=-1024), delimiter=",")
+                sp.savetxt(filename, sp.ma.filled(options.imshow.get_array(),fill_value=sp.nan), delimiter=",")
             options.status.set("Done", 100)
     else:
         mb.showinfo("No mode chosen", "Please choose one of the display modes from the menu on the right!")
