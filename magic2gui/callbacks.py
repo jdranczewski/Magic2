@@ -51,6 +51,8 @@ def open_image(options, env):
             options.status.set("Rendering fringes", 66)
             # Render the fringes onto the canvas
             m2graphics.render_fringes(fringes, canvas, width=options.width_var.get())
+            # Reset the image limits
+            options.conserve_limits = False
             # Set the mode (the set_mode function handles rendering)
             options.mode = env + "_fringes"
             set_mode(options)
@@ -334,6 +336,10 @@ def recompute(event, options):
 # Also used for refreshing
 def set_mode(options):
     key = options.mode.split("_")
+    if options.conserve_limits:
+        # Get the current display limits
+        ylim = options.ax.get_ylim()
+        xlim = options.ax.get_xlim()
     # Clear the axes and all labellers/event handlers attached to them
     # (if they exist)
     options.ax.clear()
@@ -392,6 +398,13 @@ def set_mode(options):
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         options.mframe.cax.axis('on')
         options.cbar.ax.set_ylabel('Electron density / $cm^{-3}$', rotation=270, labelpad=20)
+    if options.conserve_limits:
+        # revert the graph to the old display limits
+        options.ax.set_xlim(xlim)
+        options.ax.set_ylim(ylim)
+    else:
+        # Revert to the original setting
+        options.conserve_limits = True
     # Refresh the graph's canvas
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position

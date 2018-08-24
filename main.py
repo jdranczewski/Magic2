@@ -33,6 +33,9 @@ class Options:
         self.imshow = None
         # The core name of the imported files, used as a template for exports
         self.namecore = None
+        # A check of whether the limits of the limits of the graph should
+        # be conserved while switching modes
+        self.conserve_limits = True
         # A Labeller object. Its existence is an indication of being in
         # labelling mode and having to disattach event listeners when
         # switching the graph display
