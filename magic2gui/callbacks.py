@@ -388,7 +388,7 @@ def set_mode(options):
         options.ax.set_ylabel("Distance / $mm$")
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         options.mframe.cax.axis('on')
-        options.cbar.ax.set_ylabel('Electron density / $m^{-3}$', rotation=270, labelpad=20)
+        options.cbar.ax.set_ylabel('Electron density / $cm^{-3}$', rotation=270, labelpad=20)
     # Refresh the graph's canvas
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position
@@ -712,6 +712,8 @@ def plasma_density(options):
         # Calculate the density map
         options.density = (multiplier * options.subtracted * 8
                            * (sp.pi * c / e)**2 * me * e0 / d / wavelength)
+        # Convert to centimetres cubed
+        options.density /= 1e6
         # Let set_mode render the map
         options.mode = "density_graph"
         set_mode(options)
