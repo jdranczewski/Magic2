@@ -141,7 +141,7 @@ def onmove(event, labeller, line_plot, ax):
 def onpress(event, labeller, line_plot):
     if event.key == 'control':
         labeller.control = True
-    elif event.key == 'ctrl+backspace':
+    elif event.key == 'ctrl+backspace' or event.key == 'backspace':
         # This deletes the point that has been placed last
         labeller.points = labeller.points[:-1]
         # If there are points to display, display them. If not,
@@ -151,7 +151,7 @@ def onpress(event, labeller, line_plot):
             line_plot.set_data(points[:, 1], points[:, 0])
         else:
             line_plot.set_data([], [])
-        # line_plot.figure.canvas.draw_idle()
+        line_plot.figure.canvas.draw_idle()
 
 
 def onrelease(event, labeller):
