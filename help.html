@@ -30,8 +30,9 @@ recalculate the subtracted map). There are also two buttons for changing the
 thickness of the fringe rendering.
 </p>
 <p>
-The bottom section allows for changing the fringe <a>labelling mode</a>, so that
-the phase goes up, down, or stays constant. It can also be reset to zero.
+The bottom section allows for changing the fringe <a href="#h3_labelling">
+labelling mode</a>, so that the phase goes up, down, or stays constant.
+It can also be reset to zero.
 </p>
 <h3 id="h3_menu">The menu</h3>
 <p>
@@ -71,7 +72,7 @@ all the subsequent fringes the line has encountered.
 </p>
 <p>
 Unlabelled fringes will be shown as black and ignored while
-<a>interpolating</a>.
+<a href="#h2_interpolation">interpolating</a>.
 </p>
 
 <h2 id="h2_interpolation">Interpolation</h2>
@@ -80,10 +81,10 @@ Unlabelled fringes will be shown as black and ignored while
 Once all the fringes are labelled, we need to find phase values in the empty
 spaces between them. This is what interpolation is used for. There are two
 interpolation methods in Magic2. They can be invoked by choosing an option from
-<a href="h3_menu">the menu</a> or by clicking a map option in <a
-href="h3_sidebar">the sidebar</a>. There is also a debug mode, which displays
+<a href="#h3_menu">the menu</a> or by clicking a map option in <a
+href="#h3_sidebar">the sidebar</a>. There is also a debug mode, which displays
 the output of all stages of the interpolation. It can be invoked from <a
-href="h3_menu">the menu</a> and has a lengthy warning message that explains its
+href="#h3_menu">the menu</a> and has a lengthy warning message that explains its
 functionality.
 </p>
 <h3 id="h3_fast_interpolation">Fast interpolation</h3>
@@ -98,7 +99,7 @@ and should be used mostly for reference.
 <p>
 The exact interpolation method is a custom one written for this software and
 based on the work George has done with Magic, as well as <a
-href="https://doi.org/10.1016/S0098-3004(97)00088-5" target=_blank>this
+href="#https://doi.org/10.1016/S0098-3004(97)00088-5" target=_blank>this
 paper</a>.
 </p>
 <p>
@@ -112,9 +113,9 @@ interferograms much better.
 <h3 id="h3_subtraction">Performing the subtraction</h3>
 <p>
 To perform a subtraction of the plasma and background you can either click the
-"Subtracted map" option in <a href="h3_sidebar">the sidebar</a> (or right-click
+"Subtracted map" option in <a href="#h3_sidebar">the sidebar</a> (or right-click
 it if you want to recompute), or use the <b>Process -> Subtract</b> option in <a
-href="h3_menu">the menu</a>.
+href="#h3_menu">the menu</a>.
 </p>
 <h3 id="h3_zero_shift">Setting the zero fringe shift point</h3>
 <p>
@@ -127,9 +128,9 @@ When in the manual mode, press the <b>escape (esc)</b> key to exit it.
 <h3 id="h3_plasma_density">Calculating the plasma density</h3>
 <p>
 To calculate the plasma density based on the subtracted map, you can either
-click the "Plasma density" option in <a href="h3_sidebar">the sidebar</a> (or
+click the "Plasma density" option in <a href="#h3_sidebar">the sidebar</a> (or
 right-click it if you want to recompute), or use the <b>Process -> Calculate
-plasma density</b> option in <a href="h3_menu">the menu</a>.
+plasma density</b> option in <a href="#h3_menu">the menu</a>.
 </p>
 <p>
 If you have not done so before, Magic2 will ask you to specify the shot
@@ -148,5 +149,11 @@ with fringes, only the interpolated maps (including subtracted and plasma
 density maps).
 </p>
 <h3 id="h3_cosine">Cosine</h3>
+<p>
 <b>Process -> Cosine</b> takes the cosine of the current interpolated phase
 view. This can be then compared to the initial interferogram used for tracing.
+</p>
+<p>
+The process takes into account the 'double' setting in <a
+href="#h3_plasma_density"> the shot options</a>.
+</p>
