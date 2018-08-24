@@ -1,0 +1,159 @@
+<h1>Magic 2 - help file</h1>
+<div id="contents">
+  <h2>Table of contents</h2>
+</div>
+
+<h2 id="h2_introduction">Introduction</h2>
+<p>
+Welcome to Magic2, the successor to Magic. The software has been written by
+Jakub Dranczewski during his UROP in 2018. It's main purpose is to create plasma
+density maps based on traced out interferograms.
+</p>
+
+<h2 id="h2_basics">Basics of the interface</h2>
+<h3 id="h3_graphing_area">The graphing area</h3>
+<p>
+The main element of Magic2 is the graphing area which takes up most of the
+screen. The output of all functions will be displayed here, it also allows
+interactivity in certain modes.
+</p>
+<h3 id="h3_sidebar">The sidebar</h3>
+<p>
+The sidebar consists of two sections. The top one (Display) can be used to
+change what is currently displayed in the <a href="#h3_graphing_area">graphing
+area</a>. Clicking any of the options shows the corresponding graph, or
+attempts to obtain it (while asking the user for permission). For example, if
+no file is open, clicking "Background fringes" will result in a dialog allowing
+for choosing a file to open and display. Right-clicking the options allows for
+recalculating them (for example right-clicking the "Subtracted map" will
+recalculate the subtracted map). There are also two buttons for changing the
+thickness of the fringe rendering.
+</p>
+<p>
+The bottom section allows for changing the fringe <a href="#h3_labelling">
+labelling mode</a>, so that the phase goes up, down, or stays constant.
+It can also be reset to zero.
+</p>
+<h3 id="h3_menu">The menu</h3>
+<p>
+The menu contains some additional options you may want to use, although <a
+href="#h3_sidebar">the sidebar</a> can be used to go through pretty much the
+whole fringe loading, labelling, interpolating and subtracting process. The
+options that can be found in the menus will be discussed in different section
+below.
+</p>
+
+<h2 id="h2_fringes">Working with traced interferograms</h2>
+<h3 id="h3_interferogram_structure">Structure of the files</h3>
+<p>
+The files for the background and plasma shot interferograms should be .png files
+of the same resolution. The fringes are indicated with black pixels. A mask can
+be applied by painting grey pixels on the images.
+</p>
+<h3 id="h3_opening_fringes">Opening fringe images</h3>
+<p>
+You can open a fringe image either by using the File menu, or by clicking the
+corresponding option in <a href="#h3_sidebar">the sidebar</a>. A dialog will
+open, prompting you to choose a .png file. It will then be processed, and the
+fringes will be displayed in <a href="#h3_graphing_area">the graphing area</a>.
+</p>
+<h3 id="h3_labelling">Labelling fringes</h3>
+<p>
+Once a fringe image is open, you can label the fringes to indicate the phase
+associated with them. You can do it by clicking anywhere within <a
+href="#h3_graphing_area">the graphing area</a> while holding down the
+<b>control (Ctrl)</b> key on your keyboard. This will start a line. You can add
+points to this line by further control+clicking. To confirm, right click within
+<a href="#h3_graphing_area">the graphing area</a> while holding down control.
+This will go through all the fringes your line has crossed. It will take the
+phase of the first one, and depending on the setting in <a
+href="#h3_sidebar">the sidebar</a> assign a higher, lower, or constant phase to
+all the subsequent fringes the line has encountered.
+</p>
+<p>
+Unlabelled fringes will be shown as black and ignored while
+<a href="#h2_interpolation">interpolating</a>.
+</p>
+
+<h2 id="h2_interpolation">Interpolation</h2>
+<h3 id="h3_interpolation_idea">The idea of interpolation</h3>
+<p>
+Once all the fringes are labelled, we need to find phase values in the empty
+spaces between them. This is what interpolation is used for. There are two
+interpolation methods in Magic2. They can be invoked by choosing an option from
+<a href="#h3_menu">the menu</a> or by clicking a map option in <a
+href="#h3_sidebar">the sidebar</a>. There is also a debug mode, which displays
+the output of all stages of the interpolation. It can be invoked from <a
+href="#h3_menu">the menu</a> and has a lengthy warning message that explains its
+functionality.
+</p>
+<h3 id="h3_fast_interpolation">Fast interpolation</h3>
+<p>
+The fast interpolation method can be used on simple interferograms or to check
+whether your fringe labelling is going in the right direction. It is quicker,
+but does not account for flat triangles in the triangulation of the
+interferogram, meaning that it can produce non-physical artefacts in the output
+and should be used mostly for reference.
+</p>
+<h3 id="h3_exact_interpolation">Exact interpolation</h3>
+<p>
+The exact interpolation method is a custom one written for this software and
+based on the work George has done with Magic, as well as <a
+href="#https://doi.org/10.1016/S0098-3004(97)00088-5" target=_blank>this
+paper</a>.
+</p>
+<p>
+The method's advantage is that it removes invalid flat triangles from the
+triangulation that is used to interpolate the phase. This takes more time,
+but is often worth it, as it represents complicated features of the
+interferograms much better.
+</p>
+
+<h2 id="h2_subtract_plasma">Subtraction and plasma density calculation</h2>
+<h3 id="h3_subtraction">Performing the subtraction</h3>
+<p>
+To perform a subtraction of the plasma and background you can either click the
+"Subtracted map" option in <a href="#h3_sidebar">the sidebar</a> (or right-click
+it if you want to recompute), or use the <b>Process -> Subtract</b> option in <a
+href="#h3_menu">the menu</a>.
+</p>
+<h3 id="h3_zero_shift">Setting the zero fringe shift point</h3>
+<p>
+If you would like to adjust the zero fringe shift point, use the <b>Process -> Set
+zero shift point</b> option. This will allow you to either automatically select
+this point as the one that has the lowest fringe shift value, or to use your
+mouse and control+click the point that is supposed to have zero fringe shift.
+When in the manual mode, press the <b>escape (esc)</b> key to exit it.
+</p>
+<h3 id="h3_plasma_density">Calculating the plasma density</h3>
+<p>
+To calculate the plasma density based on the subtracted map, you can either
+click the "Plasma density" option in <a href="#h3_sidebar">the sidebar</a> (or
+right-click it if you want to recompute), or use the <b>Process -> Calculate
+plasma density</b> option in <a href="#h3_menu">the menu</a>.
+</p>
+<p>
+If you have not done so before, Magic2 will ask you to specify the shot
+details. Those are the resolution of the interferogram, depth of the object,
+wavelength of the laser, and whether the interferograms were traced 'doubly'
+(meaning that a distance between two traced lines represents half a fringe
+shift). You can always set those options by going to <b>Process -> Set shot
+details</b>.
+</p>
+
+<h2 id="h2_other_operations">Other operations</h2>
+<h3 id="h3_invert">Invert</h3>
+<p>
+<b>Process -> Invert</b> inverts the data in the current view. This does not work
+with fringes, only the interpolated maps (including subtracted and plasma
+density maps).
+</p>
+<h3 id="h3_cosine">Cosine</h3>
+<p>
+<b>Process -> Cosine</b> takes the cosine of the current interpolated phase
+view. This can be then compared to the initial interferogram used for tracing.
+</p>
+<p>
+The process takes into account the 'double' setting in <a
+href="#h3_plasma_density"> the shot options</a>.
+</p>
