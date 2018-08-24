@@ -368,6 +368,14 @@ def set_mode(options):
         options.cbar.ax.set_ylabel('Fringe shift', rotation=270, labelpad=20)
     elif key[0] == 'density':
         options.imshow = options.ax.imshow(options.density, cmap=options.cmap)
+        # Adjust the tick labels to be in milimeters
+        ticks = options.ax.xaxis.get_majorticklocs()
+        options.ax.xaxis.set_ticklabels(ticks/options.resolution)
+        ticks = options.ax.yaxis.get_majorticklocs()
+        options.ax.yaxis.set_ticklabels(ticks/options.resolution)
+        # Add x and y axis labels
+        options.ax.set_xlabel("Distance / $mm$")
+        options.ax.set_ylabel("Distance / $mm$")
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         options.mframe.cax.axis('on')
         options.cbar.ax.set_ylabel('Electron density / $m^{-3}$', rotation=270, labelpad=20)
