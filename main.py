@@ -31,6 +31,8 @@ class Options:
         self.fig = None
         self.ax = None
         self.imshow = None
+        # The core name of the imported files, used as a template for exports
+        self.namecore = None
         # A Labeller object. Its existence is an indication of being in
         # labelling mode and having to disattach event listeners when
         # switching the graph display

@@ -7,6 +7,9 @@ class StatusBar(Tk.Frame):
     def __init__(self, master):
         Tk.Frame.__init__(self, master, bd=2, relief=Tk.SUNKEN)
         self.master = master
+        # Create and pack a label displaying the project's name
+        self.name_label = Tk.Label(self, text="")
+        self.name_label.pack(side=Tk.LEFT)
         # Create and pack a progress bar
         self.pb = ttk.Progressbar(self, orient='horizontal', mode='determinate')
         self.pb.pack(side=Tk.RIGHT)
@@ -32,3 +35,8 @@ class StatusBar(Tk.Frame):
         self.label.update_idletasks()
         self.update_idletasks()
         self.master.update()
+
+    # Update the name label
+    def set_name_label(self, text):
+        self.name_label['text'] = text
+        self.name_label.update_idletasks()

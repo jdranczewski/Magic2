@@ -6,6 +6,7 @@ import scipy as sp
 from copy import copy
 import pickle
 import gzip
+import os
 from matplotlib.pyplot import cm
 
 import magic2gui.dialog as m2dialog
@@ -29,6 +30,12 @@ def open_image(options, env):
         filename = fd.askopenfile(filetypes=[("PNG files", "*.png;*.PNG")])
         if filename is not None:
             options.status.set("Reading the file", 0)
+            # Save the name (except for the last word) as a template which will
+            # be used when saving files
+            options.namecore = os.path.basename(filename.name).rsplit(" ", 1)[0]
+            if len(options.namecore.split(".")) > 1:
+                options.namecore = options.namecore.split(".")[0]
+            options.status.set_name_label(options.namecore)
             # Delete the old objects if we are overwriting
             if options.objects[env]['canvas'] is not None:
                 del options.objects[env]['canvas']
@@ -62,7 +69,8 @@ def open_image(options, env):
 # completely deterministic, the labelling will be assigned in the correct order
 def m_save(options):
     filename = fd.asksaveasfilename(filetypes=[("Magic2 file", "*.m2")],
-                                    defaultextension=".m2")
+                                    defaultextension=".m2",
+                                    initialfile=options.namecore)
     if filename != '':
         options.status.set("Exporting", 0)
         dump = (
@@ -140,7 +148,8 @@ def export(options):
     if options.mode is not None:
         filename = fd.asksaveasfilename(filetypes=[(".csv file", "*.csv"),
                                                    ("All files", "*")],
-                                        defaultextension=".csv")
+                                        defaultextension=".csv",
+                                        initialfile=options.namecore)
         if filename != '':
             options.status.set("Exporting", 0)
             # The mask is filled with -1024 to make the masking uniform
@@ -185,7 +194,8 @@ def export_image(options):
         # Ask for a file name
         filename = fd.asksaveasfilename(filetypes=[("PNG files", "*.png;*.PNG"),
                                                    ("All files", "*")],
-                                        defaultextension=".png")
+                                        defaultextension=".png",
+                                        initialfile=options.namecore)
         if filename != '':
             # Save the graph, using the dpi obtained with the dialog
             options.fig.savefig(filename, dpi=dialog.result)
@@ -715,7 +725,7 @@ def cosine(options):
             multiplier = 1
         else:
             multiplier = 2
-        options.ax.imshow(sp.cos(options.imshow.get_array()*multiplier*sp.pi), cmap="Greys")
+        options.imshow = options.ax.imshow(sp.cos(options.imshow.get_array()*multiplier*sp.pi), cmap="Greys")
         # This mode is a spetial little snowflake, in that it doesn't have
         # a radio button or a set_mode if clause. We handle it ourselves here
         options.fig.canvas.draw()
