@@ -5,7 +5,6 @@ import magic2gui.callbacks as m2callbacks
 import magic2gui.matplotlib_frame as m2mframe
 import magic2gui.status_bar as m2status_bar
 from matplotlib.pyplot import imread
-import numpy as np
 import pickle
 
 
