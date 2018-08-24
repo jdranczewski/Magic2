@@ -205,7 +205,7 @@ def main():
     width_frame.pack()
     b = Tk.Button(width_frame, text="<", command=lambda: m2callbacks.lower_width(options))
     b.pack(side=Tk.LEFT)
-    l = Tk.Label(width_frame, text="width:")
+    l = Tk.Label(width_frame, text="fringe width:")
     l.pack(side=Tk.LEFT)
     options.width_var = Tk.IntVar()
     options.width_var.set(2)
@@ -231,6 +231,12 @@ def main():
                             variable=options.direction_var, value=key,
                             command=lambda: options.mframe.canvas._tkcanvas.focus_set())
         b.pack(anchor=Tk.W)
+
+    # Create a small help section
+    help_group = Tk.LabelFrame(side_frame, text="Keyboard shortcuts", padx=5, pady=5)
+    help_group.pack(fill=Tk.BOTH)
+    hl = Tk.Label(help_group, anchor=Tk.W, justify=Tk.LEFT, text="ctrl+click - add point\nctrl+right click - finish line\nx, z - zoom in and out\nw, a, s, d - move the graph\nh - show the whole interferogram\ng - show gridlines\no - zoom rectangle\np - pan and zoom")
+    hl.pack()
 
     # Create a status bar and place it at the bottom of the window.
     options.status = m2status_bar.StatusBar(root)
