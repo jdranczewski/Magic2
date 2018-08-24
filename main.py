@@ -33,6 +33,8 @@ class Options:
         self.imshow = None
         # The core name of the imported files, used as a template for exports
         self.namecore = None
+        # A flag for checking whether the name has been set manually
+        self.ncmanual = False
         # A check of whether the limits of the limits of the graph should
         # be conserved while switching modes
         self.conserve_limits = True
@@ -95,6 +97,10 @@ def main():
     filemenu.add_command(label="Open .m2",
                          command=lambda:
                          m2callbacks.m_open(options))
+    filemenu.add_separator()
+    filemenu.add_command(label="Set project name",
+                         command=lambda:
+                         m2callbacks.set_namecore(options))
     filemenu.add_separator()
     filemenu.add_command(label="Export the current view's data",
                          command=lambda:

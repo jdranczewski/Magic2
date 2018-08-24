@@ -30,12 +30,13 @@ def open_image(options, env):
         filename = fd.askopenfile(filetypes=[("PNG files", "*.png;*.PNG")])
         if filename is not None:
             options.status.set("Reading the file", 0)
-            # Save the name (except for the last word) as a template which will
-            # be used when saving files
-            options.namecore = os.path.basename(filename.name).rsplit(" ", 1)[0]
-            if len(options.namecore.split(".")) > 1:
-                options.namecore = options.namecore.split(".")[0]
-            options.status.set_name_label(options.namecore)
+            if not options.ncmanual:
+                # Save the name (except for the last word) as a template which will
+                # be used when saving files
+                options.namecore = os.path.basename(filename.name).rsplit(" ", 1)[0]
+                if len(options.namecore.split(".")) > 1:
+                    options.namecore = options.namecore.split(".")[0]
+                options.status.set_name_label(options.namecore)
             # Delete the old objects if we are overwriting
             if options.objects[env]['canvas'] is not None:
                 del options.objects[env]['canvas']
@@ -157,6 +158,39 @@ def m_open(options):
                 options.conserve_limits = False
                 options.mode = "plasma_fringes"
                 set_mode(options)
+
+
+# This dialog is used for exporting the graph as an image.
+# It allows the user to choose a resolution
+class NameDialog(m2dialog.Dialog):
+    def __init__(self, parent, options, title=None):
+        # We need to save the options, which would not be accepted as an
+        # argument by the original Dialog class, so we override __init__
+        self.options = options
+        m2dialog.Dialog.__init__(self, parent, title)
+
+    def body(self, master):
+        # Create a simple body
+        ttk.Label(master, text="Project name:").grid(row=0)
+        self.e = ttk.Entry(master)
+        if self.options.namecore is not None:
+            self.e.insert(0, self.options.namecore)
+        self.e.grid(row=0, column=1)
+        return self.e
+
+    def apply(self):
+        # Save the value from the text field as .result
+        self.result = self.e.get()
+
+
+# This function exports the current graph as an image
+def set_namecore(options):
+    dialog = NameDialog(options.root, options, title="Set name")
+    if dialog.result is not None:
+        options.namecore = dialog.result
+        options.ncmanual = True
+        options.status.set_name_label(options.namecore)
+
 
 # Export the data from the current view
 def export(options):
