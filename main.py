@@ -7,6 +7,7 @@ import magic2gui.status_bar as m2status_bar
 from matplotlib.pyplot import imread
 import numpy as np
 import pickle
+import webbrowser
 
 
 # This is a way of getting global variables without actually using global
@@ -133,7 +134,7 @@ def main():
                             command=lambda:
                             m2callbacks.cosine(options))
 
-    # Create the display submenu
+    # Create the other submenu
     othermenu = Tk.Menu(menu)
     menu.add_cascade(label="Other", menu=othermenu)
     othermenu.add_command(label="Set colormap",
@@ -148,6 +149,13 @@ def main():
         options.objects = pickle.load(open("save.p", "rb"))
         print("Opened")
     othermenu.add_command(label="Unpickle", command=unpickle)
+
+    # Create the help submenu
+    helpmenu = Tk.Menu(menu)
+    menu.add_cascade(label="Help", menu=helpmenu)
+    helpmenu.add_command(label="Display manual",
+                         command=lambda:
+                         webbrowser.open("help.html"))
 
     # Create the matplotlib widget
     options.mframe = m2mframe.GraphFrame(root, bind_keys=True, show_toolbar=True)
