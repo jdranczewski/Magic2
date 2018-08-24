@@ -18,7 +18,7 @@ class Labeller():
 
 # This function is used to handle the user pressing a mouse key
 # while in the graphing area
-def onclick(event, labeller, line_plot, fringes, canvas, fig, ax):
+def onclick(event, labeller, line_plot, temp_line, fringes, canvas, fig, ax):
     # If this was a single click within the graphing area, add a point
     # to the line
     if labeller.control and not event.dblclick and event.xdata:
@@ -33,6 +33,7 @@ def onclick(event, labeller, line_plot, fringes, canvas, fig, ax):
             label_fringes(labeller, fringes, canvas, fig, ax)
             labeller.points = []
             line_plot.set_data([], [])
+            temp_line.set_data([], [])
             line_plot.figure.canvas.draw()
 
 
@@ -120,7 +121,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
     m2graphics.render_fringes(fringes, canvas, width=labeller.options.width_var.get(), indices=fix_indices)
     canvas.imshow.set_data(sp.ma.masked_where(canvas.fringe_phases_visual == -1024, canvas.fringe_phases_visual))
     canvas.imshow.set_clim(fringes.min, fringes.max)
-    canvas.imshow.figure.canvas.draw()
+    canvas.imshow.figure.canvas.draw_idle()
     # This (when uncommented) allows one to see the pixels the labelling line
     # went through. Useful for debugging
     # ax.plot(x,y)
@@ -128,17 +129,16 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
 
 # If the mouse moves in the graph area and a line has begun, make a part
 # of the line move after the mouse
-def onmove(event, labeller, line_plot, ax):
+def onmove(event, labeller, line_plot, temp_line, ax):
     if len(labeller.points) and event.inaxes == ax:
         # Note that we are not actually modifying labeller.points here
-        points = sp.append(sp.array(labeller.points),
-                           [[event.ydata, event.xdata]], 0)
-        line_plot.set_data(points[:, 1], points[:, 0])
+        points = sp.array([labeller.points[-1], [event.ydata, event.xdata]])
+        temp_line.set_data(points[:, 1], points[:, 0])
         line_plot.figure.canvas.draw_idle()
 
 
 # Store whether the control key is pressed
-def onpress(event, labeller, line_plot):
+def onpress(event, labeller, line_plot, temp_line):
     if event.key == 'control':
         labeller.control = True
     elif event.key == 'ctrl+backspace' or event.key == 'backspace':
@@ -151,6 +151,7 @@ def onpress(event, labeller, line_plot):
             line_plot.set_data(points[:, 1], points[:, 0])
         else:
             line_plot.set_data([], [])
+            temp_line.set_data([], [])
         line_plot.figure.canvas.draw_idle()
 
 
@@ -164,13 +165,14 @@ def onrelease(event, labeller):
 def label(fringes, canvas, fig, ax, direction_var=None):
     labeller = Labeller(direction_var)
     line_plot, = ax.plot([], [], "--")
+    temp_line, = ax.plot([], [], "--")
     b0 = fig.canvas.mpl_connect('button_press_event',
-                                lambda event: onclick(event, labeller, line_plot,
+                                lambda event: onclick(event, labeller, line_plot, temp_line,
                                                  fringes, canvas, fig, ax))
     b1 = fig.canvas.mpl_connect('motion_notify_event',
-                                lambda event: onmove(event, labeller, line_plot, ax))
+                                lambda event: onmove(event, labeller, line_plot, temp_line, ax))
     b2 = fig.canvas.mpl_connect('key_press_event',
-                                lambda event: onpress(event, labeller, line_plot))
+                                lambda event: onpress(event, labeller, line_plot, temp_line))
     b3 = fig.canvas.mpl_connect('key_release_event',
                                 lambda event: onrelease(event, labeller))
     labeller.binds = [b0, b1, b2, b3]
