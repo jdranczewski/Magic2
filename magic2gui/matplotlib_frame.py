@@ -45,7 +45,7 @@ class GraphFrame(Tk.Frame):
         # Bind keyboard shortcuts
         if bind_keys:
             # Delete default keyboard shortcuts that we will be using elsewhere
-            rcParams['keymap.back'] = ['left', 'c']
+            rcParams['keymap.back'] = ['left']
             rcParams['keymap.save'] = ['ctrl+s']
 
             def on_key_press(event):
