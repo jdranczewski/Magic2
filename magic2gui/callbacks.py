@@ -139,9 +139,11 @@ def m_open(options):
             # If data is available for either background or plasma fringes,
             # display them
             if dump[0] is not None:
+                options.conserve_limits = False
                 options.mode = "background_fringes"
                 set_mode(options)
             elif dump[3] is not None:
+                options.conserve_limits = False
                 options.mode = "plasma_fringes"
                 set_mode(options)
 
