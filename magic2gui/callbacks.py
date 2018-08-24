@@ -711,7 +711,11 @@ def plasma_density(options):
 # from which the fringe lines were traced
 def cosine(options):
     if options.mode.split("_")[1] == 'map':
-        options.ax.imshow(sp.cos(options.imshow.get_array()*2*sp.pi), cmap="Greys")
+        if options.double is True:
+            multiplier = 1
+        else:
+            multiplier = 2
+        options.ax.imshow(sp.cos(options.imshow.get_array()*multiplier*sp.pi), cmap="Greys")
         # This mode is a spetial little snowflake, in that it doesn't have
         # a radio button or a set_mode if clause. We handle it ourselves here
         options.fig.canvas.draw()
