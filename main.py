@@ -72,6 +72,11 @@ def main():
     # Create a root tkinter object and set its title
     options.root = root = Tk.Tk()
     root.wm_title("Magic2")
+    # Setting the icon doesn't work on Linux for some reason
+    try:
+        root.iconbitmap("magic2.ico")
+    except:
+        pass
     # Set the first row and column in root's grid layout to resize.
     # This way the graph will fit all the available space
     root.grid_columnconfigure(0, weight=1)
