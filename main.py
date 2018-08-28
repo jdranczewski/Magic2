@@ -264,6 +264,10 @@ def main():
     options.status.grid(row=1, columnspan=2, sticky=("W", "E"))
     # status.set("waiting",-1)
 
+    # Confirm exit
+    root.protocol("WM_DELETE_WINDOW",
+                  lambda: m2callbacks.close_window(options))
+
     # Start the programme's main loop
     root.mainloop()
 

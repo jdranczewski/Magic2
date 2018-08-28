@@ -854,3 +854,8 @@ class AboutDialog(m2dialog.Dialog):
 
 def about(options):
     AboutDialog(options.root)
+
+
+def close_window(options):
+    if mb.askokcancel("Quit", "Do you actually want to quit?"):
+        options.root.destroy()
