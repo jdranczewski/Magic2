@@ -256,7 +256,7 @@ def main():
     # Create a small help section
     help_group = Tk.LabelFrame(side_frame, text="Keyboard shortcuts", padx=5, pady=5)
     help_group.pack(fill=Tk.BOTH)
-    hl = Tk.Label(help_group, anchor=Tk.W, justify=Tk.LEFT, text="ctrl+click - add point\nctrl+right click - finish line\nx, z - zoom in and out\nw, a, s, d - move the graph\nh - show the whole interferogram\ng - show gridlines\no - zoom rectangle\np - pan and zoom")
+    hl = Tk.Label(help_group, anchor=Tk.W, justify=Tk.LEFT, text="ctrl+click - add point\nctrl+right click - finish line\nx, z - zoom in and out\nw, a, s, d - move the graph\nh - show the whole interferogram\ng - show gridlines\no - toggle zoom rectangle\np - toggle pan and zoom")
     hl.pack()
 
     # Create a status bar and place it at the bottom of the window.
