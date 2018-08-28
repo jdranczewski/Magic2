@@ -102,6 +102,12 @@ def main():
     filemenu.add_command(label="Open .m2",
                          command=lambda:
                          m2callbacks.m_open(options))
+    filemenu.add_command(label="Open .m2 and interpolate (exact)",
+                         command=lambda:
+                         m2callbacks.m_open(options, interpolate='exact'))
+    filemenu.add_command(label="Open .m2 and interpolate (fast)",
+                         command=lambda:
+                         m2callbacks.m_open(options, interpolate='fast'))
     filemenu.add_separator()
     filemenu.add_command(label="Set project name",
                          command=lambda:

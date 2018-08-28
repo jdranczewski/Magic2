@@ -107,7 +107,7 @@ def m_save(options):
 
 
 # This function reads data seaved with m_save
-def m_open(options):
+def m_open(options, interpolate = None):
     if (options.objects['background']['canvas'] is not None or options.objects['plasma']['canvas'] is not None) and not mb.askokcancel("Discard data?", "Discard current data? Opening an .m2 file will overwrite any data you are currently working on."):
         return False
     filename = fd.askopenfile(filetypes=[("Magic2 files", "*.m2")])
@@ -159,6 +159,18 @@ def m_open(options):
                 options.conserve_limits = False
                 options.mode = "plasma_fringes"
                 set_mode(options)
+            # Allow for automatic interpolation of the just-loaded
+            # interfererograms
+            if interpolate == "fast":
+                if dump[0] is not None:
+                    interpolate_fast(options, env='background')
+                if dump[3] is not None:
+                    interpolate_fast(options, env='plasma')
+            elif interpolate == "exact":
+                if dump[0] is not None:
+                    interpolate_exact(options, env='background')
+                if dump[3] is not None:
+                    interpolate_exact(options, env='plasma')
 
 
 # This dialog is used for exporting the graph as an image.
