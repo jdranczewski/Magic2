@@ -93,6 +93,7 @@ def m_save(options):
             dump.append(None)
             dump.append(None)
             dump.append(None)
+        dump.append(options.offset)
         dump.append(options.namecore)
         dump.append(options.resolution)
         dump.append(options.depth)
@@ -142,6 +143,7 @@ def m_open(options, interpolate = None):
                     options.subtracted = None
                     options.density = None
             # Set the shot options
+            options.offset = dump[-6]
             options.namecore = dump[-5]
             options.status.set_name_label(options.namecore)
             options.resolution = dump[-4]
