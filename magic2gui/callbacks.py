@@ -798,3 +798,20 @@ def cosine(options):
         options.mode = "cosine_graph"
     else:
         mb.showinfo("Open a map", "Taking the cosine is possible only for interpolated phase maps.")
+
+
+class AboutDialog(m2dialog.Dialog):
+    def body(self, master):
+        photo = Tk.PhotoImage(file="logo_s.png")
+        logo = Tk.Label(master, image=photo)
+        logo.photo = photo
+        logo.pack()
+        label = Tk.Label(master, text="This software was created by Jakub Dranczewski during a UROP in 2018.\nIt is based on concepts from Magic, which was created by George.\n\nYou can contact me on jbd17@ic.ac.uk or (as I inevitably loose either the whole email or the 17) jakub.dranczewski@gmail.com")
+        label.pack()
+
+    def buttonbox(self):
+        pass
+
+
+def about(options):
+    AboutDialog(options.root)

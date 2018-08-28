@@ -171,6 +171,9 @@ def main():
     helpmenu.add_command(label="Display manual",
                          command=lambda:
                          webbrowser.open("help.html"))
+    helpmenu.add_command(label="About",
+                         command=lambda:
+                         m2callbacks.about(options))
 
     # Create the matplotlib widget
     options.mframe = m2mframe.GraphFrame(root, bind_keys=True, show_toolbar=True)
