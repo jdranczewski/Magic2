@@ -144,13 +144,13 @@ def m_open(options, interpolate = None):
                     options.subtracted = None
                     options.density = None
             # Set the shot options
-            options.offset = dump[-6]
-            options.namecore = dump[-5]
+            options.offset = dump[6]
+            options.namecore = dump[7]
             options.status.set_name_label(options.namecore)
-            options.resolution = dump[-4]
-            options.depth = dump[-3]
-            options.wavelength = dump[-2]
-            options.double = dump[-1]
+            options.resolution = dump[8]
+            options.depth = dump[9]
+            options.wavelength = dump[10]
+            options.double = dump[11]
             options.status.set("Done", 100)
             # If data is available for either background or plasma fringes,
             # display them
