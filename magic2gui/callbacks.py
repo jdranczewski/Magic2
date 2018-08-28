@@ -8,6 +8,7 @@ import pickle
 import gzip
 import os
 from matplotlib.pyplot import cm
+import matplotlib.ticker as ticker
 
 import magic2gui.dialog as m2dialog
 import magic2.graphics as m2graphics
@@ -435,10 +436,9 @@ def set_mode(options):
     elif key[0] == 'density':
         options.imshow = options.ax.imshow(options.density, cmap=options.cmap)
         # Adjust the tick labels to be in milimeters
-        ticks = options.ax.xaxis.get_majorticklocs()
-        options.ax.xaxis.set_ticklabels(ticks/options.resolution)
-        ticks = options.ax.yaxis.get_majorticklocs()
-        options.ax.yaxis.set_ticklabels(ticks/options.resolution)
+        ticks = ticker.FuncFormatter(lambda x, pos: '{:0.2f}'.format(x/options.resolution))
+        options.ax.xaxis.set_major_formatter(ticks)
+        options.ax.yaxis.set_major_formatter(ticks)
         # Add x and y axis labels
         options.ax.set_xlabel("Distance / $mm$")
         options.ax.set_ylabel("Distance / $mm$")
