@@ -55,7 +55,10 @@ class Options:
         self.cmap = m2graphics.cmap
         # An image of the two interpolations subtracted
         self.subtracted = None
+        # The offset variable allows setting a fringe shift of 0 at any point
         self.offset = 0
+        # The centre of the plasma density map
+        self.centre = [0, 0]
         # An image of the plasma density
         self.density = None
         # The colorbar
@@ -151,6 +154,9 @@ def main():
     processmenu.add_command(label="Set shot details",
                             command=lambda:
                             m2callbacks.shot_options(options))
+    processmenu.add_command(label="Set centre of the density map",
+                            command=lambda:
+                            m2callbacks.set_centre(options))
     processmenu.add_separator()
     processmenu.add_command(label="Cosine",
                             command=lambda:

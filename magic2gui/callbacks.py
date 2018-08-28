@@ -62,6 +62,7 @@ def open_image(options, env):
             # calculation again, as the data has changed
             options.subtracted = None
             options.density = None
+            options.offset = 0
             options.status.set("Done", 100)
 
 
@@ -450,8 +451,9 @@ def set_mode(options):
     elif key[0] == 'density':
         options.imshow = options.ax.imshow(options.density, cmap=options.cmap)
         # Adjust the tick labels to be in milimeters
-        ticks = ticker.FuncFormatter(lambda x, pos: '{:0.2f}'.format(x/options.resolution))
+        ticks = ticker.FuncFormatter(lambda x, pos: '{:0.2f}'.format((x - options.centre[1])/options.resolution))
         options.ax.xaxis.set_major_formatter(ticks)
+        ticks = ticker.FuncFormatter(lambda y, pos: '{:0.2f}'.format((y - options.centre[0])/options.resolution))
         options.ax.yaxis.set_major_formatter(ticks)
         # Add x and y axis labels
         options.ax.set_xlabel("Distance / $mm$")
@@ -583,22 +585,22 @@ def subtract(options):
         # Subtract the interferograms, masking them with the user-defined mask,
         # as well as the regions that couldn't be interpolated for both
         # background and plasma images
-        try:
-            options.subtracted = sp.ma.masked_where(
-                sp.logical_or(sp.logical_or(
-                    options.objects['plasma']['canvas'].mask == False,
-                    options.objects['plasma']['canvas'].interpolated == -1024.0),
-                    options.objects['background']['canvas'].interpolated == -1024.0
-                ),
-                options.objects['background']['canvas'].interpolated
-                - options.objects['plasma']['canvas'].interpolated
-            )
-            # Let set_mode do the rendering
-            options.mode = "subtracted_graph"
-            set_mode(options)
-            return True
-        except ValueError:
-            mb.showinfo("Wrong shape", "The shapes of the background and plasma images are different ({} and {}). They need to be the same for the subtraction to be performed!".format(options.objects['background']['canvas'].interpolated.shape, options.objects['plasma']['canvas'].interpolated.shape))
+        # try:
+        options.subtracted = sp.ma.masked_where(
+            sp.logical_or(sp.logical_or(
+                options.objects['plasma']['canvas'].mask == False,
+                options.objects['plasma']['canvas'].interpolated == -1024.0),
+                options.objects['background']['canvas'].interpolated == -1024.0
+            ),
+            options.objects['background']['canvas'].interpolated
+            - options.objects['plasma']['canvas'].interpolated
+        )
+        # Let set_mode do the rendering
+        options.mode = "subtracted_graph"
+        set_mode(options)
+        return True
+        # except ValueError:
+        #     mb.showinfo("Wrong shape", "The shapes of the background and plasma images are different ({} and {}). They need to be the same for the subtraction to be performed!".format(options.objects['background']['canvas'].interpolated.shape, options.objects['plasma']['canvas'].interpolated.shape))
 
 
 # This dialog allows the user to set the shift that should be normalised
@@ -795,6 +797,28 @@ def plasma_density(options):
         # Let set_mode render the map
         options.mode = "density_graph"
         set_mode(options)
+
+
+# Event handler for setting the centre of the density map
+def onclick(event, options, bind):
+    options.centre = [event.ydata, event.xdata]
+    print(options.centre)
+    options.fig.canvas.mpl_disconnect(bind)
+    set_mode(options)
+
+# Set centre of the plasma density map
+def set_centre(options):
+    if options.mode == "density_graph":
+        ans = mb.askyesnocancel("Set centre?", "Press 'Yes' and then click anywhere on the graph to set the centre of the density map.\n\n"
+                                "Press 'No' to reset the centre to [0, 0].")
+        if ans:
+            bind = options.fig.canvas.mpl_connect('button_press_event',
+                                        lambda event: onclick(event, options, bind))
+        elif ans is not None:
+            options.centre = [0, 0]
+            set_mode(options)
+    else:
+        mb.showinfo("Not in plasma density mode", "You need to be in the plasma density map mode to set the centre of that map.")
 
 
 # Take the cosine of a phase map. It should look very similar to the picture
