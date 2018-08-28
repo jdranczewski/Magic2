@@ -30,6 +30,16 @@ h3 {
 <h1>Magic 2 - the manual</h1>
 <div id="contents">
   <h2>Table of contents</h2>
+  <ul>
+    <li><a href="#h2_introduction">Introduction</a></li>
+    <li><a href="#h2_basics">Basics of the interface</a></li>
+    <li><a href="#h2_fringes">Working with traced interferograms</a></li>
+    <li><a href="#h2_interpolation">Interpolation</a></li>
+    <li><a href="#h2_subtract_plasma">Subtraction and plasma density calculation</a></li>
+    <li><a href="#h2_export">Exporting</a></li>
+    <li><a href="#h2_other_operations">Other operations</a></li>
+    <li><a href="#h2_saving">.m2 - Magic2's very own file format</a></li>
+  </ul>
 </div>
 
 <h2 id="h2_introduction">Introduction</h2>
@@ -85,6 +95,17 @@ You can open a fringe image either by using the File menu, or by clicking the
 corresponding option in <a href="#h3_sidebar">the sidebar</a>. A dialog will
 open, prompting you to choose a .png file. It will then be processed, and the
 fringes will be displayed in <a href="#h3_graphing_area">the graphing area</a>.
+</p>
+<h3 id="h3_project_name">Project name</h3>
+<p>
+A name for the project will be automatically extracted from the filename of the
+.png you opened by cutting off the last word. You can see the result on the left
+side of <a href="#h3_sidebar">the sidebar</a>. You can also change the project
+name in the File <a href="#h3_menu">menu</a>.
+</p>
+<p>
+The project name is used as a name template when <a>exporting the data</a> or <a
+href="#h2_saving">saving .m2 files</a>.
 </p>
 <h3 id="h3_labelling">Labelling fringes</h3>
 <p>
@@ -170,6 +191,24 @@ shift). You can always set those options by going to <b>Process -> Set shot
 details</b>.
 </p>
 
+<h2 id="h2_export">Exporting</a>
+<h3 id="h2_data_export">Exporting data</h3>
+<p>
+You can export the data you are currently viewing in the <a
+href="#h3_graphing_area">graphing area</a> at any point by using the "Export the
+current view's data" option in the File <a href="#h3_menu">menu</a>. This will
+give you an option to choose the desired file location and name. The default
+format is .csv. The areas that are masked out (or not interpolated) are
+indicated with the string 'nan'.
+</p>
+<h3 id="h3_saving_figures">Saving figures</h3>
+<p>
+You can save the graph you are currently viewing by using the "Save the
+graph as an image" option in the File <a href="#h3_menu">menu</a>. A prompt will
+come up asking you to put in a dpi, effectively setting the images resolution.
+You can then choose a location for your file.
+</p>
+
 <h2 id="h2_other_operations">Other operations</h2>
 <h3 id="h3_invert">Invert</h3>
 <p>
@@ -185,6 +224,30 @@ view. This can be then compared to the initial interferogram used for tracing.
 <p>
 The process takes into account the 'double' setting in <a
 href="#h3_plasma_density"> the shot options</a>.
+</p>
+
+<h2 id="h2_saving">.m2 - Magic2's very own file format</h2>
+<p>
+.m2 files are envisioned as a simple way to exchange labelled interferograms in
+a small file (usually around 200KB). You can send an .m2 file to someone, and
+they will be able to open it and get exactly the same data you are working on.
+</p>
+<h3 id="h3_whats_in_m2">What's in an .m2 file?</h3>
+<p>
+The file contains two Boolean arrays for both background and plasma
+interferograms (one for the fringes and one for the user-defined mask), together
+with the fringes' phases. It also
+contains the <a href="#h3_project_name">project's name</a> and
+<a href="#h3_plasma_density">shot details</a>.
+</p>
+<h3 id="h3_openin_m2">Opening an .m2 file</h3>
+<p>
+To open an .m2 file, choose a suitable option from the File <a
+href="#h3_menu">menu</a>. You can just open an .m2 file, which will give you the
+labelled fringe data (note that it will take a few seconds for Magic2 to process
+the file, just like with <a href="#h3_opening_fringes">opening .png files</a>),
+or choose to interpolate the data too (you have a choice of a fast or exact
+interpolation, more on this topic <a href="#h2_interpolation">here</a>).
 </p>
 </div>
 </body>
