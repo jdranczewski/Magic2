@@ -610,12 +610,15 @@ class ZeroDialog(m2dialog.Dialog):
 
     def body(self, master):
         # Create a simple body
-        ttk.Label(master, text="Set the value of fringe shift that should be normalised to be zero.\nIf you choose the automatic (Auto) option,\nMagic2 will take the lowest fringe shift and set that as the zero point.\n\n", anchor=Tk.CENTER).grid(row=0, columnspan=2)
-        ttk.Label(master, text="Zero point:").grid(row=1)
+        ttk.Label(master, text="Set the value of fringe shift that should be normalised to be zero.\n\n"
+                               "If you choose the automatic (Auto) option, Magic2 will take the lowest\n"
+                               "fringe shift and set that as the zero point.\n",
+                               anchor=Tk.CENTER).grid(row=0, columnspan=2)
+        ttk.Label(master, text="Zero point:  ").grid(row=1, sticky=Tk.E)
         self.e = Tk.Spinbox(master, from_=-1024.0, to=1024.0, increment=1.0)
         self.e.delete(0, Tk.END)
         self.e.insert(Tk.END, self.options.offset)
-        self.e.grid(row=1, column=1)
+        self.e.grid(row=1, column=1, sticky=Tk.W)
         return self.e
 
     # Create the buttons
