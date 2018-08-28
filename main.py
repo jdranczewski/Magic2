@@ -55,6 +55,7 @@ class Options:
         self.cmap = m2graphics.cmap
         # An image of the two interpolations subtracted
         self.subtracted = None
+        self.offset = 0
         # An image of the plasma density
         self.density = None
         # The colorbar

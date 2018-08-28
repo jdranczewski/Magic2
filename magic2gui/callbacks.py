@@ -196,7 +196,7 @@ class NameDialog(m2dialog.Dialog):
         self.result = self.e.get()
 
 
-# This function exports the current graph as an image
+# This function sets the project's name
 def set_namecore(options):
     dialog = NameDialog(options.root, options, title="Set name")
     if dialog.result is not None:
@@ -437,7 +437,7 @@ def set_mode(options):
         # note: this function works on the assumption that the things it is
         # attempting to show have been generated previously. It is the burden
         # of event handlers to check whether this is corrct
-        options.imshow = options.ax.imshow(options.subtracted, cmap=options.cmap)
+        options.imshow = options.ax.imshow(options.subtracted-options.offset, cmap=options.cmap)
         # Add a colorbar using its own subplot
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         # Unhide the colorbar's subplot
@@ -489,6 +489,7 @@ def lower_width(options):
                 m2graphics.clear_visual(options.objects['plasma']['canvas'])
                 m2graphics.render_fringes(options.objects['plasma']['fringes'], options.objects['plasma']['canvas'], width=options.width_var.get())
             set_mode(options)
+
 
 def higher_width(options):
     if options.mode is None or options.mode.split("_")[1] != "fringes":
@@ -598,72 +599,69 @@ def subtract(options):
             mb.showinfo("Wrong shape", "The shapes of the background and plasma images are different ({} and {}). They need to be the same for the subtraction to be performed!".format(options.objects['background']['canvas'].interpolated.shape, options.objects['plasma']['canvas'].interpolated.shape))
 
 
-# //Functions related to setting the zero fringe shift point:
+# This dialog allows the user to set the shift that should be normalised
+# to be zero.
+class ZeroDialog(m2dialog.Dialog):
+    def __init__(self, parent, options, title=None):
+        # We need to save the options, which would not be accepted as an
+        # argument by the original Dialog class, so we override __init__
+        self.options = options
+        m2dialog.Dialog.__init__(self, parent, title)
 
-# A handler for when the graph is clicked
-def set_zero_onclick(event, options, control, binds):
-    # get out of the zero-setting mode if the display mode has changed
-    if options.mode != "subtracted_graph":
-        for bind in binds:
-            options.fig.canvas.mpl_disconnect(bind)
-        options.status.set("Done", 100)
-    elif control[0] and options.subtracted[int(event.ydata), int(event.xdata)] != "--":
-        # Take the value under the mouse cursor and offset the subtracted
-        # data by it
-        options.subtracted = options.subtracted - options.subtracted[int(event.ydata), int(event.xdata)]
-        set_mode(options)
+    def body(self, master):
+        # Create a simple body
+        ttk.Label(master, text="Set the value of fringe shift that should be normalised to be zero.\nIf you choose the automatic (Auto) option,\nMagic2 will take the lowest fringe shift and set that as the zero point.\n\n", anchor=Tk.CENTER).grid(row=0, columnspan=2)
+        ttk.Label(master, text="Zero point:").grid(row=1)
+        self.e = Tk.Spinbox(master, from_=-1024.0, to=1024.0, increment=1.0)
+        self.e.delete(0, Tk.END)
+        self.e.insert(Tk.END, self.options.offset)
+        self.e.grid(row=1, column=1)
+        return self.e
 
+    # Create the buttons
+    def buttonbox(self):
+        box = Tk.Frame(self)
+        w = ttk.Button(box, text="OK", width=10, command=self.ok,
+                       default=Tk.ACTIVE)
+        w.pack(side=Tk.LEFT, padx=5, pady=5)
+        w = ttk.Button(box, text="Auto", width=10, command=self.auto)
+        w.pack(side=Tk.LEFT, padx=5, pady=5)
+        w = ttk.Button(box, text="Cancel", width=10, command=self.cancel)
+        w.pack(side=Tk.LEFT, padx=5, pady=5)
+        self.bind("<Return>", self.ok)
+        self.bind("<Escape>", self.cancel)
+        box.pack()
 
-# Two handlers for keypresses
-def set_zero_keypress(event, options, control, binds):
-    # This keeps track of the control key being pressed
-    if event.key == 'control':
-        control[0] = True
-    # This goes out of the zero-zero seting mode when esc is pressed
-    elif event.key == 'escape':
-        for bind in binds:
-            options.fig.canvas.mpl_disconnect(bind)
-        options.status.set("Done", 100)
+    def auto(self):
+        self.result = "auto"
+        self.withdraw()
+        self.update_idletasks()
+        self.cancel()
 
+    def validate(self):
+        try:
+            # All the inputs should be floats or integers
+            float(self.e.get())
+            return 1
+        except ValueError:
+            mb.showerror("Error", "The zero value needs to be a float or an integer!")
+            return 0
 
-def set_zero_keyrelease(event, control):
-    if event.key == 'control':
-        control[0] = False
+    def apply(self):
+        # Save the value from the text field as .result
+        self.result = float(self.e.get())
 
 
 # The main function for zero-setting
 def set_zero(options):
     # Check if mode is correct
     if options.mode == "subtracted_graph":
-        ans =  mb.askyesnocancel("Set zero shift point", "Would you like to set the zero shift point automatically? This will set the smallest shift (possibly a negative one) as the zero shift point, essentialy marking the place as having zero plasma density.\n\nAlternatively, you can press 'No' to enter manual mode. Ctrl+click anywhere on the graph to set the point as having zero fringe shift.\n\nTo reset the zero point, recalculate the subtraction.")
-        # A choice is offered here. The zero point can be set automatically
-        # or by hand
-        if ans:
-            # Offset the subtracted data by its minimum
-            options.subtracted = options.subtracted - sp.amin(options.subtracted)
-            set_mode(options)
-        elif ans is not None:
-            # Add some event bindings for the manual mode
-            options.status.set("Press esc to finish setting zero shift point", 0)
-            # Making 'control' a list is a sneaky way of passing by reference
-            control = [False]
-            binds = []
-            b0 = options.fig.canvas.mpl_connect('button_press_event',
-                                                lambda event: set_zero_onclick(
-                                                    event, options, control, binds))
-            binds.append(b0)
-            b1 = options.fig.canvas.mpl_connect('key_press_event',
-                                                lambda event:
-                                                    set_zero_keypress(event,
-                                                                      options,
-                                                                      control,
-                                                                      binds))
-            binds.append(b1)
-            b2 = options.fig.canvas.mpl_connect('key_release_event',
-                                                lambda event:
-                                                    set_zero_keyrelease(event,
-                                                                        control))
-            binds.append(b2)
+        dialog = ZeroDialog(options.root, options, title="Choose zero point")
+        if dialog.result == "auto":
+            options.offset = sp.amin(options.subtracted)
+        elif dialog.result is not None:
+            options.offset = dialog.result
+        set_mode(options)
     else:
         mb.showinfo("Not in subtracted mode", "You need to be in the subtracted map mode to set the zero shift point.")
 
@@ -785,7 +783,7 @@ def plasma_density(options):
         else:
             multiplier = 1
         # Calculate the density map
-        options.density = (multiplier * options.subtracted * 8
+        options.density = (multiplier * (options.subtracted-options.offset) * 8
                            * (sp.pi * c / e)**2 * me * e0 / d / wavelength)
         # Convert to centimetres cubed
         options.density /= 1e6
