@@ -1,6 +1,7 @@
 import scipy as sp
 import scipy.special as special
 from . import graphics as m2graphics
+from matplotlib.animation import FuncAnimation
 
 
 # This class stores some data about the current labelling operation
@@ -18,7 +19,7 @@ class Labeller():
 
 # This function is used to handle the user pressing a mouse key
 # while in the graphing area
-def onclick(event, labeller, line_plot, temp_line, fringes, canvas, fig, ax):
+def onclick(event, labeller, line_plot, temp_line, fringes, canvas, fig, ax, ani):
     # If this was a single click within the graphing area, add a point
     # to the line
     if labeller.control and not event.dblclick and event.xdata:
@@ -35,6 +36,8 @@ def onclick(event, labeller, line_plot, temp_line, fringes, canvas, fig, ax):
             line_plot.set_data([], [])
             temp_line.set_data([], [])
             line_plot.figure.canvas.draw()
+        if ani is not None:
+            ani._blit_cache.clear()
 
 
 # This uses the set of points chosen by the user to label the fringes
@@ -134,7 +137,6 @@ def onmove(event, labeller, line_plot, temp_line, ax):
         # Note that we are not actually modifying labeller.points here
         points = sp.array([labeller.points[-1], [event.ydata, event.xdata]])
         temp_line.set_data(points[:, 1], points[:, 0])
-        line_plot.figure.canvas.draw_idle()
 
 
 # Store whether the control key is pressed
@@ -160,15 +162,20 @@ def onrelease(event, labeller):
         labeller.control = False
 
 
+def update(num, temp_line, master):
+    # print(temp_line.get_data())
+    return temp_line,
+
+
 # This sets up the labeller object, the line that is drawn, as well as
 # attaches all the event handlers
-def label(fringes, canvas, fig, ax, direction_var=None):
-    labeller = Labeller(direction_var)
+def label(fringes, canvas, fig, ax, master=None, options=None):
+    labeller = Labeller(options=options)
     line_plot, = ax.plot([], [], "--")
-    temp_line, = ax.plot([], [], "--")
+    temp_line, = ax.plot([], [], "--", animated=True)
     b0 = fig.canvas.mpl_connect('button_press_event',
                                 lambda event: onclick(event, labeller, line_plot, temp_line,
-                                                 fringes, canvas, fig, ax))
+                                                 fringes, canvas, fig, ax, labeller.ani))
     b1 = fig.canvas.mpl_connect('motion_notify_event',
                                 lambda event: onmove(event, labeller, line_plot, temp_line, ax))
     b2 = fig.canvas.mpl_connect('key_press_event',
@@ -176,10 +183,14 @@ def label(fringes, canvas, fig, ax, direction_var=None):
     b3 = fig.canvas.mpl_connect('key_release_event',
                                 lambda event: onrelease(event, labeller))
     labeller.binds = [b0, b1, b2, b3]
+    labeller.ani = FuncAnimation(fig, update, interval=100, fargs=(temp_line, master), blit=True)
+    fig.canvas.draw()
+    print(labeller.ani)
     return labeller
 
 
 def stop_labelling(fig, labeller):
+    labeller.ani._stop()
     for bind in labeller.binds:
         fig.canvas.mpl_disconnect(bind)
     del labeller

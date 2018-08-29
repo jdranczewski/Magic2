@@ -408,6 +408,7 @@ def set_mode(options):
     options.ax.clear()
     if options.labeller is not None:
         m2labelling.stop_labelling(options.fig, options.labeller)
+        options.labeller = None
     if options.cbar is not None:
         # If there exists a colorbar, clean it and hide it
         options.mframe.cax.clear()
@@ -425,7 +426,7 @@ def set_mode(options):
         canvas.imshow.set_clim(fringes.min, fringes.max)
         options.labeller = m2labelling.label(fringes, canvas,
                                              options.fig, options.ax,
-                                             options)
+                                             options=options)
     elif key[1] == 'map':
         canvas = options.objects[key[0]]['canvas']
         # The map image is masked where there is no interpolation data and
