@@ -28,7 +28,8 @@ def open_image(options, env):
         pass
     else:
         # Display a window for chooisng the file
-        filename = fd.askopenfile(filetypes=[("PNG files", "*.png;*.PNG")])
+        filename = fd.askopenfile(filetypes=[("PNG files", "*.png;*.PNG")],
+                                  title="Open "+env+" interferogram")
         if filename is not None:
             options.status.set("Reading the file", 0)
             if not options.ncmanual:
