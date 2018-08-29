@@ -15,6 +15,8 @@ class Labeller():
         self.binds = []
         # The app's options
         self.options = options
+        # The animator object
+        self.ani = None
 
 
 # This function is used to handle the user pressing a mouse key
@@ -167,8 +169,17 @@ def onrelease(event, labeller):
 
 # This update function is used in the animation. It doesn't do stuff, but
 # it returns the objects that need to be redrawn. i is the frame number
-def ani_update(i, line_plot, temp_line):
-    return line_plot, temp_line
+def ani_update(i, line_plot, temp_line, imshow, prev_lim, ax, labeller):
+    if prev_lim == [ax.get_xlim(), ax.get_ylim()]:
+        return line_plot, temp_line
+    else:
+        # If the limits change, do a redraw. This is slooow, but actually works
+        # (the slight overhead with scrolling is worth it, as we get
+        # significant improvements when drawing lines)
+        prev_lim[0], prev_lim[1] = ax.get_xlim(), ax.get_ylim()
+        labeller.ani._blit_cache.clear()
+        imshow.figure.canvas.draw()
+        return line_plot, temp_line
 
 
 # This sets up the labeller object, the line that is drawn, as well as
@@ -190,8 +201,10 @@ def label(fringes, canvas, fig, ax, master=None, options=None, imshow=None):
     # Create an animation function that updates the state of the line
     # that is being drawn. blit is used to speed things up. It's cache
     # has to be cleared when fringe labelling is changed
+    prev_lim = [ax.get_xlim(), ax.get_ylim()]
     labeller.ani = FuncAnimation(fig, ani_update, interval=100,
-                                 fargs=(line_plot, temp_line), blit=True)
+                                 fargs=(line_plot, temp_line, imshow,
+                                        prev_lim, ax, labeller), blit=True)
     # This is needed for the animation to start.
     # Because reasons
     # I guess
