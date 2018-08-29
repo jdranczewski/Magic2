@@ -72,7 +72,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
     # overhead here)
     fix_indices = []
     # Get the increment from a radio button variable if available
-    if labeller.options.direction_var is not None:
+    if labeller.options is not None:
         increment = labeller.options.direction_var.get()
     else:
         increment = 1
@@ -115,7 +115,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
             prev_index = index
     # If the maximum phase reached in this labelling series is higher than
     # the one stored, update that. This is used to update the colour range
-    if labeller.options.direction_var is not None:
+    if labeller.options is not None:
         if labeller.options.direction_var.get() == 1:
             if phase > fringes.max:
                 fringes.max = phase
@@ -126,7 +126,11 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         if phase > fringes.max:
             fringes.max = phase
     # Render and show the changed fringes
-    m2graphics.render_fringes(fringes, canvas, width=labeller.options.width_var.get(), indices=fix_indices)
+    if labeller.options is not None:
+        width = labeller.options.width_var.get()
+    else:
+        width = 3
+    m2graphics.render_fringes(fringes, canvas, width=width, indices=fix_indices)
     canvas.imshow.set_data(sp.ma.masked_where(canvas.fringe_phases_visual == -1024, canvas.fringe_phases_visual))
     canvas.imshow.set_clim(fringes.min, fringes.max)
     canvas.imshow.figure.canvas.draw_idle()
