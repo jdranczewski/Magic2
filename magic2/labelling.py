@@ -27,7 +27,6 @@ def onclick(event, labeller, line_plot, temp_line, fringes, canvas, fig, ax, ani
         # We use the points list to draw a line on the graph
         points = sp.array(labeller.points)
         line_plot.set_data(points[:, 1], points[:, 0])
-        line_plot.figure.canvas.draw()
         # If the event was a double click, label the fringes and clear the data
         # related to the current labelling operation
         if event.button == 3:
@@ -35,9 +34,9 @@ def onclick(event, labeller, line_plot, temp_line, fringes, canvas, fig, ax, ani
             labeller.points = []
             line_plot.set_data([], [])
             temp_line.set_data([], [])
-            line_plot.figure.canvas.draw()
-        if ani is not None:
+            # This clears the blit cache and redraws the figure
             ani._blit_cache.clear()
+            fig.canvas.draw()
 
 
 # This uses the set of points chosen by the user to label the fringes
@@ -162,16 +161,17 @@ def onrelease(event, labeller):
         labeller.control = False
 
 
-def update(num, temp_line, master):
-    # print(temp_line.get_data())
-    return temp_line,
+# This update function is used in the animation. It doesn't do stuff, but
+# it returns the objects that need to be redrawn. i is the frame number
+def ani_update(i, line_plot, temp_line):
+    return line_plot, temp_line
 
 
 # This sets up the labeller object, the line that is drawn, as well as
 # attaches all the event handlers
-def label(fringes, canvas, fig, ax, master=None, options=None):
+def label(fringes, canvas, fig, ax, master=None, options=None, imshow=None):
     labeller = Labeller(options=options)
-    line_plot, = ax.plot([], [], "--")
+    line_plot, = ax.plot([], [], "--", animated=True)
     temp_line, = ax.plot([], [], "--", animated=True)
     b0 = fig.canvas.mpl_connect('button_press_event',
                                 lambda event: onclick(event, labeller, line_plot, temp_line,
@@ -183,9 +183,15 @@ def label(fringes, canvas, fig, ax, master=None, options=None):
     b3 = fig.canvas.mpl_connect('key_release_event',
                                 lambda event: onrelease(event, labeller))
     labeller.binds = [b0, b1, b2, b3]
-    labeller.ani = FuncAnimation(fig, update, interval=100, fargs=(temp_line, master), blit=True)
+    # Create an animation function that updates the state of the line
+    # that is being drawn. blit is used to speed things up. It's cache
+    # has to be cleared when fringe labelling is changed
+    labeller.ani = FuncAnimation(fig, ani_update, interval=100,
+                                 fargs=(line_plot, temp_line), blit=True)
+    # This is needed for the animation to start.
+    # Because reasons
+    # I guess
     fig.canvas.draw()
-    print(labeller.ani)
     return labeller
 
 
