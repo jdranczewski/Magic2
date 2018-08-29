@@ -86,10 +86,14 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         #      0##         0 - fringe
         #     ##0          # - line
         #    #  0
-        for index in canvas.fringe_indices[int(y[i])-1:int(y[i])+1, int(x[i])]:
-            # If a non-empty index found, use this and break
-            if index != -1:
-                break
+        try:
+            for index in canvas.fringe_indices[int(y[i])-1:int(y[i])+1, int(x[i])]:
+                # If a non-empty index found, use this and break
+                if index != -1:
+                    break
+        # In case we go out of range, just pass
+        except IndexError:
+            pass
         # If the index is not -1 and not the same as the previous one, assign
         # a calculated phase to a fringe
         if index >= 0 and index != prev_index:
