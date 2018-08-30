@@ -7,6 +7,7 @@ import magic2gui.status_bar as m2status_bar
 from matplotlib.pyplot import imread
 import pickle
 import webbrowser
+import ctypes
 
 
 # This is a way of getting global variables without actually using global
@@ -76,7 +77,15 @@ def main():
     # Create a root tkinter object and set its title
     options.root = root = Tk.Tk()
     root.wm_title("Magic2")
-    # Setting the icon doesn't work on Linux for some reason
+    # This is windows specific, but needed for the icon to show up
+    # in the taskbar. try/catch in case this is run on other platforms
+    try:
+        myappid = 'jdranczewski.magic2'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    except:
+        pass
+    # Setting the icon doesn't work on Linux for some reason, so we have
+    # a try/catch here again
     try:
         root.iconbitmap("magic2.ico")
     except:

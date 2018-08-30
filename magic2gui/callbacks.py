@@ -28,7 +28,8 @@ def open_image(options, env):
         pass
     else:
         # Display a window for chooisng the file
-        filename = fd.askopenfile(filetypes=[("PNG files", "*.png;*.PNG")])
+        filename = fd.askopenfile(filetypes=[("PNG files", "*.png;*.PNG")],
+                                  title="Open "+env+" interferogram")
         if filename is not None:
             options.status.set("Reading the file", 0)
             if not options.ncmanual:
@@ -46,6 +47,10 @@ def open_image(options, env):
                 options.subtracted = None
             # Create a canvas object
             canvas = options.objects[env]['canvas'] = m2graphics.Canvas(filename)
+            if canvas.error:
+                mb.showerror("File not opened", "There was an error while opening the image. Are you sure it's a .png?")
+                options.objects[env]['canvas'] = None
+                return False
             options.status.set("Looking for fringes", 33)
             # Extract fringe information from the file
             fringes = options.objects[env]['fringes'] = m2fringes.Fringes()
@@ -328,8 +333,6 @@ def set_colormap(options):
 
 # Handle the user choosing one of the radio buttons
 def show_radio(options):
-    # Give the focus back to the graph
-    options.mframe.canvas._tkcanvas.focus_set()
     # Store the mode info from the buttons
     key = options.show_var.get().split("_")
     # Set the buttons to the previous state, in case the user cancels
@@ -408,6 +411,7 @@ def set_mode(options):
     options.ax.clear()
     if options.labeller is not None:
         m2labelling.stop_labelling(options.fig, options.labeller)
+        options.labeller = None
     if options.cbar is not None:
         # If there exists a colorbar, clean it and hide it
         options.mframe.cax.clear()
@@ -425,7 +429,7 @@ def set_mode(options):
         canvas.imshow.set_clim(fringes.min, fringes.max)
         options.labeller = m2labelling.label(fringes, canvas,
                                              options.fig, options.ax,
-                                             options)
+                                             options=options, imshow=options.imshow)
     elif key[1] == 'map':
         canvas = options.objects[key[0]]['canvas']
         # The map image is masked where there is no interpolation data and
@@ -472,6 +476,8 @@ def set_mode(options):
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position
     options.show_var.set(options.mode)
+    # Give the focus back to the graph
+    options.mframe.canvas._tkcanvas.focus_set()
 
 
 # Decrease the width of the rendered fringes
@@ -845,7 +851,7 @@ class AboutDialog(m2dialog.Dialog):
         logo = Tk.Label(master, image=photo)
         logo.photo = photo
         logo.pack()
-        label = Tk.Label(master, text="This software was created by Jakub Dranczewski during a UROP in 2018.\nIt is based on concepts from Magic, which was created by George.\n\nYou can contact me on jbd17@ic.ac.uk or (as I inevitably loose either the whole email or the 17) jakub.dranczewski@gmail.com")
+        label = Tk.Label(master, text="This software was created by Jakub Dranczewski during a UROP in 2018.\nIt is based on concepts from Magic, which was created by George Swadling.\n\nYou can contact me on jbd17@ic.ac.uk or (as I inevitably loose either the whole email or the 17) jakub.dranczewski@gmail.com\n\nv1.1")
         label.pack()
 
     def buttonbox(self):

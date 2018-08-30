@@ -1,6 +1,7 @@
 import scipy as sp
 import scipy.special as special
 from . import graphics as m2graphics
+from matplotlib.animation import FuncAnimation
 
 
 # This class stores some data about the current labelling operation
@@ -14,11 +15,13 @@ class Labeller():
         self.binds = []
         # The app's options
         self.options = options
+        # The animator object
+        self.ani = None
 
 
 # This function is used to handle the user pressing a mouse key
 # while in the graphing area
-def onclick(event, labeller, line_plot, temp_line, fringes, canvas, fig, ax):
+def onclick(event, labeller, line_plot, temp_line, fringes, canvas, fig, ax, ani):
     # If this was a single click within the graphing area, add a point
     # to the line
     if labeller.control and not event.dblclick and event.xdata:
@@ -26,7 +29,6 @@ def onclick(event, labeller, line_plot, temp_line, fringes, canvas, fig, ax):
         # We use the points list to draw a line on the graph
         points = sp.array(labeller.points)
         line_plot.set_data(points[:, 1], points[:, 0])
-        line_plot.figure.canvas.draw()
         # If the event was a double click, label the fringes and clear the data
         # related to the current labelling operation
         if event.button == 3:
@@ -34,7 +36,9 @@ def onclick(event, labeller, line_plot, temp_line, fringes, canvas, fig, ax):
             labeller.points = []
             line_plot.set_data([], [])
             temp_line.set_data([], [])
-            line_plot.figure.canvas.draw()
+            # This clears the blit cache and redraws the figure
+            ani._blit_cache.clear()
+            fig.canvas.draw()
 
 
 # This uses the set of points chosen by the user to label the fringes
@@ -68,7 +72,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
     # overhead here)
     fix_indices = []
     # Get the increment from a radio button variable if available
-    if labeller.options.direction_var is not None:
+    if labeller.options is not None:
         increment = labeller.options.direction_var.get()
     else:
         increment = 1
@@ -84,10 +88,14 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         #      0##         0 - fringe
         #     ##0          # - line
         #    #  0
-        for index in canvas.fringe_indices[int(y[i])-1:int(y[i])+1, int(x[i])]:
-            # If a non-empty index found, use this and break
-            if index != -1:
-                break
+        try:
+            for index in canvas.fringe_indices[int(y[i])-1:int(y[i])+1, int(x[i])]:
+                # If a non-empty index found, use this and break
+                if index != -1:
+                    break
+        # In case we go out of range, just pass
+        except IndexError:
+            pass
         # If the index is not -1 and not the same as the previous one, assign
         # a calculated phase to a fringe
         if index >= 0 and index != prev_index:
@@ -107,7 +115,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
             prev_index = index
     # If the maximum phase reached in this labelling series is higher than
     # the one stored, update that. This is used to update the colour range
-    if labeller.options.direction_var is not None:
+    if labeller.options is not None:
         if labeller.options.direction_var.get() == 1:
             if phase > fringes.max:
                 fringes.max = phase
@@ -118,7 +126,11 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         if phase > fringes.max:
             fringes.max = phase
     # Render and show the changed fringes
-    m2graphics.render_fringes(fringes, canvas, width=labeller.options.width_var.get(), indices=fix_indices)
+    if labeller.options is not None:
+        width = labeller.options.width_var.get()
+    else:
+        width = 3
+    m2graphics.render_fringes(fringes, canvas, width=width, indices=fix_indices)
     canvas.imshow.set_data(sp.ma.masked_where(canvas.fringe_phases_visual == -1024, canvas.fringe_phases_visual))
     canvas.imshow.set_clim(fringes.min, fringes.max)
     canvas.imshow.figure.canvas.draw_idle()
@@ -134,7 +146,7 @@ def onmove(event, labeller, line_plot, temp_line, ax):
         # Note that we are not actually modifying labeller.points here
         points = sp.array([labeller.points[-1], [event.ydata, event.xdata]])
         temp_line.set_data(points[:, 1], points[:, 0])
-        line_plot.figure.canvas.draw_idle()
+        # The FuncAnimation will render this, we just update data here
 
 
 # Store whether the control key is pressed
@@ -160,15 +172,28 @@ def onrelease(event, labeller):
         labeller.control = False
 
 
+# This update function is used in the animation. It doesn't do stuff, but
+# it returns the objects that need to be redrawn. i is the frame number
+def ani_update(i, line_plot, temp_line, imshow, prev_lim, ax, labeller):
+    if prev_lim != [ax.get_xlim(), ax.get_ylim()]:
+        # If the limits change, do a redraw. This is slooow, but actually works
+        # (the slight overhead with scrolling is worth it, as we get
+        # significant improvements when drawing lines)
+        prev_lim[0], prev_lim[1] = ax.get_xlim(), ax.get_ylim()
+        labeller.ani._blit_cache.clear()
+        imshow.figure.canvas.draw()
+    return line_plot, temp_line
+
+
 # This sets up the labeller object, the line that is drawn, as well as
 # attaches all the event handlers
-def label(fringes, canvas, fig, ax, direction_var=None):
-    labeller = Labeller(direction_var)
-    line_plot, = ax.plot([], [], "--")
-    temp_line, = ax.plot([], [], "--")
+def label(fringes, canvas, fig, ax, master=None, options=None, imshow=None):
+    labeller = Labeller(options=options)
+    line_plot, = ax.plot([], [], "--", animated=True)
+    temp_line, = ax.plot([], [], "--", animated=True)
     b0 = fig.canvas.mpl_connect('button_press_event',
                                 lambda event: onclick(event, labeller, line_plot, temp_line,
-                                                 fringes, canvas, fig, ax))
+                                                 fringes, canvas, fig, ax, labeller.ani))
     b1 = fig.canvas.mpl_connect('motion_notify_event',
                                 lambda event: onmove(event, labeller, line_plot, temp_line, ax))
     b2 = fig.canvas.mpl_connect('key_press_event',
@@ -176,10 +201,22 @@ def label(fringes, canvas, fig, ax, direction_var=None):
     b3 = fig.canvas.mpl_connect('key_release_event',
                                 lambda event: onrelease(event, labeller))
     labeller.binds = [b0, b1, b2, b3]
+    # Create an animation function that updates the state of the line
+    # that is being drawn. blit is used to speed things up. It's cache
+    # has to be cleared when fringe labelling is changed
+    prev_lim = [ax.get_xlim(), ax.get_ylim()]
+    labeller.ani = FuncAnimation(fig, ani_update, interval=100,
+                                 fargs=(line_plot, temp_line, imshow,
+                                        prev_lim, ax, labeller), blit=True)
+    # This is needed for the animation to start.
+    # Because reasons
+    # I guess
+    fig.canvas.draw()
     return labeller
 
 
 def stop_labelling(fig, labeller):
+    labeller.ani._stop()
     for bind in labeller.binds:
         fig.canvas.mpl_disconnect(bind)
     del labeller
