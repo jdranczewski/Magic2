@@ -146,6 +146,7 @@ def onmove(event, labeller, line_plot, temp_line, ax):
         # Note that we are not actually modifying labeller.points here
         points = sp.array([labeller.points[-1], [event.ydata, event.xdata]])
         temp_line.set_data(points[:, 1], points[:, 0])
+        # The FuncAnimation will render this, we just update data here
 
 
 # Store whether the control key is pressed
@@ -174,16 +175,14 @@ def onrelease(event, labeller):
 # This update function is used in the animation. It doesn't do stuff, but
 # it returns the objects that need to be redrawn. i is the frame number
 def ani_update(i, line_plot, temp_line, imshow, prev_lim, ax, labeller):
-    if prev_lim == [ax.get_xlim(), ax.get_ylim()]:
-        return line_plot, temp_line
-    else:
+    if prev_lim != [ax.get_xlim(), ax.get_ylim()]:
         # If the limits change, do a redraw. This is slooow, but actually works
         # (the slight overhead with scrolling is worth it, as we get
         # significant improvements when drawing lines)
         prev_lim[0], prev_lim[1] = ax.get_xlim(), ax.get_ylim()
         labeller.ani._blit_cache.clear()
         imshow.figure.canvas.draw()
-        return line_plot, temp_line
+    return line_plot, temp_line
 
 
 # This sets up the labeller object, the line that is drawn, as well as
