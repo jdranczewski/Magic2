@@ -329,8 +329,6 @@ def set_colormap(options):
 
 # Handle the user choosing one of the radio buttons
 def show_radio(options):
-    # Give the focus back to the graph
-    options.mframe.canvas._tkcanvas.focus_set()
     # Store the mode info from the buttons
     key = options.show_var.get().split("_")
     # Set the buttons to the previous state, in case the user cancels
@@ -474,6 +472,8 @@ def set_mode(options):
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position
     options.show_var.set(options.mode)
+    # Give the focus back to the graph
+    options.mframe.canvas._tkcanvas.focus_set()
 
 
 # Decrease the width of the rendered fringes
