@@ -847,7 +847,7 @@ class AboutDialog(m2dialog.Dialog):
         logo = Tk.Label(master, image=photo)
         logo.photo = photo
         logo.pack()
-        label = Tk.Label(master, text="This software was created by Jakub Dranczewski during a UROP in 2018.\nIt is based on concepts from Magic, which was created by George.\n\nYou can contact me on jbd17@ic.ac.uk or (as I inevitably loose either the whole email or the 17) jakub.dranczewski@gmail.com")
+        label = Tk.Label(master, text="This software was created by Jakub Dranczewski during a UROP in 2018.\nIt is based on concepts from Magic, which was created by George.\n\nYou can contact me on jbd17@ic.ac.uk or (as I inevitably loose either the whole email or the 17) jakub.dranczewski@gmail.com\n\nv1.1")
         label.pack()
 
     def buttonbox(self):
