@@ -47,6 +47,10 @@ def open_image(options, env):
                 options.subtracted = None
             # Create a canvas object
             canvas = options.objects[env]['canvas'] = m2graphics.Canvas(filename)
+            if canvas.error:
+                mb.showerror("File not opened", "There was an error while opening the image. Are you sure it's a .png?")
+                options.objects[env]['canvas'] = None
+                return False
             options.status.set("Looking for fringes", 33)
             # Extract fringe information from the file
             fringes = options.objects[env]['fringes'] = m2fringes.Fringes()
