@@ -816,6 +816,7 @@ def onclick(event, options, bind):
     options.fig.canvas.mpl_disconnect(bind)
     options.conserve_limits = False
     set_mode(options)
+    options.root.config(cursor="")
 
 # Set centre of the plasma density map
 def set_centre(options):
@@ -823,6 +824,7 @@ def set_centre(options):
         ans = mb.askyesnocancel("Set centre?", "Press 'Yes' and then click anywhere on the graph to set the centre of the density map.\n\n"
                                 "Press 'No' to reset the centre to [0, 0].")
         if ans:
+            options.root.config(cursor="crosshair")
             bind = options.fig.canvas.mpl_connect('button_press_event',
                                         lambda event: onclick(event, options, bind))
         elif ans is not None:
