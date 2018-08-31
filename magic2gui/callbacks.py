@@ -402,6 +402,9 @@ def recompute(event, options):
 # Also used for refreshing
 def set_mode(options):
     key = options.mode.split("_")
+    # This allows one to stop the conserve_limits variable from switching
+    # back to True after the function executes
+    stop_reverting = False
     if options.conserve_limits:
         # Get the current display limits
         ylim = options.ax.get_ylim()
@@ -453,12 +456,13 @@ def set_mode(options):
         # stops it from touching the colorbar's ticks' labels
         options.cbar.ax.set_ylabel('Fringe shift', rotation=270, labelpad=20)
     elif key[0] == 'density':
-        options.imshow = options.ax.imshow(options.density, cmap=options.cmap)
-        # Adjust the tick labels to be in milimeters
-        ticks = ticker.FuncFormatter(lambda x, pos: '{:0.2f}'.format((x - options.centre[1])/options.resolution))
-        options.ax.xaxis.set_major_formatter(ticks)
-        ticks = ticker.FuncFormatter(lambda y, pos: '{:0.2f}'.format((y - options.centre[0])/options.resolution))
-        options.ax.yaxis.set_major_formatter(ticks)
+        y_size, x_size = options.density.shape
+        extent = sp.array([0-options.centre[1],x_size-options.centre[1],y_size-options.centre[0],0-options.centre[0]])/options.resolution
+        # Don't conserve limits (we're changing the range here)
+        options.conserve_limits = False
+        # This means that next time we switch mode, the limits will be reset:
+        stop_reverting = True
+        options.imshow = options.ax.imshow(options.density, cmap=options.cmap, extent=extent)
         # Add x and y axis labels
         options.ax.set_xlabel("Distance / $mm$")
         options.ax.set_ylabel("Distance / $mm$")
@@ -469,7 +473,7 @@ def set_mode(options):
         # revert the graph to the old display limits
         options.ax.set_xlim(xlim)
         options.ax.set_ylim(ylim)
-    else:
+    elif not stop_reverting:
         # Revert to the original setting
         options.conserve_limits = True
     # Refresh the graph's canvas
@@ -807,9 +811,10 @@ def plasma_density(options):
 
 # Event handler for setting the centre of the density map
 def onclick(event, options, bind):
-    options.centre = [event.ydata, event.xdata]
+    options.centre = [event.ydata*options.resolution, event.xdata*options.resolution]
     print(options.centre)
     options.fig.canvas.mpl_disconnect(bind)
+    options.conserve_limits = False
     set_mode(options)
 
 # Set centre of the plasma density map
