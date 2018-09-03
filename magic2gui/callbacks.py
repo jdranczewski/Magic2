@@ -810,23 +810,37 @@ def plasma_density(options):
 
 
 # Event handler for setting the centre of the density map
-def onclick(event, options, bind):
+def set_centre_onclick(event, options, binds):
     options.centre = [event.ydata*options.resolution, event.xdata*options.resolution]
-    print(options.centre)
-    options.fig.canvas.mpl_disconnect(bind)
+    # Unbind all the event handlers
+    for bind in binds:
+        options.fig.canvas.mpl_disconnect(bind)
     options.conserve_limits = False
     set_mode(options)
     options.root.config(cursor="")
 
+
+# Event handler for cancelling the process of setting the centre
+# of the density map
+def set_centre_onpress(event, options, binds):
+    if event.key == "escape":
+        for bind in binds:
+            options.fig.canvas.mpl_disconnect(bind)
+        options.root.config(cursor="")
+
+
 # Set centre of the plasma density map
 def set_centre(options):
     if options.mode == "density_graph":
-        ans = mb.askyesnocancel("Set centre?", "Press 'Yes' and then click anywhere on the graph to set the centre of the density map.\n\n"
+        ans = mb.askyesnocancel("Set centre?", "Press 'Yes' and then click anywhere on the graph to set the centre of the density map. Use the escape key to cancel.\n\n"
                                 "Press 'No' to reset the centre to [0, 0].")
         if ans:
             options.root.config(cursor="crosshair")
-            bind = options.fig.canvas.mpl_connect('button_press_event',
-                                        lambda event: onclick(event, options, bind))
+            binds = [None, None]
+            binds[0] = options.fig.canvas.mpl_connect('button_press_event',
+                lambda event: set_centre_onclick(event, options, binds))
+            binds[1] = options.fig.canvas.mpl_connect('key_press_event',
+                lambda event: set_centre_onpress(event, options, binds))
         elif ans is not None:
             options.centre = [0, 0]
             set_mode(options)
