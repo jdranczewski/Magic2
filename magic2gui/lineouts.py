@@ -10,7 +10,9 @@ import magic2gui.matplotlib_frame as m2mframe
 class Lineout():
     def __init__(self, line, options):
         self.options = options
-        self.line = line
+        self.line = line.copy()
+        if options.mode == "density_graph":
+            self.line *= options.resolution
         self.line_plot, = options.ax.plot(line[:, 1], line[:, 0])
         options.fig.canvas.draw()
 
@@ -24,9 +26,13 @@ class Lineout():
         b = ttk.Button(window, text="test", command=lambda: options.show_var.set("background_fringes"))
         b.pack()
 
-        self.profile = profile_line(sp.ma.filled(options.imshow.get_array().astype(float), fill_value=sp.nan), line[0], line[1])
+        self.profile = profile_line(sp.ma.filled(options.imshow.get_array().astype(float), fill_value=sp.nan), self.line[0], self.line[1])
         self.mframe = m2mframe.GraphFrame(window, bind_keys=True, show_toolbar=True)
-        self.mframe.ax.plot(self.profile)
+        if options.mode == "density_graph":
+            xspace = sp.linspace(0, len(self.profile)/options.resolution, len(self.profile))
+        else:
+            xspace = sp.linspace(0, len(self.profile), len(self.profile))
+        self.mframe.ax.plot(xspace, self.profile)
         self.mframe.pack()
 
     def remove(self):
