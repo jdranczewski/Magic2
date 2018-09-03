@@ -11,6 +11,7 @@ from matplotlib.pyplot import cm
 import matplotlib.ticker as ticker
 
 import magic2gui.dialog as m2dialog
+import magic2gui.lineouts as m2lineouts
 import magic2.graphics as m2graphics
 import magic2.fringes as m2fringes
 import magic2.labelling as m2labelling
@@ -409,6 +410,8 @@ def set_mode(options):
         # Get the current display limits
         ylim = options.ax.get_ylim()
         xlim = options.ax.get_xlim()
+    if options.lineout_meta is not None:
+        m2lineouts.stop_lineout(options)
     # Clear the axes and all labellers/event handlers attached to them
     # (if they exist)
     options.ax.clear()
@@ -815,6 +818,7 @@ def set_centre_onclick(event, options, binds):
     # Unbind all the event handlers
     for bind in binds:
         options.fig.canvas.mpl_disconnect(bind)
+    # Allow the graph to resize after the centre is set
     options.conserve_limits = False
     set_mode(options)
     options.root.config(cursor="")
@@ -864,6 +868,11 @@ def cosine(options):
         options.mode = "cosine_graph"
     else:
         mb.showinfo("Open a map", "Taking the cosine is possible only for interpolated phase maps.")
+
+
+def lineout(options):
+    # TODO: Check whether we're in a map view
+    m2lineouts.create_lineout(options)
 
 
 class AboutDialog(m2dialog.Dialog):

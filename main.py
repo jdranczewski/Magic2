@@ -43,6 +43,9 @@ class Options:
         # labelling mode and having to disattach event listeners when
         # switching the graph display
         self.labeller = None
+        # A variable storing some metadata on the current lineout-taking
+        # process, allowing for stopping it
+        self.lineout_meta = None
         # The status bar
         self.status = None
         # The tkinter variable associated with radio buttons that decide
@@ -170,6 +173,10 @@ def main():
     processmenu.add_command(label="Cosine",
                             command=lambda:
                             m2callbacks.cosine(options))
+    processmenu.add_separator()
+    processmenu.add_command(label="Take lineout",
+                            command=lambda:
+                            m2callbacks.lineout(options))
 
     # Create the other submenu
     othermenu = Tk.Menu(menu)
