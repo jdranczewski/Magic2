@@ -46,6 +46,8 @@ class Options:
         # A variable storing some metadata on the current lineout-taking
         # process, allowing for stopping it
         self.lineout_meta = None
+        # A list of currently active lineouts
+        self.lineouts = []
         # The status bar
         self.status = None
         # The tkinter variable associated with radio buttons that decide

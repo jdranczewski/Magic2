@@ -14,6 +14,7 @@ class Lineout():
         if options.mode == "density_graph":
             self.line *= options.resolution
         self.line_plot, = options.ax.plot(line[:, 1], line[:, 0])
+        self.mode = options.mode
         options.fig.canvas.draw()
 
         window = self.window = Tk.Toplevel()
@@ -35,8 +36,19 @@ class Lineout():
         self.mframe.ax.plot(xspace, self.profile)
         self.mframe.pack()
 
+    def update(self):
+        if self.options.mode == "density_graph":
+            scale = self.options.resolution
+        else:
+            scale = 1
+        if self.options.mode == self.mode:
+            self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale, self.line[:, 0]/scale)
+        else:
+            self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale, self.line[:, 0]/scale, "--")
+
     def remove(self):
         self.line_plot.remove()
+        self.options.lineouts.remove(self)
         self.options.root.focus_set()
         self.window.destroy()
         self.options.fig.canvas.draw()
@@ -50,6 +62,7 @@ def lineout_onclick(event, line_plot, options, binds, ani):
         line = sp.array(line).transpose()[:, ::-1]
         stop_lineout(options)
         lineout = Lineout(line, options)
+        options.lineouts.append(lineout)
 
 
 def lineout_onmove(event, line_plot, ax):

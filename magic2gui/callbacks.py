@@ -479,6 +479,9 @@ def set_mode(options):
     elif not stop_reverting:
         # Revert to the original setting
         options.conserve_limits = True
+    # Update all the active lineouts
+    for lineout in options.lineouts:
+        lineout.update()
     # Refresh the graph's canvas
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position
