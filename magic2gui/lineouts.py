@@ -96,8 +96,12 @@ class Lineout():
         # Create an x axis, with the units depending on the mode
         if options.mode == "density_graph":
             self.xspace = sp.linspace(0, len(self.profile)/options.resolution, len(self.profile))
+            self.mframe.ax.set_xlabel("Distance / $mm$")
+            self.mframe.ax.set_ylabel("Electron density / $cm^{-3}$")
         else:
             self.xspace = sp.linspace(0, len(self.profile), len(self.profile))
+            self.mframe.ax.set_xlabel("Distance / $px$")
+            self.mframe.ax.set_ylabel("Fringes")
         # Plot the lineout
         self.mframe.ax.plot(self.xspace, self.profile, color=self.colour)
         # Pack the frame, filling all available space
