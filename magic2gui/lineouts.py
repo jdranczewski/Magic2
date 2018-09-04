@@ -73,6 +73,10 @@ class Lineout():
             self.width_box.delete(0, Tk.END)
             self.width_box.insert(Tk.END, redoing.width)
         self.width_box.pack(side=Tk.LEFT)
+        self.showboxvar = Tk.BooleanVar()
+        self.showboxvar.set(True)
+        self.sb = ttk.Checkbutton(oframe, text="Show bounding box", variable=self.showboxvar, command=self.update_vis)
+        self.sb.pack(side=Tk.LEFT)
         ttk.Label(oframe, text="Colour:").pack(side=Tk.LEFT)
         self.colourvar = Tk.StringVar()
         # A list of the basic matplotlib colours
@@ -131,6 +135,7 @@ class Lineout():
             # Draw the rectangle
             patch = Polygon(self.get_verts(), color=self.colour, linewidth=0, alpha=0.3)
             self.rect = self.options.ax.add_patch(patch)
+            self.update_vis()
         else:
             self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale, self.line[:, 0]/scale, "--", color=self.colour)
             self.rect = None
@@ -204,6 +209,12 @@ class Lineout():
         # Change the verices of the rectangle in the main window
         self.rect.set_xy(self.get_verts())
         self.options.fig.canvas.draw()
+
+    # Show or hide the bounding box
+    def update_vis(self):
+        if self.rect is not None:
+            self.rect.set_visible(self.showboxvar.get())
+            self.options.fig.canvas.draw()
 
     # Update the lineout's colour and draw the necessary lines
     def update_colour(self, *args):
