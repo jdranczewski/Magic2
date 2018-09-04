@@ -126,6 +126,10 @@ def ani_update(i, line_plot):
 
 # This function is used to start the layout creation process
 def create_lineout(options):
+    # If a lineout is currently being drawn, stop it
+    if options.lineout_meta is not None:
+        stop_lineout(options)
+    # Change the cursor to a crosshair
     options.root.config(cursor="crosshair")
     # Plot an empty line
     line_plot, = options.ax.plot([], [], "--", color="tab:orange", animated=True)
