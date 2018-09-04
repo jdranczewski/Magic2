@@ -61,13 +61,19 @@ class Lineout():
 
         # Create the options
         oframe = Tk.Frame(window)
-        oframe.pack(fill=Tk.BOTH)
+        oframe.pack(side=Tk.BOTTOM, fill=Tk.BOTH)
+        for i in range(3):
+            oframe.grid_columnconfigure(i, weight=1)
         b = ttk.Button(oframe, text="Export lineout", command=self.export)
-        b.pack(side=Tk.LEFT)
+        b.grid(sticky=("N", "S", "E", "W"))
         b = ttk.Button(oframe, text="Redraw in current mode", command=self.redo)
-        b.pack(side=Tk.LEFT)
-        ttk.Label(oframe, text="Width (px):").pack(side=Tk.LEFT)
-        self.width_box = Tk.Spinbox(oframe, from_=1, to=1024, increment=1, width=4, command=self.update_width)
+        b.grid(row=0, column=1, sticky=("N", "S", "E", "W"))
+        b = ttk.Button(oframe, text="Close this lineout", command=self.remove)
+        b.grid(row=0, column=2, sticky=("N", "S", "E", "W"))
+        wframe = Tk.Frame(oframe)
+        wframe.grid(row=1, column=0, sticky=Tk.W)
+        ttk.Label(wframe, text="Width (px):").pack(side=Tk.LEFT)
+        self.width_box = Tk.Spinbox(wframe, from_=1, to=1024, increment=1, width=4, command=self.update_width)
         self.width_box.bind("<Return>", self.update_width)
         if redoing is not None:
             self.width_box.delete(0, Tk.END)
@@ -76,8 +82,10 @@ class Lineout():
         self.showboxvar = Tk.BooleanVar()
         self.showboxvar.set(True)
         self.sb = ttk.Checkbutton(oframe, text="Show bounding box", variable=self.showboxvar, command=self.update_vis)
-        self.sb.pack(side=Tk.LEFT)
-        ttk.Label(oframe, text="Colour:").pack(side=Tk.LEFT)
+        self.sb.grid(row=1, column=1)
+        cframe = Tk.Frame(oframe)
+        cframe.grid(row=1, column=2, sticky=Tk.E)
+        ttk.Label(cframe, text="Colour:").pack(side=Tk.LEFT)
         self.colourvar = Tk.StringVar()
         # A list of the basic matplotlib colours
         choice = ('tab:blue', 'tab:orange', 'tab:green', 'tab:red',
@@ -85,7 +93,7 @@ class Lineout():
                   'tab:olive', 'tab:cyan')
         # The star (*) unpacks the above tuple, as ttk.OptionMenu takes options
         # as just a lot of arguments
-        self.colour_option = ttk.OptionMenu(oframe, self.colourvar, self.colour , *choice, command=self.update_colour)
+        self.colour_option = ttk.OptionMenu(cframe, self.colourvar, self.colour , *choice, command=self.update_colour)
         self.colour_option.pack(side=Tk.LEFT)
 
         # Calculate the profile
