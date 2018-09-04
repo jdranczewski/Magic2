@@ -46,6 +46,8 @@ class Lineout():
         oframe.pack(fill=Tk.BOTH)
         b = ttk.Button(oframe, text="Export lineout", command=self.export)
         b.pack(side=Tk.LEFT)
+        b = ttk.Button(oframe, text="Redraw in current mode", command=self.redo)
+        b.pack(side=Tk.LEFT)
 
         # Calculate the profile
         self.profile = profile_line(sp.ma.filled(options.imshow.get_array().astype(float), fill_value=sp.nan), self.line[0], self.line[1])
@@ -117,6 +119,19 @@ class Lineout():
             sp.savetxt(filename,
                        sp.vstack((self.xspace, self.profile)).transpose(),
                        header=header)
+
+    def redo(self):
+        # Check if the line will require to be scaled (self.line is in pixels)
+        if self.options.mode == "density_graph":
+            scale = self.options.resolution
+        else:
+            scale = 1
+        # Create a Lineout object
+        lineout = Lineout(self.line/scale, self.options)
+        # Add the object ot the list of active lineouts
+        self.options.lineouts.append(lineout)
+        # Remove this object
+        self.remove()
 
 
 # //Event handlers for the lineout creation process//
