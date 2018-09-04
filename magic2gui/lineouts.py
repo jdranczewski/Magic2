@@ -18,8 +18,7 @@ class Lineout():
         options.fig.canvas.draw()
 
         window = self.window = Tk.Toplevel()
-        window.transient(options.root)
-        # top.grab_set()
+        # window.transient(options.root)
         window.focus_set()
         window.geometry("+%d+%d" % (options.root.winfo_rootx()+50,
                                     options.root.winfo_rooty()+50))
@@ -34,7 +33,7 @@ class Lineout():
         else:
             xspace = sp.linspace(0, len(self.profile), len(self.profile))
         self.mframe.ax.plot(xspace, self.profile)
-        self.mframe.pack()
+        self.mframe.pack(fill=Tk.BOTH, expand=1)
 
     def update(self):
         if self.options.mode == "density_graph":
