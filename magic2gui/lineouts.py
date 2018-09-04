@@ -11,7 +11,7 @@ import magic2gui.matplotlib_frame as m2mframe
 # A class for working with layouts
 class Lineout():
     # This creates a lineout based on coordinates passed as 'line'
-    def __init__(self, line, options):
+    def __init__(self, line, options, redoing=None):
         # Save a reference to the options object
         self.options = options
         # Save the mode the lineout was created in
@@ -36,8 +36,12 @@ class Lineout():
         # Set the focus to the new window
         window.focus_set()
         # Place the window close to the root one
-        window.geometry("+%d+%d" % (options.root.winfo_rootx()+50,
-                                    options.root.winfo_rooty()+50))
+        if redoing is not None:
+            window.geometry("+%d+%d" % (redoing.window.winfo_rootx(),
+                                        redoing.window.winfo_rooty()))
+        else:
+            window.geometry("+%d+%d" % (options.root.winfo_rootx()+50,
+                                        options.root.winfo_rooty()+50))
         # Attach an event listener for when the window's closed
         window.protocol("WM_DELETE_WINDOW", self.remove)
 
@@ -127,7 +131,7 @@ class Lineout():
         else:
             scale = 1
         # Create a Lineout object
-        lineout = Lineout(self.line/scale, self.options)
+        lineout = Lineout(self.line/scale, self.options, redoing=self)
         # Add the object ot the list of active lineouts
         self.options.lineouts.append(lineout)
         # Remove this object
