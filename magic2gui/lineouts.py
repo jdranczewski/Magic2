@@ -2,6 +2,7 @@ import tkinter as Tk
 import tkinter.ttk as ttk
 import tkinter.filedialog as fd
 from matplotlib.animation import FuncAnimation
+from matplotlib.patches import Polygon
 import scipy as sp
 from skimage.measure import profile_line
 
@@ -18,11 +19,13 @@ class Lineout():
         self.options = options
         # Save the mode the lineout was created in
         self.mode = options.mode
-        # Set the colour (blue is default)
+        # Set the colour (blue is default) and width of the lineout
         if redoing is not None:
             self.colour = redoing.colour
+            self.width = redoing.width
         else:
             self.colour = 'tab:blue'
+            self.width = 1
 
         # Save the coordinates of the line
         self.line = line.copy()
@@ -32,6 +35,10 @@ class Lineout():
         # Draw the line on the graph, using the initially supplied
         # coordinates (could be in mm)
         self.line_plot, = options.ax.plot(line[:, 1], line[:, 0], color=self.colour)
+
+        # Draw the rectangle
+        patch = Polygon(self.get_verts(), color=self.colour, linewidth=0, alpha=0.3)
+        self.rect = options.ax.add_patch(patch)
         options.fig.canvas.draw()
 
         # Create a window for the lineout
@@ -59,14 +66,12 @@ class Lineout():
         b.pack(side=Tk.LEFT)
         b = ttk.Button(oframe, text="Redraw in current mode", command=self.redo)
         b.pack(side=Tk.LEFT)
-        self.width = 1
         ttk.Label(oframe, text="Width (px):").pack(side=Tk.LEFT)
         self.width_box = Tk.Spinbox(oframe, from_=1, to=1024, increment=1, width=4, command=self.update_width)
         self.width_box.bind("<Return>", self.update_width)
         if redoing is not None:
             self.width_box.delete(0, Tk.END)
             self.width_box.insert(Tk.END, redoing.width)
-            self.width = redoing.width
         self.width_box.pack(side=Tk.LEFT)
         ttk.Label(oframe, text="Colour:").pack(side=Tk.LEFT)
         self.colourvar = Tk.StringVar()
@@ -94,6 +99,23 @@ class Lineout():
         # Pack the frame, filling all available space
         self.mframe.pack(fill=Tk.BOTH, expand=1)
 
+    # This function calculates the vertices of a rectangle of
+    # a given width along the lineout
+    def get_verts(self):
+        dy = self.line[1, 0] - self.line[0, 0]
+        dx = self.line[1, 1] - self.line[0, 1]
+        wx = self.width/2 * sp.sin(sp.arctan2(dy, dx))
+        wy = -self.width/2 * sp.cos(sp.arctan2(dy, dx))
+        verts = sp.array([
+            [self.line[0, 1]-wx, self.line[0, 0]-wy],
+            [self.line[0, 1]+wx, self.line[0, 0]+wy],
+            [self.line[1, 1]+wx, self.line[1, 0]+wy],
+            [self.line[1, 1]-wx, self.line[1, 0]-wy]
+        ])
+        if self.options.mode == "density_graph":
+            verts /= self.options.resolution
+        return verts
+
     # This function can be used to redraw the Lineout. Used in the
     # set_mode callback
     def update(self):
@@ -106,13 +128,21 @@ class Lineout():
         # a solid line. Otherwise, draw a dashed one
         if self.options.mode == self.mode:
             self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale, self.line[:, 0]/scale, color=self.colour)
+            # Draw the rectangle
+            patch = Polygon(self.get_verts(), color=self.colour, linewidth=0, alpha=0.3)
+            self.rect = self.options.ax.add_patch(patch)
         else:
             self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale, self.line[:, 0]/scale, "--", color=self.colour)
+            self.rect = None
+        self.options.fig.canvas.draw()
 
     # Delete the lineout when the associated window is closed
     def remove(self):
         # Remove the line from the graph
         self.line_plot.remove()
+        # Remove the rectangle if exists
+        if self.rect is not None:
+            self.rect.remove()
         self.options.fig.canvas.draw()
         # Remove this lineout from the list of active ones
         self.options.lineouts.remove(self)
@@ -171,11 +201,15 @@ class Lineout():
         self.mframe.ax.lines[0].set_data(self.xspace, self.profile)
         # Redraw the graph in lineout's window
         self.mframe.fig.canvas.draw()
+        # Change the verices of the rectangle in the main window
+        self.rect.set_xy(self.get_verts())
+        self.options.fig.canvas.draw()
 
     # Update the lineout's colour and draw the necessary lines
     def update_colour(self, *args):
         self.colour = self.colourvar.get()
         self.line_plot.set_color(self.colour)
+        self.rect.set_color(self.colour)
         self.mframe.ax.lines[0].set_color(self.colour)
         self.mframe.fig.canvas.draw()
         self.options.fig.canvas.draw()
