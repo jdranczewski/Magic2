@@ -55,9 +55,9 @@ class Lineout():
 
 def lineout_onclick(event, line_plot, options, binds, ani):
     line = line_plot.get_data()
-    if len(line[0]) == 0:
+    if len(line[0]) == 0 and event.inaxes == options.ax:
         line_plot.set_data((event.xdata,), (event.ydata,))
-    elif len(line) == 2:
+    elif len(line) == 2 and event.inaxes == options.ax:
         line = sp.array(line).transpose()[:, ::-1]
         stop_lineout(options)
         lineout = Lineout(line, options)
