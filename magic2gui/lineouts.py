@@ -10,12 +10,19 @@ import magic2gui.matplotlib_frame as m2mframe
 
 # A class for working with layouts
 class Lineout():
-    # This creates a lineout based on coordinates passed as 'line'
+    # This creates a lineout based on coordinates passed as 'line'.
+    # 'redoing' is a Lineout object passed if we're recalculating
+    # an existing lineout in a different mode
     def __init__(self, line, options, redoing=None):
         # Save a reference to the options object
         self.options = options
         # Save the mode the lineout was created in
         self.mode = options.mode
+        # Set the colour (blue is default)
+        if redoing is not None:
+            self.colour = redoing.colour
+        else:
+            self.colour = 'c0'
 
         # Save the coordinates of the line
         self.line = line.copy()
@@ -24,7 +31,7 @@ class Lineout():
             self.line *= options.resolution
         # Draw the line on the graph, using the initially supplied
         # coordinates (could be in mm)
-        self.line_plot, = options.ax.plot(line[:, 1], line[:, 0])
+        self.line_plot, = options.ax.plot(line[:, 1], line[:, 0], color=self.colour)
         options.fig.canvas.draw()
 
         # Create a window for the lineout
@@ -52,6 +59,16 @@ class Lineout():
         b.pack(side=Tk.LEFT)
         b = ttk.Button(oframe, text="Redraw in current mode", command=self.redo)
         b.pack(side=Tk.LEFT)
+        ttk.Label(oframe, text="Colour:").pack(side=Tk.LEFT)
+        self.colourvar = Tk.StringVar()
+        # A list of the basic matplotlib colours
+        choice = ('tab:blue', 'tab:orange', 'tab:green', 'tab:red',
+                  'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray',
+                  'tab:olive', 'tab:cyan')
+        # The star (*) unpacks the above tuple, as ttk.OptionMenu takes options
+        # as just a lot of arguments
+        self.colour_option = ttk.OptionMenu(oframe, self.colourvar, self.colour , *choice, command=self.update_colour)
+        self.colour_option.pack(side=Tk.LEFT)
 
         # Calculate the profile
         self.profile = profile_line(sp.ma.filled(options.imshow.get_array().astype(float), fill_value=sp.nan), self.line[0], self.line[1])
@@ -64,7 +81,7 @@ class Lineout():
         else:
             self.xspace = sp.linspace(0, len(self.profile), len(self.profile))
         # Plot the lineout
-        self.mframe.ax.plot(self.xspace, self.profile)
+        self.mframe.ax.plot(self.xspace, self.profile, color=self.colour)
         # Pack the frame, filling all available space
         self.mframe.pack(fill=Tk.BOTH, expand=1)
 
@@ -79,9 +96,9 @@ class Lineout():
         # If we are in the mode in which the lineout was created, draw
         # a solid line. Otherwise, draw a dashed one
         if self.options.mode == self.mode:
-            self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale, self.line[:, 0]/scale)
+            self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale, self.line[:, 0]/scale, color=self.colour)
         else:
-            self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale, self.line[:, 0]/scale, "--")
+            self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale, self.line[:, 0]/scale, "--", color=self.colour)
 
     # Delete the lineout when the associated window is closed
     def remove(self):
@@ -124,6 +141,7 @@ class Lineout():
                        sp.vstack((self.xspace, self.profile)).transpose(),
                        header=header)
 
+    # Redraw and recalculate the lineout in the current mode
     def redo(self):
         # Check if the line will require to be scaled (self.line is in pixels)
         if self.options.mode == "density_graph":
@@ -136,6 +154,14 @@ class Lineout():
         self.options.lineouts.append(lineout)
         # Remove this object
         self.remove()
+
+    # Update the lineout's colour and draw the necessary lines
+    def update_colour(self, *args):
+        self.colour = self.colourvar.get()
+        self.line_plot.set_color(self.colour)
+        self.mframe.ax.lines[0].set_color(self.colour)
+        self.mframe.fig.canvas.draw()
+        self.options.fig.canvas.draw()
 
 
 # //Event handlers for the lineout creation process//
