@@ -1,5 +1,6 @@
 import tkinter as Tk
 import tkinter.ttk as ttk
+import tkinter.filedialog as fd
 from matplotlib.animation import FuncAnimation
 import scipy as sp
 from skimage.measure import profile_line
@@ -41,8 +42,10 @@ class Lineout():
         window.protocol("WM_DELETE_WINDOW", self.remove)
 
         # Create the options
-        b = ttk.Button(window, text="test", command=lambda: options.show_var.set("background_fringes"))
-        b.pack()
+        oframe = Tk.Frame(window)
+        oframe.pack(fill=Tk.BOTH)
+        b = ttk.Button(oframe, text="Export lineout", command=self.export)
+        b.pack(side=Tk.LEFT)
 
         # Calculate the profile
         self.profile = profile_line(sp.ma.filled(options.imshow.get_array().astype(float), fill_value=sp.nan), self.line[0], self.line[1])
@@ -51,11 +54,11 @@ class Lineout():
         self.mframe = m2mframe.GraphFrame(window, bind_keys=True, show_toolbar=True)
         # Create an x axis, with the units depending on the mode
         if options.mode == "density_graph":
-            xspace = sp.linspace(0, len(self.profile)/options.resolution, len(self.profile))
+            self.xspace = sp.linspace(0, len(self.profile)/options.resolution, len(self.profile))
         else:
-            xspace = sp.linspace(0, len(self.profile), len(self.profile))
+            self.xspace = sp.linspace(0, len(self.profile), len(self.profile))
         # Plot the lineout
-        self.mframe.ax.plot(xspace, self.profile)
+        self.mframe.ax.plot(self.xspace, self.profile)
         # Pack the frame, filling all available space
         self.mframe.pack(fill=Tk.BOTH, expand=1)
 
@@ -85,6 +88,35 @@ class Lineout():
         self.options.root.focus_set()
         # Destroy the lineout's window
         self.window.destroy()
+
+    # Export the lineout data
+    def export(self):
+        filename = fd.asksaveasfilename(filetypes=[(".csv file", "*.csv"),
+                                                   ("All files", "*")],
+                                        defaultextension=".csv",
+                                        initialfile=self.options.namecore)
+        # Give focus back to the lineout window
+        self.window.focus_set()
+        if filename != '':
+            # Add appropriate units to the header
+            if self.mode.split("_")[0] == "density":
+                header = "distance (mm),\tplasma density (cm^-3)"
+                scale = self.options.resolution
+                units = "mm"
+            else:
+                header = "distance (px),\tfringes"
+                scale = 1
+                units = "px"
+            # Add some metadata to the header
+            header = "start: {}{}\nend: {}{}\nmode: {}\n".format(
+                self.line[0, ::-1]/scale, units,
+                self.line[1, ::-1]/scale, units,
+                self.mode
+            ) + header
+            # Save the data under the given filename
+            sp.savetxt(filename,
+                       sp.vstack((self.xspace, self.profile)).transpose(),
+                       header=header)
 
 
 # //Event handlers for the lineout creation process//
