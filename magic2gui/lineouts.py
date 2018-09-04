@@ -28,6 +28,7 @@ class Lineout():
 
         # Create a window for the lineout
         window = self.window = Tk.Toplevel()
+        window.wm_title(" ".join(options.mode.split("_")) + " lineout")
         # Transient means modal in this case - doesn't show up in the
         # taskbar, cannot be minimised, etc.
         # window.transient(options.root)
