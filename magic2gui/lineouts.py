@@ -59,6 +59,15 @@ class Lineout():
         b.pack(side=Tk.LEFT)
         b = ttk.Button(oframe, text="Redraw in current mode", command=self.redo)
         b.pack(side=Tk.LEFT)
+        self.width = 1
+        ttk.Label(oframe, text="Width (px):").pack(side=Tk.LEFT)
+        self.width_box = Tk.Spinbox(oframe, from_=1, to=1024, increment=1, width=4, command=self.update_width)
+        self.width_box.bind("<Return>", self.update_width)
+        if redoing is not None:
+            self.width_box.delete(0, Tk.END)
+            self.width_box.insert(Tk.END, redoing.width)
+            self.width = redoing.width
+        self.width_box.pack(side=Tk.LEFT)
         ttk.Label(oframe, text="Colour:").pack(side=Tk.LEFT)
         self.colourvar = Tk.StringVar()
         # A list of the basic matplotlib colours
@@ -71,7 +80,7 @@ class Lineout():
         self.colour_option.pack(side=Tk.LEFT)
 
         # Calculate the profile
-        self.profile = profile_line(sp.ma.filled(options.imshow.get_array().astype(float), fill_value=sp.nan), self.line[0], self.line[1])
+        self.profile = profile_line(sp.ma.filled(options.imshow.get_array().astype(float), fill_value=sp.nan), self.line[0], self.line[1], linewidth=self.width)
 
         # Create the matplotlib frame
         self.mframe = m2mframe.GraphFrame(window, bind_keys=True, show_toolbar=True)
@@ -154,6 +163,14 @@ class Lineout():
         self.options.lineouts.append(lineout)
         # Remove this object
         self.remove()
+
+    # Update the Lineout's width
+    def update_width(self, *args):
+        self.width = float(self.width_box.get())
+        self.profile = profile_line(sp.ma.filled(self.options.imshow.get_array().astype(float), fill_value=sp.nan), self.line[0], self.line[1], linewidth=self.width)
+        self.mframe.ax.lines[0].set_data(self.xspace, self.profile)
+        # Redraw the graph in lineout's window
+        self.mframe.fig.canvas.draw()
 
     # Update the lineout's colour and draw the necessary lines
     def update_colour(self, *args):
