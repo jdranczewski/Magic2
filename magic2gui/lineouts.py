@@ -22,7 +22,7 @@ class Lineout():
         if redoing is not None:
             self.colour = redoing.colour
         else:
-            self.colour = 'c0'
+            self.colour = 'tab:blue'
 
         # Save the coordinates of the line
         self.line = line.copy()
