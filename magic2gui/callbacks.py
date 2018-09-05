@@ -824,7 +824,7 @@ def set_centre_onclick(event, options, binds):
     # Allow the graph to resize after the centre is set
     options.conserve_limits = False
     set_mode(options)
-    options.root.config(cursor="")
+    options.mframe.config(cursor="")
 
 
 # Event handler for cancelling the process of setting the centre
@@ -833,7 +833,7 @@ def set_centre_onpress(event, options, binds):
     if event.key == "escape":
         for bind in binds:
             options.fig.canvas.mpl_disconnect(bind)
-        options.root.config(cursor="")
+        options.mframe.config(cursor="")
 
 
 # Set centre of the plasma density map
@@ -842,7 +842,7 @@ def set_centre(options):
         ans = mb.askyesnocancel("Set centre?", "Press 'Yes' and then click anywhere on the graph to set the centre of the density map. Use the escape key to cancel.\n\n"
                                 "Press 'No' to reset the centre to [0, 0].")
         if ans:
-            options.root.config(cursor="crosshair")
+            options.mframe.config(cursor="crosshair")
             binds = [None, None]
             binds[0] = options.fig.canvas.mpl_connect('button_press_event',
                 lambda event: set_centre_onclick(event, options, binds))

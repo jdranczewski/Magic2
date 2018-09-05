@@ -312,7 +312,7 @@ def create_lineout(options):
     if options.lineout_meta is not None:
         stop_lineout(options)
     # Change the cursor to a crosshair
-    options.root.config(cursor="crosshair")
+    options.mframe.config(cursor="crosshair")
     # Plot an empty line
     line_plot, = options.ax.plot([], [], "--", color="tab:orange", animated=True)
     # Create and start the animation. blit=True speeds it up significantly
@@ -339,7 +339,7 @@ def stop_lineout(options):
     for bind in options.lineout_meta[0]:
         options.fig.canvas.mpl_disconnect(bind)
     # Change the cursor back
-    options.root.config(cursor="")
+    options.mframe.config(cursor="")
     # Stop the animation
     options.lineout_meta[1]._stop()
     # Remove the line_plot
