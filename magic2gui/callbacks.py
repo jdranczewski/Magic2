@@ -106,6 +106,7 @@ def m_save(options):
         dump.append(options.depth)
         dump.append(options.wavelength)
         dump.append(options.double)
+        dump.append(options.centre)
         # We use gzip to make the file smaller. Normal pickling produced files
         # that were around 30MB, while the compressed version of the same data
         # is 188KB
@@ -157,6 +158,13 @@ def m_open(options, interpolate = None):
             options.depth = dump[9]
             options.wavelength = dump[10]
             options.double = dump[11]
+            # For saved variables introduced in v1.02
+            try:
+                options.centre = dump[12]
+            except IndexError:
+                # The centre option is set to a default of [0, 0] when creating
+                # the Options object.
+                pass
             options.status.set("Done", 100)
             # If data is available for either background or plasma fringes,
             # display them
