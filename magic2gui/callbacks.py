@@ -863,12 +863,24 @@ def cosine(options):
             multiplier = 1
         else:
             multiplier = 2
-        options.imshow = options.ax.imshow(sp.cos(options.imshow.get_array()*multiplier*sp.pi), cmap="Greys")
         # This mode is a spetial little snowflake, in that it doesn't have
-        # a radio button or a set_mode if clause. We handle it ourselves here
+        # a radio button or a set_mode if clause. We handle its rendering
+        # ourselves here:
+        # Clear the canvas
+        options.ax.clear()
+        # Draw the cosine
+        options.imshow = options.ax.imshow(sp.cos(options.imshow.get_array()*multiplier*sp.pi), cmap="Greys")
+        # Set the mode variable
+        mode = options.mode.split("_")[0]+"_cosine_graph"
+        options.show_var.set(mode)
+        options.mode = mode
+        # Take care of the lineouts
+        if options.lineout_meta is not None:
+            m2lineouts.stop_lineout(options)
+        for lineout in options.lineouts:
+            lineout.update()
+        # Draw the canvas
         options.fig.canvas.draw()
-        options.show_var.set("cosine_graph")
-        options.mode = "cosine_graph"
     else:
         mb.showinfo("Open a map", "Taking the cosine is possible only for interpolated phase maps.")
 
