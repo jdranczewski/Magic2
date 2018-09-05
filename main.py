@@ -43,6 +43,11 @@ class Options:
         # labelling mode and having to disattach event listeners when
         # switching the graph display
         self.labeller = None
+        # A variable storing some metadata on the current lineout-taking
+        # process, allowing for stopping it
+        self.lineout_meta = None
+        # A list of currently active lineouts
+        self.lineouts = []
         # The status bar
         self.status = None
         # The tkinter variable associated with radio buttons that decide
@@ -170,6 +175,10 @@ def main():
     processmenu.add_command(label="Cosine",
                             command=lambda:
                             m2callbacks.cosine(options))
+    processmenu.add_separator()
+    processmenu.add_command(label="Take lineout",
+                            command=lambda:
+                            m2callbacks.lineout(options))
 
     # Create the other submenu
     othermenu = Tk.Menu(menu)
@@ -267,6 +276,11 @@ def main():
     help_group.pack(fill=Tk.BOTH)
     hl = Tk.Label(help_group, anchor=Tk.W, justify=Tk.LEFT, text="ctrl+click - add point\nctrl+right click - finish line\nx, z - zoom in and out\nw, a, s, d - move the graph\nh - show the whole interferogram\ng - show gridlines\no - toggle zoom rectangle\np - toggle pan and zoom")
     hl.pack()
+
+    # Add a button for taking lineouts
+    b = ttk.Button(side_frame, text="Take lineout",
+                   command=lambda: m2callbacks.lineout(options))
+    b.pack(fill=Tk.BOTH)
 
     # Create a status bar and place it at the bottom of the window.
     options.status = m2status_bar.StatusBar(root)

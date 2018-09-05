@@ -21,8 +21,8 @@ class Canvas():
                     image = plt.imread(filename.name)
                 # Fringes are black, extract them from the image
                 self.fringes_image = image == 0
-                # This is the user defined mask, it was grey (so neither black nor
-                # white, which is the condition we're using here)
+                # This is the user defined mask, it was grey (so neither black
+                # nor white, which is the condition we're using here)
                 self.mask = sp.logical_or(image == 1, self.fringes_image)
             else:
                 # This uses a provide mask and image (for example from an .m2 file)

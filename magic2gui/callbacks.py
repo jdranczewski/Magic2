@@ -11,6 +11,7 @@ from matplotlib.pyplot import cm
 import matplotlib.ticker as ticker
 
 import magic2gui.dialog as m2dialog
+import magic2gui.lineouts as m2lineouts
 import magic2.graphics as m2graphics
 import magic2.fringes as m2fringes
 import magic2.labelling as m2labelling
@@ -105,6 +106,7 @@ def m_save(options):
         dump.append(options.depth)
         dump.append(options.wavelength)
         dump.append(options.double)
+        dump.append(options.centre)
         # We use gzip to make the file smaller. Normal pickling produced files
         # that were around 30MB, while the compressed version of the same data
         # is 188KB
@@ -156,6 +158,13 @@ def m_open(options, interpolate = None):
             options.depth = dump[9]
             options.wavelength = dump[10]
             options.double = dump[11]
+            # For saved variables introduced in v1.02
+            try:
+                options.centre = dump[12]
+            except IndexError:
+                # The centre option is set to a default of [0, 0] when creating
+                # the Options object.
+                pass
             options.status.set("Done", 100)
             # If data is available for either background or plasma fringes,
             # display them
@@ -347,8 +356,8 @@ def show_radio(options):
             set_mode(options)
         # If the user wants the interpolated map, check if it exists...
         elif key[1] == 'map':
+            options.mode = "_".join(key)
             if options.objects[key[0]]['canvas'].interpolation_done:
-                options.mode = "_".join(key)
                 set_mode(options)
             # ...if not, give the user the option to generate one
             else:
@@ -380,6 +389,7 @@ def show_radio(options):
 # the radio buttons on the right
 def recompute(event, options):
     key = event.widget['value'].split("_")
+    print(key)
     if key[1] == 'fringes':
         phases = [fringe.phase for fringe in options.objects[key[0]]['fringes'].list]
         options.objects[key[0]]['fringes'].min = sp.amin([phase for phase in phases if phase != -2048.0])
@@ -402,10 +412,15 @@ def recompute(event, options):
 # Also used for refreshing
 def set_mode(options):
     key = options.mode.split("_")
+    # This allows one to stop the conserve_limits variable from switching
+    # back to True after the function executes
+    stop_reverting = False
     if options.conserve_limits:
         # Get the current display limits
         ylim = options.ax.get_ylim()
         xlim = options.ax.get_xlim()
+    if options.lineout_meta is not None:
+        m2lineouts.stop_lineout(options)
     # Clear the axes and all labellers/event handlers attached to them
     # (if they exist)
     options.ax.clear()
@@ -453,12 +468,13 @@ def set_mode(options):
         # stops it from touching the colorbar's ticks' labels
         options.cbar.ax.set_ylabel('Fringe shift', rotation=270, labelpad=20)
     elif key[0] == 'density':
-        options.imshow = options.ax.imshow(options.density, cmap=options.cmap)
-        # Adjust the tick labels to be in milimeters
-        ticks = ticker.FuncFormatter(lambda x, pos: '{:0.2f}'.format((x - options.centre[1])/options.resolution))
-        options.ax.xaxis.set_major_formatter(ticks)
-        ticks = ticker.FuncFormatter(lambda y, pos: '{:0.2f}'.format((y - options.centre[0])/options.resolution))
-        options.ax.yaxis.set_major_formatter(ticks)
+        y_size, x_size = options.density.shape
+        extent = sp.array([0-options.centre[1],x_size-options.centre[1],y_size-options.centre[0],0-options.centre[0]])/options.resolution
+        # Don't conserve limits (we're changing the range here)
+        options.conserve_limits = False
+        # This means that next time we switch mode, the limits will be reset:
+        stop_reverting = True
+        options.imshow = options.ax.imshow(options.density, cmap=options.cmap, extent=extent)
         # Add x and y axis labels
         options.ax.set_xlabel("Distance / $mm$")
         options.ax.set_ylabel("Distance / $mm$")
@@ -469,9 +485,12 @@ def set_mode(options):
         # revert the graph to the old display limits
         options.ax.set_xlim(xlim)
         options.ax.set_ylim(ylim)
-    else:
+    elif not stop_reverting:
         # Revert to the original setting
         options.conserve_limits = True
+    # Update all the active lineouts
+    for lineout in options.lineouts:
+        lineout.update()
     # Refresh the graph's canvas
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position
@@ -806,20 +825,38 @@ def plasma_density(options):
 
 
 # Event handler for setting the centre of the density map
-def onclick(event, options, bind):
-    options.centre = [event.ydata, event.xdata]
-    print(options.centre)
-    options.fig.canvas.mpl_disconnect(bind)
+def set_centre_onclick(event, options, binds):
+    options.centre = [event.ydata*options.resolution, event.xdata*options.resolution]
+    # Unbind all the event handlers
+    for bind in binds:
+        options.fig.canvas.mpl_disconnect(bind)
+    # Allow the graph to resize after the centre is set
+    options.conserve_limits = False
     set_mode(options)
+    options.mframe.config(cursor="")
+
+
+# Event handler for cancelling the process of setting the centre
+# of the density map
+def set_centre_onpress(event, options, binds):
+    if event.key == "escape":
+        for bind in binds:
+            options.fig.canvas.mpl_disconnect(bind)
+        options.mframe.config(cursor="")
+
 
 # Set centre of the plasma density map
 def set_centre(options):
     if options.mode == "density_graph":
-        ans = mb.askyesnocancel("Set centre?", "Press 'Yes' and then click anywhere on the graph to set the centre of the density map.\n\n"
+        ans = mb.askyesnocancel("Set centre?", "Press 'Yes' and then click anywhere on the graph to set the centre of the density map. Use the escape key to cancel.\n\n"
                                 "Press 'No' to reset the centre to [0, 0].")
         if ans:
-            bind = options.fig.canvas.mpl_connect('button_press_event',
-                                        lambda event: onclick(event, options, bind))
+            options.mframe.config(cursor="crosshair")
+            binds = [None, None]
+            binds[0] = options.fig.canvas.mpl_connect('button_press_event',
+                lambda event: set_centre_onclick(event, options, binds))
+            binds[1] = options.fig.canvas.mpl_connect('key_press_event',
+                lambda event: set_centre_onpress(event, options, binds))
         elif ans is not None:
             options.centre = [0, 0]
             set_mode(options)
@@ -835,14 +872,33 @@ def cosine(options):
             multiplier = 1
         else:
             multiplier = 2
-        options.imshow = options.ax.imshow(sp.cos(options.imshow.get_array()*multiplier*sp.pi), cmap="Greys")
         # This mode is a spetial little snowflake, in that it doesn't have
-        # a radio button or a set_mode if clause. We handle it ourselves here
+        # a radio button or a set_mode if clause. We handle its rendering
+        # ourselves here:
+        # Clear the canvas
+        options.ax.clear()
+        # Draw the cosine
+        options.imshow = options.ax.imshow(sp.cos(options.imshow.get_array()*multiplier*sp.pi), cmap="Greys")
+        # Set the mode variable
+        mode = options.mode.split("_")[0]+"_cosine_graph"
+        options.show_var.set(mode)
+        options.mode = mode
+        # Take care of the lineouts
+        if options.lineout_meta is not None:
+            m2lineouts.stop_lineout(options)
+        for lineout in options.lineouts:
+            lineout.update()
+        # Draw the canvas
         options.fig.canvas.draw()
-        options.show_var.set("cosine_graph")
-        options.mode = "cosine_graph"
     else:
         mb.showinfo("Open a map", "Taking the cosine is possible only for interpolated phase maps.")
+
+
+def lineout(options):
+    if options.mode is not None:
+        m2lineouts.create_lineout(options)
+    else:
+        mb.showinfo("No mode chosen", "Please choose one of the display modes from the menu on the right!")
 
 
 class AboutDialog(m2dialog.Dialog):
@@ -851,7 +907,7 @@ class AboutDialog(m2dialog.Dialog):
         logo = Tk.Label(master, image=photo)
         logo.photo = photo
         logo.pack()
-        label = Tk.Label(master, text="This software was created by Jakub Dranczewski during a UROP in 2018.\nIt is based on concepts from Magic, which was created by George Swadling.\n\nYou can contact me on jbd17@ic.ac.uk or (as I inevitably loose either the whole email or the 17) jakub.dranczewski@gmail.com\n\nv1.1")
+        label = Tk.Label(master, text="This software was created by Jakub Dranczewski during a UROP in 2018.\nIt is based on concepts from Magic, which was created by George Swadling.\n\nYou can contact me on jbd17@ic.ac.uk or (as I inevitably loose either the whole email or the 17) jakub.dranczewski@gmail.com\n\nv1.02")
         label.pack()
 
     def buttonbox(self):

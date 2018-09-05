@@ -3,7 +3,8 @@
 <title>Magic2 manual</title>
 <style>
 html, body {
-  background-color: #90CAF9;
+  background-color: #5709a4;
+  background: linear-gradient(140deg, #5709a4, #c84579 35%, #f3cd22);
 }
 #main {
   max-width: 700px;
@@ -27,7 +28,7 @@ h3 {
 </head>
 <body>
 <div id="main">
-<h1>Magic 2 - the manual</h1>
+<h1><img src="logo_s.png" style="width: 8em;vertical-align: bottom;"/> - the manual</h1>
 <div id="contents">
   <h2>Table of contents</h2>
   <ul>
@@ -37,6 +38,7 @@ h3 {
     <li><a href="#h2_interpolation">Interpolation</a></li>
     <li><a href="#h2_subtract_plasma">Subtraction and plasma density calculation</a></li>
     <li><a href="#h2_export">Exporting</a></li>
+    <li><a href="#h2_lineouts">Taking lineouts</a></li>
     <li><a href="#h2_other_operations">Other operations</a></li>
     <li><a href="#h2_saving">.m2 - Magic2's very own file format</a></li>
   </ul>
@@ -104,8 +106,8 @@ side of <a href="#h3_sidebar">the sidebar</a>. You can also change the project
 name in the File <a href="#h3_menu">menu</a>.
 </p>
 <p>
-The project name is used as a name template when <a>exporting the data</a> or <a
-href="#h2_saving">saving .m2 files</a>.
+The project name is used as a name template when <a href="#h3_data_export">
+exporting the data</a> or <a href="#h2_saving">saving .m2 files</a>.
 </p>
 <h3 id="h3_labelling">Labelling fringes</h3>
 <p>
@@ -189,15 +191,23 @@ wavelength of the laser, and whether the interferograms were traced 'doubly'
 shift). You can always set those options by going to <b>Process -> Set shot
 details</b>.
 </p>
+<h3 id="h3_set_centre">Set the centre of the map</h3>
+<p>
+By using the <b>Process -> Set centre of the density map</b> option in <a
+href="h3_menu">the menu</a> it is possible to set an arbitrary [0, 0] point for
+the plasma density map. In the dialog window that pops up, pressing 'Yes' will
+allow you to click anywhere on the map (press the escape key to cancel the
+operation) and pressing 'No' will reset the centre to the original position.
+
 
 <h2 id="h2_export">Exporting</a>
 <h3 id="h2_data_export">Exporting data</h3>
 <p>
 You can export the data you are currently viewing in the <a
-href="#h3_graphing_area">graphing area</a> at any point by using the "Export the
-current view's data" option in the File <a href="#h3_menu">menu</a>. This will
-give you an option to choose the desired file location and name. The default
-format is .csv. The areas that are masked out (or not interpolated) are
+href="#h3_graphing_area">graphing area</a> at any point by using the <b>"Export
+the current view's data"</b> option in the File <a href="#h3_menu">menu</a>.
+This will give you an option to choose the desired file location and name. The
+default format is .csv. The areas that are masked out (or not interpolated) are
 indicated with the string 'nan'.
 </p>
 <h3 id="h3_saving_figures">Saving figures</h3>
@@ -206,6 +216,73 @@ You can save the graph you are currently viewing by using the "Save the
 graph as an image" option in the File <a href="#h3_menu">menu</a>. A prompt will
 come up asking you to put in a dpi, effectively setting the images resolution.
 You can then choose a location for your file.
+</p>
+
+<h2 id="h2_lineouts">Taking lineouts</h2>
+<h3 id="h3_drawing_lineout">Drawing a lineout</h3>
+<p>
+To initialise drawing a lineout you can either use the <b>'Take lineout'</b>
+button on the bottom of <a href="#h3_sidebar">the sidebar</a>, or use the
+<b>Process -> Take lineout</b> option in <a href="#h3_menu">the menu</a>. This
+should work in any display mode. Your cursor will turn into a crosshair. You can
+draw the line by clicking the starting and ending points. A new window will
+appear, containing the lineout graph and several other options.
+</p>
+<h3 id="h3_lineout_export">Exporting a lineout</h3>
+<p>
+This works very similarly to <a href="#h2_data_export">exporting the data
+displayed in the graphing area</a> and can be done by pressing a button in the
+layout window. The .csv file that is created will contain a
+header with the starting and ending points and the display mode specified. The
+header also specifies the units that have to be used when analysing the data.
+</p>
+<h3 id="h3_lineout_width">Width of the lineout</h3>
+<p>
+By using the input box at the bottom of the layout window, the width of the line
+sampled to create the layout can be set. This will be represented by a
+semi-transparent rectangle displayed in <a href="#h3_graphing_area">the graphing
+area</a>. The rectangle can be turned off with a switch in the layout window.
+<h3 id="h3_lineout_colour">The lineout's colour</h3>
+<p>
+You can set the colour of the lineout at the bottom of the lineout window. This
+will change the colour of the lineout line, as well as the lineout graph, making
+them easier to colour-code and associate with each other.
+</p>
+<p>
+The colours available are the standard matplotlib colours (the ones it cycles
+through when plotting multiple things).
+</p>
+<h3 id="h3_lineout_lifecycle">The lifecycle of a layout</h3>
+<p>
+When a layout is created in a particular display mode, it is attached to that
+mode. This is indicated by the title of the lineout window (eg. 'plasma map
+lineout'). It will show as a solid line only in that mode, turning into a
+dashed, semi-transparent line in other modes.
+</p>
+<p>
+The lineout will exist until you close its respective window. It should survive
+pretty much any operation you perform on your data.
+</p>
+<h3 id="#h3_redraw_lineout">Redraw lineout in current mode</h3>
+<p>
+The <b>'Redraw in current mode'</b> button at the bottom of the lineout window creates
+a new lineout of the same width, colour and position as the old one, but changes
+the source of data (and the display mode that the lineout is attached to) to the
+data currently being displayed.
+</p>
+<p>
+For example, if you create a lineout in the 'Background map' display mode, you
+can inspect the plasma map data along the same line by going to switching to the
+'Plasma map' mode and clicking the 'Redraw in current mode' button. This will
+delete the original layout.
+</p>
+<h3 id="h3_lineout_pin">Pinning the lineout window</h3>
+<p>
+The <b>(Un)pin this window</b> button in a layout window allows you to choose
+whether you want the window to be attached (<i>modal</i>) to Magic2's main
+window or not. When modal, the window doesn't show in your system's taskbar, and
+is always displayed on top of the main Magic2 window, minimising itself when you
+minimise Magic2 etc.
 </p>
 
 <h2 id="h2_other_operations">Other operations</h2>
@@ -237,8 +314,9 @@ The file contains two Boolean arrays for both background and plasma
 interferograms (one for the fringes and one for the user-defined mask), together
 with the fringes' phases. It also
 contains the <a href="#h3_project_name">project's name</a>,
-<a href="#h3_plasma_density">shot details</a>, and the <a
-href="#h3_zero_shift">zero point setting</a>.
+<a href="#h3_plasma_density">shot details</a>, <a
+href="#h3_zero_shift">zero point setting</a>, and the <a
+href="#h3_set_centre">centre of the plasma density map</a>.
 </p>
 <h3 id="h3_openin_m2">Opening an .m2 file</h3>
 <p>
