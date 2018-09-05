@@ -356,8 +356,8 @@ def show_radio(options):
             set_mode(options)
         # If the user wants the interpolated map, check if it exists...
         elif key[1] == 'map':
+            options.mode = "_".join(key)
             if options.objects[key[0]]['canvas'].interpolation_done:
-                options.mode = "_".join(key)
                 set_mode(options)
             # ...if not, give the user the option to generate one
             else:
@@ -389,6 +389,7 @@ def show_radio(options):
 # the radio buttons on the right
 def recompute(event, options):
     key = event.widget['value'].split("_")
+    print(key)
     if key[1] == 'fringes':
         phases = [fringe.phase for fringe in options.objects[key[0]]['fringes'].list]
         options.objects[key[0]]['fringes'].min = sp.amin([phase for phase in phases if phase != -2048.0])
