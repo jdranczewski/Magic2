@@ -34,10 +34,12 @@ class Lineout():
             self.line *= options.resolution
         # Draw the line on the graph, using the initially supplied
         # coordinates (could be in mm)
-        self.line_plot, = options.ax.plot(line[:, 1], line[:, 0], color=self.colour)
+        self.line_plot, = options.ax.plot(line[:, 1], line[:, 0],
+                                          color=self.colour)
 
         # Draw the rectangle
-        patch = Polygon(self.get_verts(), color=self.colour, linewidth=0, alpha=0.3)
+        patch = Polygon(self.get_verts(), color=self.colour, linewidth=0,
+                        alpha=0.3)
         self.rect = options.ax.add_patch(patch)
         self.main_canvas_draw()
 
@@ -73,7 +75,8 @@ class Lineout():
         wframe = Tk.Frame(oframe)
         wframe.grid(row=1, column=0, sticky=Tk.W)
         ttk.Label(wframe, text="Width (px):").pack(side=Tk.LEFT)
-        self.width_box = Tk.Spinbox(wframe, from_=1, to=1024, increment=1, width=4, command=self.update_width)
+        self.width_box = Tk.Spinbox(wframe, from_=1, to=1024, increment=1,
+                                    width=4, command=self.update_width)
         self.width_box.bind("<Return>", self.update_width)
         if redoing is not None:
             self.width_box.delete(0, Tk.END)
@@ -81,7 +84,9 @@ class Lineout():
         self.width_box.pack(side=Tk.LEFT)
         self.showboxvar = Tk.BooleanVar()
         self.showboxvar.set(True)
-        self.sb = ttk.Checkbutton(oframe, text="Show bounding box", variable=self.showboxvar, command=self.update_vis)
+        self.sb = ttk.Checkbutton(oframe, text="Show bounding box",
+                                  variable=self.showboxvar,
+                                  command=self.update_vis)
         self.sb.grid(row=1, column=1)
         cframe = Tk.Frame(oframe)
         cframe.grid(row=1, column=2, sticky=Tk.E)
@@ -93,17 +98,20 @@ class Lineout():
                   'tab:olive', 'tab:cyan')
         # The star (*) unpacks the above tuple, as ttk.OptionMenu takes options
         # as just a lot of arguments
-        self.colour_option = ttk.OptionMenu(cframe, self.colourvar, self.colour , *choice, command=self.update_colour)
+        self.colour_option = ttk.OptionMenu(cframe, self.colourvar, self.colour,
+                                            *choice, command=self.update_colour)
         self.colour_option.pack(side=Tk.LEFT)
 
         # Calculate the profile
         self.profile = profile_line(sp.ma.filled(options.imshow.get_array().astype(float), fill_value=sp.nan), self.line[0], self.line[1], linewidth=self.width)
 
         # Create the matplotlib frame
-        self.mframe = m2mframe.GraphFrame(window, bind_keys=True, show_toolbar=True)
+        self.mframe = m2mframe.GraphFrame(window, bind_keys=True,
+                                          show_toolbar=True)
         # Create an x axis, with the units depending on the mode
         if options.mode == "density_graph":
-            self.xspace = sp.linspace(0, len(self.profile)/options.resolution, len(self.profile))
+            self.xspace = sp.linspace(0, len(self.profile)/options.resolution,
+                                      len(self.profile))
             self.mframe.ax.set_xlabel("Distance / $mm$")
             self.mframe.ax.set_ylabel("Electron density / $cm^{-3}$")
         else:
@@ -143,13 +151,19 @@ class Lineout():
         # If we are in the mode in which the lineout was created, draw
         # a solid line. Otherwise, draw a dashed one
         if self.options.mode == self.mode:
-            self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale, self.line[:, 0]/scale, color=self.colour)
+            self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale,
+                                                   self.line[:, 0]/scale,
+                                                   color=self.colour)
             # Draw the rectangle
-            patch = Polygon(self.get_verts(), color=self.colour, linewidth=0, alpha=0.3)
+            patch = Polygon(self.get_verts(), color=self.colour,
+                            linewidth=0, alpha=0.3)
             self.rect = self.options.ax.add_patch(patch)
             self.update_vis(draw=False)
         else:
-            self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale, self.line[:, 0]/scale, "--", color=self.colour)
+            self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale,
+                                                   self.line[:, 0]/scale, "--",
+                                                   color=self.colour,
+                                                   alpha=0.7)
             self.rect = None
 
     # Delete the lineout when the associated window is closed
