@@ -4,6 +4,7 @@ import tkinter.filedialog as fd
 from matplotlib.animation import FuncAnimation
 from matplotlib.patches import Polygon
 import scipy as sp
+import ctypes
 from skimage.measure import profile_line
 
 import magic2gui.matplotlib_frame as m2mframe
@@ -45,7 +46,20 @@ class Lineout():
 
         # Create a window for the lineout
         window = self.window = Tk.Toplevel()
-        window.wm_title(" ".join(options.mode.split("_")) + " lineout")
+        window.wm_title(" ".join(options.mode.split("_")) + " lineout - " + options.namecore)
+        # This is windows specific, but needed for the icon to show up
+        # in the taskbar. try/catch in case this is run on other platforms
+        try:
+            myappid = 'jdranczewski.magic2'
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        except:
+            pass
+        # Setting the icon doesn't work on Linux for some reason, so we have
+        # a try/catch here again
+        try:
+            window.iconbitmap("magic2.ico")
+        except:
+            pass
         # Transient means modal in this case - doesn't show up in the
         # taskbar, cannot be minimised, etc.
         # window.transient(options.root)
