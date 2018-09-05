@@ -39,7 +39,7 @@ class Lineout():
         # Draw the rectangle
         patch = Polygon(self.get_verts(), color=self.colour, linewidth=0, alpha=0.3)
         self.rect = options.ax.add_patch(patch)
-        options.fig.canvas.draw()
+        self.main_canvas_draw()
 
         # Create a window for the lineout
         window = self.window = Tk.Toplevel()
@@ -147,11 +147,10 @@ class Lineout():
             # Draw the rectangle
             patch = Polygon(self.get_verts(), color=self.colour, linewidth=0, alpha=0.3)
             self.rect = self.options.ax.add_patch(patch)
-            self.update_vis()
+            self.update_vis(draw=False)
         else:
             self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale, self.line[:, 0]/scale, "--", color=self.colour)
             self.rect = None
-        self.options.fig.canvas.draw()
 
     # Delete the lineout when the associated window is closed
     def remove(self):
@@ -160,7 +159,7 @@ class Lineout():
         # Remove the rectangle if exists
         if self.rect is not None:
             self.rect.remove()
-        self.options.fig.canvas.draw()
+        self.main_canvas_draw()
         # Remove this lineout from the list of active ones
         self.options.lineouts.remove(self)
         # Set the focus back to the main window
@@ -220,13 +219,14 @@ class Lineout():
         self.mframe.fig.canvas.draw()
         # Change the verices of the rectangle in the main window
         self.rect.set_xy(self.get_verts())
-        self.options.fig.canvas.draw()
+        self.main_canvas_draw()
 
     # Show or hide the bounding box
-    def update_vis(self):
+    def update_vis(self, draw=True):
         if self.rect is not None:
             self.rect.set_visible(self.showboxvar.get())
-            self.options.fig.canvas.draw()
+            if draw:
+                self.main_canvas_draw()
 
     # Update the lineout's colour and draw the necessary lines
     def update_colour(self, *args):
@@ -235,6 +235,13 @@ class Lineout():
         self.rect.set_color(self.colour)
         self.mframe.ax.lines[0].set_color(self.colour)
         self.mframe.fig.canvas.draw()
+        self.main_canvas_draw()
+
+    # A function that draws the canvas of the main figure, but also clears
+    # the blitting cache of any labelling animation currently happening
+    def main_canvas_draw(self):
+        if self.options.labeller is not None:
+            self.options.labeller.ani._blit_cache.clear()
         self.options.fig.canvas.draw()
 
 
