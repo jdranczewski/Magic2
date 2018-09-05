@@ -46,6 +46,7 @@ class Lineout():
 
         # Create a window for the lineout
         window = self.window = Tk.Toplevel()
+        self.transient = False
         window.wm_title(" ".join(options.mode.split("_")) + " lineout - " + options.namecore)
         # This is windows specific, but needed for the icon to show up
         # in the taskbar. try/catch in case this is run on other platforms
@@ -60,9 +61,6 @@ class Lineout():
             window.iconbitmap("magic2.ico")
         except:
             pass
-        # Transient means modal in this case - doesn't show up in the
-        # taskbar, cannot be minimised, etc.
-        # window.transient(options.root)
         # Set the focus to the new window
         window.focus_set()
         # Place the window close to the root one
@@ -84,7 +82,9 @@ class Lineout():
         b.grid(sticky=("N", "S", "E", "W"))
         b = ttk.Button(oframe, text="Redraw in current mode", command=self.redo)
         b.grid(row=0, column=1, sticky=("N", "S", "E", "W"))
-        b = ttk.Button(oframe, text="Close this lineout", command=self.remove)
+        self.pinvar = Tk.StringVar()
+        self.pinvar.set("Pin this window")
+        b = ttk.Button(oframe, textvariable=self.pinvar, command=self.un_pin)
         b.grid(row=0, column=2, sticky=("N", "S", "E", "W"))
         wframe = Tk.Frame(oframe)
         wframe.grid(row=1, column=0, sticky=Tk.W)
@@ -239,6 +239,18 @@ class Lineout():
         self.options.lineouts.append(lineout)
         # Remove this object
         self.remove()
+
+    # Pin/Unpin the window:
+    def un_pin(self):
+        # Transient means modal in this case - doesn't show up in the
+        # taskbar, cannot be minimised, etc.
+        if self.transient:
+            self.window.transient("")
+            self.pinvar.set("Pin this window")
+        else:
+            self.window.transient(self.options.root)
+            self.pinvar.set("Unpin this window")
+        self.transient = not self.transient
 
     # Update the Lineout's width
     def update_width(self, *args):
