@@ -120,6 +120,8 @@ class Lineout():
             self.mframe.ax.set_ylabel("Fringes")
         # Plot the lineout
         self.mframe.ax.plot(self.xspace, self.profile, color=self.colour)
+        # Set the limits so that the entire length of the lineout is shown
+        self.mframe.ax.set_xlim([0, sp.amax(self.xspace)])
         # Pack the frame, filling all available space
         self.mframe.pack(fill=Tk.BOTH, expand=1)
 
