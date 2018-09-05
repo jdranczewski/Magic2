@@ -278,8 +278,17 @@ def lineout_onpress(event, line_plot, options, binds, ani):
         stop_lineout(options)
 
 
-# This tells FuncAnimation which objects it needs to redraw
-def ani_update(i, line_plot):
+# This tells FuncAnimation which objects it needs to redraw.
+# It also clears the animation cache if it notices the graph limits
+# have changed
+def ani_update(i, line_plot, options, prev_lim):
+    if prev_lim != [options.ax.get_xlim(), options.ax.get_ylim()]:
+        # If the limits change, do a redraw. This is slooow, but actually works
+        # (the slight overhead with scrolling is worth it, as we get
+        # significant improvements when drawing lines)
+        prev_lim[0], prev_lim[1] = options.ax.get_xlim(), options.ax.get_ylim()
+        options.lineout_meta[1]._blit_cache.clear()
+        options.fig.canvas.draw()
     return line_plot,
 
 
@@ -293,8 +302,9 @@ def create_lineout(options):
     # Plot an empty line
     line_plot, = options.ax.plot([], [], "--", color="tab:orange", animated=True)
     # Create and start the animation. blit=True speeds it up significantly
+    prev_lim = [options.ax.get_xlim(), options.ax.get_ylim()]
     ani = FuncAnimation(options.fig, ani_update, interval=100,
-                        fargs=(line_plot,), blit=True)
+                        fargs=(line_plot, options, prev_lim), blit=True)
     options.fig.canvas.draw()
     # Bind the event handlers
     binds = [None, None, None]
