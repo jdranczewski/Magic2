@@ -874,8 +874,10 @@ def cosine(options):
 
 
 def lineout(options):
-    # TODO: Check whether we're in a map view
-    m2lineouts.create_lineout(options)
+    if options.mode is not None:
+        m2lineouts.create_lineout(options)
+    else:
+        mb.showinfo("No mode chosen", "Please choose one of the display modes from the menu on the right!")
 
 
 class AboutDialog(m2dialog.Dialog):
