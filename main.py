@@ -277,6 +277,11 @@ def main():
     hl = Tk.Label(help_group, anchor=Tk.W, justify=Tk.LEFT, text="ctrl+click - add point\nctrl+right click - finish line\nx, z - zoom in and out\nw, a, s, d - move the graph\nh - show the whole interferogram\ng - show gridlines\no - toggle zoom rectangle\np - toggle pan and zoom")
     hl.pack()
 
+    # Add a button for taking lineouts
+    b = ttk.Button(side_frame, text="Take lineout",
+                   command=lambda: m2callbacks.lineout(options))
+    b.pack(fill=Tk.BOTH)
+
     # Create a status bar and place it at the bottom of the window.
     options.status = m2status_bar.StatusBar(root)
     options.status.grid(row=1, columnspan=2, sticky=("W", "E"))
