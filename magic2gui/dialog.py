@@ -5,7 +5,7 @@ import tkinter.ttk as ttk
 
 
 class Dialog(Tk.Toplevel):
-    def __init__(self, parent, title=None):
+    def __init__(self, parent, title=None, pad=True):
         Tk.Toplevel.__init__(self, parent)
         # Make the window not show up in the window manager
         self.transient(parent)
@@ -19,7 +19,10 @@ class Dialog(Tk.Toplevel):
         body = Tk.Frame(self)
         # Create the elements and get the initial focus element
         self.initial_focus = self.body(body)
-        body.pack(padx=5, pady=5)
+        if pad:
+            body.pack(padx=5, pady=5)
+        else:
+            body.pack(fill=Tk.BOTH, expand=1)
         # Create the buttons
         self.buttonbox()
         # Make the dialog modal

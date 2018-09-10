@@ -340,6 +340,36 @@ def set_colormap(options):
             set_mode(options)
 
 
+class FastExactDialog(m2dialog.Dialog):
+    def body(self, master):
+        labelframe = Tk.Frame(master, bg='#fff')
+        labelframe.pack(fill=Tk.BOTH, expand=1)
+        label = Tk.Label(labelframe, text="Choose an interpolation mode. The fast one is fast, but less exact. The slow one removes flat triangles from the triangulation that is used when interpolating.", background='#fff', wraplength=350, padx=15, pady=15, justify=Tk.LEFT, anchor=Tk.W)
+        label.pack(fill=Tk.BOTH, expand=1)
+
+    # Create the buttons
+    def buttonbox(self):
+        box = Tk.Frame(self)
+        w = ttk.Button(box, text="Cancel", width=10, command=self.cancel)
+        w.pack(side=Tk.RIGHT, padx=5, pady=5)
+        w = ttk.Button(box, text="Slow and exact", width=15, command=self.slow)
+        w.pack(side=Tk.RIGHT, padx=5, pady=5)
+        w = ttk.Button(box, text="Fast", width=10, command=self.fast,
+                       default=Tk.ACTIVE)
+        w.pack(side=Tk.RIGHT, padx=5, pady=5)
+        self.bind("<Return>", self.fast)
+        self.bind("<Escape>", self.cancel)
+        box.pack(fill=Tk.BOTH, padx=10, pady=5)
+
+    def fast(self, *args):
+        self.result = "Fast"
+        self.ok()
+
+    def slow(self):
+        self.result = "Slow"
+        self.ok()
+
+
 # Handle the user choosing one of the radio buttons
 def show_radio(options):
     # Store the mode info from the buttons
@@ -356,15 +386,15 @@ def show_radio(options):
             set_mode(options)
         # If the user wants the interpolated map, check if it exists...
         elif key[1] == 'map':
-            options.mode = "_".join(key)
             if options.objects[key[0]]['canvas'].interpolation_done:
+                options.mode = "_".join(key)
                 set_mode(options)
             # ...if not, give the user the option to generate one
             else:
-                ans = mb.askyesnocancel("Fast or exact?", "Would you like to remove flat triangles from the triangulation that is used when interpolating? This is slower, but more exact.")
-                if ans:
+                dialog = FastExactDialog(options.root, title="Fast or exact?", pad=False)
+                if dialog.result == "Slow":
                     interpolate_exact(options, key[0])
-                elif ans is not None:
+                elif dialog.result == "Fast":
                     interpolate_fast(options, key[0])
 
     # If the user wants the subtracted map, show it or calculate it and show it
@@ -383,6 +413,8 @@ def show_radio(options):
         else:
             options.mode = "_".join(key)
             set_mode(options)
+    # Give the focus back to the graph
+    options.mframe.canvas._tkcanvas.focus_set()
 
 
 # Allow for quick recomputing of whatever is being right-clicked on
