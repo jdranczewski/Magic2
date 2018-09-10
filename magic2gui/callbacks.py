@@ -193,11 +193,11 @@ def m_open(options, interpolate = None):
 # This dialog is used for exporting the graph as an image.
 # It allows the user to choose a resolution
 class NameDialog(m2dialog.Dialog):
-    def __init__(self, parent, options, title=None):
+    def __init__(self, parent, options, title=None, parent_mframe=None):
         # We need to save the options, which would not be accepted as an
         # argument by the original Dialog class, so we override __init__
         self.options = options
-        m2dialog.Dialog.__init__(self, parent, title)
+        m2dialog.Dialog.__init__(self, parent, title, parent_mframe=parent_mframe)
 
     def body(self, master):
         # Create a simple body
@@ -215,7 +215,7 @@ class NameDialog(m2dialog.Dialog):
 
 # This function sets the project's name
 def set_namecore(options):
-    dialog = NameDialog(options.root, options, title="Set name")
+    dialog = NameDialog(options.root, options, title="Set name", parent_mframe=options.mframe)
     if dialog.result is not None:
         options.namecore = dialog.result
         options.ncmanual = True
@@ -271,7 +271,7 @@ class DpiDialog(m2dialog.Dialog):
 
 # This function exports the current graph as an image
 def export_image(options):
-    dialog = DpiDialog(options.root, title="Choose quality")
+    dialog = DpiDialog(options.root, title="Choose quality", parent_mframe=options.mframe)
     if dialog.result is not None:
         # Ask for a file name
         filename = fd.asksaveasfilename(filetypes=[("PNG files", "*.png;*.PNG"),
@@ -285,11 +285,11 @@ def export_image(options):
 
 # This dialog is used by the function that sets the colormap
 class CmapDialog(m2dialog.Dialog):
-    def __init__(self, parent, options, title=None):
+    def __init__(self, parent, options, title=None, parent_mframe=None):
         # We need to save the options, which would not be accepted as an
         # argument by the original Dialog class, so we override __init__
         self.options = options
-        m2dialog.Dialog.__init__(self, parent, title)
+        m2dialog.Dialog.__init__(self, parent, title, parent_mframe=parent_mframe)
 
     def body(self, master):
         ttk.Label(master, text="Colormap:").grid(row=0)
@@ -328,7 +328,7 @@ class CmapDialog(m2dialog.Dialog):
 
 # This function sets a chosen colormap
 def set_colormap(options):
-    dialog = CmapDialog(options.root, options)
+    dialog = CmapDialog(options.root, options, parent_mframe=options.mframe)
     if dialog.result is not None:
         options.cmap = copy(cm.get_cmap(dialog.result))
         # White is for masking
@@ -391,7 +391,7 @@ def show_radio(options):
                 set_mode(options)
             # ...if not, give the user the option to generate one
             else:
-                dialog = FastExactDialog(options.root, title="Fast or exact?", pad=False)
+                dialog = FastExactDialog(options.root, title="Fast or exact?", parent_mframe=options.mframe, pad=False)
                 if dialog.result == "Slow":
                     interpolate_exact(options, key[0])
                 elif dialog.result == "Fast":
@@ -665,11 +665,11 @@ def subtract(options):
 # This dialog allows the user to set the shift that should be normalised
 # to be zero.
 class ZeroDialog(m2dialog.Dialog):
-    def __init__(self, parent, options, title=None):
+    def __init__(self, parent, options, title=None, parent_mframe=None):
         # We need to save the options, which would not be accepted as an
         # argument by the original Dialog class, so we override __init__
         self.options = options
-        m2dialog.Dialog.__init__(self, parent, title)
+        m2dialog.Dialog.__init__(self, parent, title, parent_mframe=parent_mframe)
 
     def body(self, master):
         # Create a simple body
@@ -722,7 +722,7 @@ class ZeroDialog(m2dialog.Dialog):
 def set_zero(options):
     # Check if mode is correct
     if options.mode == "subtracted_graph":
-        dialog = ZeroDialog(options.root, options, title="Choose zero point")
+        dialog = ZeroDialog(options.root, options, title="Choose zero point", parent_mframe=options.mframe)
         if dialog.result == "auto":
             options.offset = sp.amin(options.subtracted)
         elif dialog.result is not None:
@@ -759,9 +759,9 @@ def invert(options):
 
 # This dialog is used to obtain/display the shot details
 class PlasmaDialog(m2dialog.Dialog):
-    def __init__(self, parent, options, title=None):
+    def __init__(self, parent, options, title=None, parent_mframe=None):
         self.options = options
-        m2dialog.Dialog.__init__(self, parent, title)
+        m2dialog.Dialog.__init__(self, parent, title, parent_mframe=parent_mframe)
 
     def body(self, master):
         master.grid_rowconfigure((0,1,2), pad=5)
@@ -816,7 +816,7 @@ class PlasmaDialog(m2dialog.Dialog):
 
 # This function shows the above dialog
 def shot_options(options):
-    dialog = PlasmaDialog(options.root, options, title="Shot details")
+    dialog = PlasmaDialog(options.root, options, title="Shot details", parent_mframe=options.mframe)
     return dialog.result is not None
 
 
@@ -949,7 +949,7 @@ class AboutDialog(m2dialog.Dialog):
 
 
 def about(options):
-    AboutDialog(options.root)
+    AboutDialog(options.root, parent_mframe=options.mframe)
 
 
 def close_window(options):

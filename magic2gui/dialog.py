@@ -5,8 +5,11 @@ import tkinter.ttk as ttk
 
 
 class Dialog(Tk.Toplevel):
-    def __init__(self, parent, title=None, pad=True):
+    def __init__(self, parent, title=None, parent_mframe=None, pad=True):
         Tk.Toplevel.__init__(self, parent)
+        # Store the parent's mframe - focus is returned to it after
+        # the dialog closes
+        self.parent_mframe = parent_mframe
         # Make the window not show up in the window manager
         self.transient(parent)
         # Set the title
@@ -71,6 +74,9 @@ class Dialog(Tk.Toplevel):
 
     def cancel(self, event=None):
         self.parent.focus_set()
+        if self.parent_mframe is not None:
+            # Give the focus back to the graph
+            self.parent_mframe.canvas._tkcanvas.focus_set()
         self.destroy()
 
     # Override to validate

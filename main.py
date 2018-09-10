@@ -29,6 +29,7 @@ class Options:
         # tkinter's root
         self.root = None
         # matplotlib's objects used to manipulate the main graph
+        self.mframe = None
         self.fig = None
         self.ax = None
         self.imshow = None
