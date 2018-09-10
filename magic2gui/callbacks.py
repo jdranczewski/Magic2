@@ -475,7 +475,9 @@ def set_mode(options):
                                canvas.fringe_phases_visual),
             cmap=options.cmap
         )
-        canvas.imshow.set_clim(fringes.min, fringes.max)
+        # The small increment is included to make the limits work when all fringes
+        # are unlabelled
+        canvas.imshow.set_clim(fringes.min, fringes.max+0.0000000001)
         options.labeller = m2labelling.label(fringes, canvas,
                                              options.fig, options.ax,
                                              options=options, imshow=options.imshow)
