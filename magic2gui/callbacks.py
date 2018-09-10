@@ -585,12 +585,12 @@ def interpolate_debug(options, env=None):
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
     elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
-    elif mb.askokcancel("Debug triangulation", "You are about to perform a debug mode interpolation. This shows the output of every step in a separate graph window. Flat triangles are usually highlighted green. Look for error messages and progress reports in the terminal. Do not interact with the main Magic2 window, as who knows what happens then?\n\nThere is a very much non-zero risk of crashing. You may loose your work (so save it)."):
+    elif mb.askokcancel("Debug triangulation", "You are about to perform a debug mode interpolation. This shows the output of every step in a separate graph window. Close that window to proceed to the next step. Flat triangles are usually highlighted green. Look for error messages and progress reports in the terminal. Do not interact with the main Magic2 window, as who knows what happens then?\n\nThere is a very much non-zero risk of crashing. You may loose your work (so save it)."):
         # The above confirmation dialog is unwieldy, but necessary to explain
         # the risks and advantages to the user
         if env is None:
             env = options.mode.split("_")[0]
-        m2triangulate.triangulate_debug(options.objects[env]['canvas'])
+        m2triangulate.triangulate_debug(options.objects[env]['canvas'], options)
         options.mode = env + "_map"
         set_mode(options)
 
