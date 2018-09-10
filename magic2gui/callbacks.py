@@ -498,7 +498,7 @@ def set_mode(options):
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         # Unhide the colorbar's subplot
         options.mframe.cax.axis('on')
-        # Add a label. Rotation is os that it's easier to read, labelpad
+        # Add a label. Rotate is so that it's easier to read, labelpad
         # stops it from touching the colorbar's ticks' labels
         options.cbar.ax.set_ylabel('Fringe shift', rotation=270, labelpad=20)
     elif key[0] == 'density':
