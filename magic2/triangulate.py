@@ -249,7 +249,9 @@ class Triangulation:
         triangle.flat = False
 
     # Interpolate the data based on the calculated triangulation
-    def interpolate(self, canvas, status = None):
+    def interpolate(self, canvas, status=None):
+        # Clear the interpolated canvas
+        canvas.interpolated = sp.zeros_like(canvas.fringes_image)-1024.0
         if status is not None:
             status.set("Performing the interpolation", 70)
         else:

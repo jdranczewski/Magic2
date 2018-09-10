@@ -77,8 +77,9 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
     else:
         increment = 1
     if increment == 2:
+        # This setting is for unlabelling
         increment = 0
-        phase = 0
+        phase = -2048
 
     # Iterate over all the points calculated previously
     for i in range(len(x)):
@@ -102,13 +103,16 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
             if phase > -1024:
                 phase += increment
                 fringes.list[index].phase = phase
-            else:
+            elif phase != -2048:
                 # This takes the value of the first fringe encountered.
                 # All values after that are just increments
                 phase = fringes.list[index].phase
                 if phase == -2048:
                     phase = 0
                     fringes.list[index].phase = phase
+            else:
+                # Unlabell the fringe
+                fringes.list[index].phase = phase
             fix_indices.append(index)
             # Storing this allows us to prevent labelling a fringe
             # multiple times

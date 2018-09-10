@@ -81,6 +81,12 @@ def render_fringes(fringes, canvas, width=0, indices=None):
                 if fringe.phase != -2048:
                     canvas.fringes_image_clean[point[0],
                                                point[1]] = 1
+                elif canvas.fringes_image_clean[point[0],
+                                                point[1]] == 1:
+                    # This will be called if a fringe was unlabelled
+                    canvas.fringes_image_clean[point[0],
+                                               point[1]] = 0
+
             except IndexError:
                 pass
             # The width is used only for drawing the visual representation
