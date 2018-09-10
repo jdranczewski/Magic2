@@ -33,6 +33,11 @@ class Dialog(Tk.Toplevel):
         # Position the window close to parent
         self.geometry("+{}+{}".format(parent.winfo_rootx()+50,
                                       parent.winfo_rooty()+50))
+        # Set the icon
+        try:
+            self.iconbitmap("magic2.ico")
+        except:
+            pass
         # Make the main window wait
         self.wait_window(self)
 
