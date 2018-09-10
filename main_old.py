@@ -1,3 +1,4 @@
+from tkinter import Tk
 import tkinter.filedialog
 import matplotlib.pyplot as plt
 import magic2.fringes as m2fringes
@@ -8,7 +9,9 @@ import scipy as sp
 
 
 def main():
+    root = Tk()
     filename = tkinter.filedialog.askopenfile(filetypes=[("PNG files", "*.png;*.PNG")])
+    root.destroy()
     print("Reading from", filename.name)
     # A canvas object is created. It handles extracting the fringes and the
     # mas out of the image. It also stores the fringe phases and indices

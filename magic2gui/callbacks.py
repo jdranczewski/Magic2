@@ -193,11 +193,11 @@ def m_open(options, interpolate = None):
 # This dialog is used for exporting the graph as an image.
 # It allows the user to choose a resolution
 class NameDialog(m2dialog.Dialog):
-    def __init__(self, parent, options, title=None):
+    def __init__(self, parent, options, title=None, parent_mframe=None):
         # We need to save the options, which would not be accepted as an
         # argument by the original Dialog class, so we override __init__
         self.options = options
-        m2dialog.Dialog.__init__(self, parent, title)
+        m2dialog.Dialog.__init__(self, parent, title, parent_mframe=parent_mframe)
 
     def body(self, master):
         # Create a simple body
@@ -215,7 +215,7 @@ class NameDialog(m2dialog.Dialog):
 
 # This function sets the project's name
 def set_namecore(options):
-    dialog = NameDialog(options.root, options, title="Set name")
+    dialog = NameDialog(options.root, options, title="Set name", parent_mframe=options.mframe)
     if dialog.result is not None:
         options.namecore = dialog.result
         options.ncmanual = True
@@ -271,7 +271,7 @@ class DpiDialog(m2dialog.Dialog):
 
 # This function exports the current graph as an image
 def export_image(options):
-    dialog = DpiDialog(options.root, title="Choose quality")
+    dialog = DpiDialog(options.root, title="Choose quality", parent_mframe=options.mframe)
     if dialog.result is not None:
         # Ask for a file name
         filename = fd.asksaveasfilename(filetypes=[("PNG files", "*.png;*.PNG"),
@@ -285,11 +285,11 @@ def export_image(options):
 
 # This dialog is used by the function that sets the colormap
 class CmapDialog(m2dialog.Dialog):
-    def __init__(self, parent, options, title=None):
+    def __init__(self, parent, options, title=None, parent_mframe=None):
         # We need to save the options, which would not be accepted as an
         # argument by the original Dialog class, so we override __init__
         self.options = options
-        m2dialog.Dialog.__init__(self, parent, title)
+        m2dialog.Dialog.__init__(self, parent, title, parent_mframe=parent_mframe)
 
     def body(self, master):
         ttk.Label(master, text="Colormap:").grid(row=0)
@@ -328,7 +328,7 @@ class CmapDialog(m2dialog.Dialog):
 
 # This function sets a chosen colormap
 def set_colormap(options):
-    dialog = CmapDialog(options.root, options)
+    dialog = CmapDialog(options.root, options, parent_mframe=options.mframe)
     if dialog.result is not None:
         options.cmap = copy(cm.get_cmap(dialog.result))
         # White is for masking
@@ -338,6 +338,36 @@ def set_colormap(options):
         # Refresh the graph if needed
         if options.mode is not None:
             set_mode(options)
+
+
+class FastExactDialog(m2dialog.Dialog):
+    def body(self, master):
+        labelframe = Tk.Frame(master, bg='#fff')
+        labelframe.pack(fill=Tk.BOTH, expand=1)
+        label = Tk.Label(labelframe, text="Choose an interpolation mode. The fast one is fast, but less exact. The slow one removes flat triangles from the triangulation that is used when interpolating.", background='#fff', wraplength=350, padx=15, pady=15, justify=Tk.LEFT, anchor=Tk.W)
+        label.pack(fill=Tk.BOTH, expand=1)
+
+    # Create the buttons
+    def buttonbox(self):
+        box = Tk.Frame(self)
+        w = ttk.Button(box, text="Cancel", width=10, command=self.cancel)
+        w.pack(side=Tk.RIGHT, padx=5, pady=5)
+        w = ttk.Button(box, text="Slow and exact", width=15, command=self.slow)
+        w.pack(side=Tk.RIGHT, padx=5, pady=5)
+        w = ttk.Button(box, text="Fast", width=10, command=self.fast,
+                       default=Tk.ACTIVE)
+        w.pack(side=Tk.RIGHT, padx=5, pady=5)
+        self.bind("<Return>", self.fast)
+        self.bind("<Escape>", self.cancel)
+        box.pack(fill=Tk.BOTH, padx=10, pady=5)
+
+    def fast(self, *args):
+        self.result = "Fast"
+        self.ok()
+
+    def slow(self):
+        self.result = "Slow"
+        self.ok()
 
 
 # Handle the user choosing one of the radio buttons
@@ -356,15 +386,15 @@ def show_radio(options):
             set_mode(options)
         # If the user wants the interpolated map, check if it exists...
         elif key[1] == 'map':
-            options.mode = "_".join(key)
             if options.objects[key[0]]['canvas'].interpolation_done:
+                options.mode = "_".join(key)
                 set_mode(options)
             # ...if not, give the user the option to generate one
             else:
-                ans = mb.askyesnocancel("Fast or exact?", "Would you like to remove flat triangles from the triangulation that is used when interpolating? This is slower, but more exact.")
-                if ans:
+                dialog = FastExactDialog(options.root, title="Fast or exact?", parent_mframe=options.mframe, pad=False)
+                if dialog.result == "Slow":
                     interpolate_exact(options, key[0])
-                elif ans is not None:
+                elif dialog.result == "Fast":
                     interpolate_fast(options, key[0])
 
     # If the user wants the subtracted map, show it or calculate it and show it
@@ -383,18 +413,22 @@ def show_radio(options):
         else:
             options.mode = "_".join(key)
             set_mode(options)
+    # Give the focus back to the graph
+    options.mframe.canvas._tkcanvas.focus_set()
 
 
 # Allow for quick recomputing of whatever is being right-clicked on
 # the radio buttons on the right
 def recompute(event, options):
     key = event.widget['value'].split("_")
-    print(key)
     if key[1] == 'fringes':
         phases = [fringe.phase for fringe in options.objects[key[0]]['fringes'].list]
-        options.objects[key[0]]['fringes'].min = sp.amin([phase for phase in phases if phase != -2048.0])
-        options.objects[key[0]]['fringes'].max = sp.amax([phase for phase in phases if phase != -2048.0])
-        set_mode(options)
+        try:
+            options.objects[key[0]]['fringes'].min = sp.amin([phase for phase in phases if phase != -2048.0])
+            options.objects[key[0]]['fringes'].max = sp.amax([phase for phase in phases if phase != -2048.0])
+            set_mode(options)
+        except ValueError:
+            pass
     if key[1] == 'map':
         options.show_var.set(event.widget['value'])
         if options.objects[key[0]]['canvas'] is not None:
@@ -441,7 +475,9 @@ def set_mode(options):
                                canvas.fringe_phases_visual),
             cmap=options.cmap
         )
-        canvas.imshow.set_clim(fringes.min, fringes.max)
+        # The small increment is included to make the limits work when all fringes
+        # are unlabelled
+        canvas.imshow.set_clim(fringes.min, fringes.max+0.0000000001)
         options.labeller = m2labelling.label(fringes, canvas,
                                              options.fig, options.ax,
                                              options=options, imshow=options.imshow)
@@ -464,7 +500,7 @@ def set_mode(options):
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         # Unhide the colorbar's subplot
         options.mframe.cax.axis('on')
-        # Add a label. Rotation is os that it's easier to read, labelpad
+        # Add a label. Rotate is so that it's easier to read, labelpad
         # stops it from touching the colorbar's ticks' labels
         options.cbar.ax.set_ylabel('Fringe shift', rotation=270, labelpad=20)
     elif key[0] == 'density':
@@ -585,12 +621,12 @@ def interpolate_debug(options, env=None):
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
     elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
-    elif mb.askokcancel("Debug triangulation", "You are about to perform a debug mode interpolation. This shows the output of every step in a separate graph window. Flat triangles are usually highlighted green. Look for error messages and progress reports in the terminal. Do not interact with the main Magic2 window, as who knows what happens then?\n\nThere is a very much non-zero risk of crashing. You may loose your work (so save it)."):
+    elif mb.askokcancel("Debug triangulation", "You are about to perform a debug mode interpolation. This shows the output of every step in a separate graph window. Close that window to proceed to the next step. Flat triangles are usually highlighted green. Look for error messages and progress reports in the terminal. Do not interact with the main Magic2 window, as who knows what happens then?\n\nThere is a very much non-zero risk of crashing. You may loose your work (so save it)."):
         # The above confirmation dialog is unwieldy, but necessary to explain
         # the risks and advantages to the user
         if env is None:
             env = options.mode.split("_")[0]
-        m2triangulate.triangulate_debug(options.objects[env]['canvas'])
+        m2triangulate.triangulate_debug(options.objects[env]['canvas'], options)
         options.mode = env + "_map"
         set_mode(options)
 
@@ -631,11 +667,11 @@ def subtract(options):
 # This dialog allows the user to set the shift that should be normalised
 # to be zero.
 class ZeroDialog(m2dialog.Dialog):
-    def __init__(self, parent, options, title=None):
+    def __init__(self, parent, options, title=None, parent_mframe=None):
         # We need to save the options, which would not be accepted as an
         # argument by the original Dialog class, so we override __init__
         self.options = options
-        m2dialog.Dialog.__init__(self, parent, title)
+        m2dialog.Dialog.__init__(self, parent, title, parent_mframe=parent_mframe)
 
     def body(self, master):
         # Create a simple body
@@ -688,7 +724,7 @@ class ZeroDialog(m2dialog.Dialog):
 def set_zero(options):
     # Check if mode is correct
     if options.mode == "subtracted_graph":
-        dialog = ZeroDialog(options.root, options, title="Choose zero point")
+        dialog = ZeroDialog(options.root, options, title="Choose zero point", parent_mframe=options.mframe)
         if dialog.result == "auto":
             options.offset = sp.amin(options.subtracted)
         elif dialog.result is not None:
@@ -725,9 +761,9 @@ def invert(options):
 
 # This dialog is used to obtain/display the shot details
 class PlasmaDialog(m2dialog.Dialog):
-    def __init__(self, parent, options, title=None):
+    def __init__(self, parent, options, title=None, parent_mframe=None):
         self.options = options
-        m2dialog.Dialog.__init__(self, parent, title)
+        m2dialog.Dialog.__init__(self, parent, title, parent_mframe=parent_mframe)
 
     def body(self, master):
         master.grid_rowconfigure((0,1,2), pad=5)
@@ -782,7 +818,7 @@ class PlasmaDialog(m2dialog.Dialog):
 
 # This function shows the above dialog
 def shot_options(options):
-    dialog = PlasmaDialog(options.root, options, title="Shot details")
+    dialog = PlasmaDialog(options.root, options, title="Shot details", parent_mframe=options.mframe)
     return dialog.result is not None
 
 
@@ -907,7 +943,7 @@ class AboutDialog(m2dialog.Dialog):
         logo = Tk.Label(master, image=photo)
         logo.photo = photo
         logo.pack()
-        label = Tk.Label(master, text="This software was created by Jakub Dranczewski during a UROP in 2018.\nIt is based on concepts from Magic, which was created by George Swadling.\n\nYou can contact me on jbd17@ic.ac.uk or (as I inevitably loose either the whole email or the 17) jakub.dranczewski@gmail.com\n\nv1.02")
+        label = Tk.Label(master, text="This software was created by Jakub Dranczewski during a UROP in 2018.\nIt is based on concepts from Magic, which was created by George Swadling.\n\nYou can contact me on jbd17@ic.ac.uk or (as I inevitably loose either the whole email or the 17) jakub.dranczewski@gmail.com\n\nv1.03")
         label.pack()
 
     def buttonbox(self):
@@ -915,7 +951,7 @@ class AboutDialog(m2dialog.Dialog):
 
 
 def about(options):
-    AboutDialog(options.root)
+    AboutDialog(options.root, parent_mframe=options.mframe)
 
 
 def close_window(options):

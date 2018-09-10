@@ -2,7 +2,11 @@ import scipy as sp
 from scipy.spatial import Delaunay
 from scipy.interpolate import LinearNDInterpolator
 import matplotlib.pyplot as plt
+import tkinter as Tk
+import ctypes
+from time import sleep
 from . import graphics as m2graphics
+import magic2gui.matplotlib_frame as m2mframe
 
 # added_points = []
 
@@ -245,7 +249,9 @@ class Triangulation:
         triangle.flat = False
 
     # Interpolate the data based on the calculated triangulation
-    def interpolate(self, canvas, status = None):
+    def interpolate(self, canvas, status=None):
+        # Clear the interpolated canvas
+        canvas.interpolated = sp.zeros_like(canvas.fringes_image)-1024.0
         if status is not None:
             status.set("Performing the interpolation", 70)
         else:
@@ -419,7 +425,19 @@ def fast_tri(canvas, ax, status):
 # On a more serious note, this function was used while creating this software.
 # It didn't have a GUI, so this just displays output in separate matplotlib
 # windows. Potentially useful for debugging purposes, so left as an option.
-def triangulate_debug(canvas):
+def triangulate_debug(canvas, options=None):
+    print("### Starting interpolation in debug mode ###")
+    # Depending on whether we are in GUI mode or not, we will use the
+    # matplotlib.pyplot library directly, or through the DebugWindow interface
+    # (defined below), which wraps the graphs in a tkinter window. This is
+    # necessary as tkinter doesn't play well with matplotlib windows and
+    # plt.show() would not stop execution until the main Magic2 windows is
+    # closed (and that's not very useful). By redefining plt we are able to
+    # leave the code in this function alone, so that it still works in
+    # headless mode (with main_old.py)
+    global plt
+    if options is not None:
+        plt = DebugWindow(options)
     tri = Triangulation(sp.transpose(
                         sp.nonzero(canvas.fringes_image_clean)),
                         canvas)
@@ -448,3 +466,79 @@ def triangulate_debug(canvas):
     plt.imshow(sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated==-1024.0), canvas.interpolated), cmap=m2graphics.cmap)
     plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.get_simplices())
     plt.show()
+
+
+# A helper class that is used instead of matplotlib.pyplot to render output of
+# interpolate_debug()
+class DebugWindow:
+    def __init__(self, options):
+        # Save a reference to the options object
+        self.options = options
+        # Define a placeholder for self.window
+        self.window = None
+
+    def make_window(self):
+        # Create a window for the graph
+        window = self.window = Tk.Toplevel()
+        window.wm_title("Debug mode interpolation")
+        # This is windows specific, but needed for the icon to show up
+        # in the taskbar. try/catch in case this is run on other platforms
+        try:
+            myappid = 'jdranczewski.magic2'
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        except:
+            pass
+        # Setting the icon doesn't work on Linux for some reason, so we have
+        # a try/catch here again
+        try:
+            window.iconbitmap("magic2.ico")
+        except:
+            pass
+        # Set the focus to the new window
+        # Pin to the root window
+        self.window.transient(self.options.root)
+        window.focus_set()
+        window.geometry("+%d+%d" % (self.options.root.winfo_rootx()+50,
+                                    self.options.root.winfo_rooty()+50))
+        # Create the matplotlib frame
+        self.mframe = m2mframe.GraphFrame(window, bind_keys=True,
+                                          show_toolbar=True)
+        self.mframe.pack(fill=Tk.BOTH, expand=1)
+        # Create a variable that will be used to stop code execution until the
+        # window is closed
+        self.proceed = False
+        window.protocol("WM_DELETE_WINDOW", self.stop)
+
+    def stop(self):
+        # Signal that we can proceed now
+        self.proceed = True
+        # Set the focus back to the main window
+        self.options.root.focus_set()
+        # Destroy the graph's window
+        self.window.destroy()
+        # Signal
+        self.window = None
+
+    # imshow and triplot correspond to matplotlib's functions, but use the
+    # mframe in self.window for drawings
+    def imshow(self, *args, **kwargs):
+        if self.window is None:
+            # A windows is created if not allready there
+            self.make_window()
+        self.mframe.ax.imshow(*args, **kwargs)
+
+    def triplot(self, *args, **kwargs):
+        if self.window is None:
+            self.make_window()
+        self.mframe.ax.triplot(*args, **kwargs)
+
+    # This refreshes the mframe's canvas and waits for self.proceed to continue
+    # execution and allow the triangulation code to continue
+    def show(self):
+        self.mframe.fig.canvas.draw()
+        while not self.proceed:
+            self.window.update()
+            # Bit of a hack, but works
+            sleep(0.25)
+        self.proceed = False
+        self.mframe.ax.clear()

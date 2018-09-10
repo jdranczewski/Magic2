@@ -5,8 +5,11 @@ import tkinter.ttk as ttk
 
 
 class Dialog(Tk.Toplevel):
-    def __init__(self, parent, title=None):
+    def __init__(self, parent, title=None, parent_mframe=None, pad=True):
         Tk.Toplevel.__init__(self, parent)
+        # Store the parent's mframe - focus is returned to it after
+        # the dialog closes
+        self.parent_mframe = parent_mframe
         # Make the window not show up in the window manager
         self.transient(parent)
         # Set the title
@@ -19,7 +22,10 @@ class Dialog(Tk.Toplevel):
         body = Tk.Frame(self)
         # Create the elements and get the initial focus element
         self.initial_focus = self.body(body)
-        body.pack(padx=5, pady=5)
+        if pad:
+            body.pack(padx=5, pady=5)
+        else:
+            body.pack(fill=Tk.BOTH, expand=1)
         # Create the buttons
         self.buttonbox()
         # Make the dialog modal
@@ -33,6 +39,11 @@ class Dialog(Tk.Toplevel):
         # Position the window close to parent
         self.geometry("+{}+{}".format(parent.winfo_rootx()+50,
                                       parent.winfo_rooty()+50))
+        # Set the icon
+        try:
+            self.iconbitmap("magic2.ico")
+        except:
+            pass
         # Make the main window wait
         self.wait_window(self)
 
@@ -63,6 +74,9 @@ class Dialog(Tk.Toplevel):
 
     def cancel(self, event=None):
         self.parent.focus_set()
+        if self.parent_mframe is not None:
+            # Give the focus back to the graph
+            self.parent_mframe.canvas._tkcanvas.focus_set()
         self.destroy()
 
     # Override to validate

@@ -81,6 +81,12 @@ def render_fringes(fringes, canvas, width=0, indices=None):
                 if fringe.phase != -2048:
                     canvas.fringes_image_clean[point[0],
                                                point[1]] = 1
+                elif canvas.fringes_image_clean[point[0],
+                                                point[1]] == 1:
+                    # This will be called if a fringe was unlabelled
+                    canvas.fringes_image_clean[point[0],
+                                               point[1]] = 0
+
             except IndexError:
                 pass
             # The width is used only for drawing the visual representation
@@ -99,7 +105,6 @@ def clear_visual(canvas):
 # Define a normalization and a colour map that can be used with
 # matplotlib's imshow to show phase in a good looking way and on
 # a white background.
-norm = Normalize(vmin=-0.5, clip=False)
 cmap = copy(plt.cm.get_cmap('plasma'))
 # White is for masking
 cmap.set_bad('white', 1.0)

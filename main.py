@@ -29,6 +29,7 @@ class Options:
         # tkinter's root
         self.root = None
         # matplotlib's objects used to manipulate the main graph
+        self.mframe = None
         self.fig = None
         self.ax = None
         self.imshow = None
@@ -261,7 +262,7 @@ def main():
         ("Increasing phase", 1),
         ("Constant phase", 0),
         ("Decreasing phase", -1),
-        ("Reset to 0", 2)
+        ("Unlabell", 2)
     ]
     options.direction_var = Tk.IntVar()
     options.direction_var.set(1)
