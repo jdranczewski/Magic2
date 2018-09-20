@@ -245,6 +245,10 @@ class Triangulation:
         n2.vertices[
             sp.argwhere(n2.vertices == tv[(op1+2) % 3])
         ] = new_index
+        triangle.vert_coordinates = self.points[triangle.vertices]
+        neighbour.vert_coordinates = self.points[neighbour.vertices]
+        t2.vert_coordinates = self.points[t2.vertices]
+        n2.vert_coordinates = self.points[n2.vertices]
         # Finally mark the triangle as sloped
         triangle.flat = False
 
