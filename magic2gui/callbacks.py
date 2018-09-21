@@ -576,7 +576,7 @@ def higher_width(options):
 def interpolate_exact(options, env=None):
     if options.mode is None:
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
-    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
+    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background' and env==None:
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
     else:
         # If the above checks are passed, perform the triangulation and
@@ -597,7 +597,7 @@ def interpolate_exact(options, env=None):
 def interpolate_fast(options, env=None):
     if options.mode is None:
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
-    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
+    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background' and env==None:
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
     else:
         # If the above checks are passed, perform the triangulation and
@@ -619,7 +619,7 @@ def interpolate_fast(options, env=None):
 def interpolate_debug(options, env=None):
     if options.mode is None:
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
-    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
+    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background' and env==None:
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
     elif mb.askokcancel("Debug triangulation", "You are about to perform a debug mode interpolation. This shows the output of every step in a separate graph window. Close that window to proceed to the next step. Flat triangles are usually highlighted green. Look for error messages and progress reports in the terminal. Do not interact with the main Magic2 window, as who knows what happens then?\n\nThere is a very much non-zero risk of crashing. You may loose your work (so save it)."):
         # The above confirmation dialog is unwieldy, but necessary to explain
