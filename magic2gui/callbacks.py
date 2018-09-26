@@ -270,7 +270,7 @@ class DpiDialog(m2dialog.Dialog):
 
 
 # This function exports the current graph as an image
-def export_image(options):
+def export_image(options=None, fig=None):
     dialog = DpiDialog(options.root, title="Choose quality", parent_mframe=options.mframe)
     if dialog.result is not None:
         # Ask for a file name
@@ -280,7 +280,10 @@ def export_image(options):
                                         initialfile=options.namecore)
         if filename != '':
             # Save the graph, using the dpi obtained with the dialog
-            options.fig.savefig(filename, dpi=dialog.result)
+            if fig is None:
+                options.fig.savefig(filename, dpi=dialog.result)
+            else:
+                fig.savefig(filename, dpi=dialog.result)
 
 
 # This dialog is used by the function that sets the colormap
@@ -517,10 +520,14 @@ def set_mode(options):
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         options.mframe.cax.axis('on')
         options.cbar.ax.set_ylabel('Electron density / $cm^{-3}$', rotation=270, labelpad=20)
+    # Clear the view history stack
+    options.mframe.clear_nav_stack()
     if options.conserve_limits:
         # revert the graph to the old display limits
         options.ax.set_xlim(xlim)
         options.ax.set_ylim(ylim)
+        # Push the cropped view onto the view history stack
+        options.mframe.push_current()
     elif not stop_reverting:
         # Revert to the original setting
         options.conserve_limits = True
@@ -924,7 +931,8 @@ def cosine(options):
             m2lineouts.stop_lineout(options)
         for lineout in options.lineouts:
             lineout.update()
-        # Draw the canvas
+        # Draw the canvas, clering the view history stack too
+        options.mframe.clear_nav_stack()
         options.fig.canvas.draw()
     else:
         mb.showinfo("Open a map", "Taking the cosine is possible only for interpolated phase maps.")

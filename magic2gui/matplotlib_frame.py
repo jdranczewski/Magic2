@@ -37,8 +37,8 @@ class GraphFrame(Tk.Frame):
         self.canvas.draw()
         # Add a toolbar if needed
         if show_toolbar:
-            toolbar = NavigationToolbar2TkAgg(self.canvas, self)
-            toolbar.update()
+            self.toolbar = NavigationToolbar2Tk(self.canvas, self)
+            self.toolbar.update()
         # Pack the canvas in the Frame
         self.canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
         self.canvas._tkcanvas.pack(side=Tk.BOTTOM, fill=Tk.BOTH, expand=1)
@@ -50,7 +50,7 @@ class GraphFrame(Tk.Frame):
 
             def on_key_press(event):
                 # The default keypress handler
-                key_press_handler(event, self.canvas, toolbar)
+                key_press_handler(event, self.canvas, self.toolbar)
                 # Keyboard navigation
                 if event.key == 'x':
                     # Zoom in
@@ -61,6 +61,7 @@ class GraphFrame(Tk.Frame):
                     self.ax.set_ylim([ylim[0]+0.1*diffy, ylim[1]-0.1*diffy])
                     self.ax.set_xlim([xlim[0]+0.1*diffx, xlim[1]-0.1*diffx])
                     self.fig.canvas.draw()
+                    self.push_current()
                 elif event.key == 'z':
                     # Zoom out
                     ylim = self.ax.get_ylim()
@@ -70,6 +71,7 @@ class GraphFrame(Tk.Frame):
                     self.ax.set_ylim([ylim[0]-0.1*diffy, ylim[1]+0.1*diffy])
                     self.ax.set_xlim([xlim[0]-0.1*diffx, xlim[1]+0.1*diffx])
                     self.fig.canvas.draw()
+                    self.push_current()
                 else:
                     # Move
                     dx = 0
@@ -90,19 +92,18 @@ class GraphFrame(Tk.Frame):
                         self.ax.set_ylim([ylim[0]+0.3*diffy*dy, ylim[1]+0.3*diffy*dy])
                         self.ax.set_xlim([xlim[0]+0.3*diffx*dx, xlim[1]+0.3*diffx*dx])
                         self.fig.canvas.draw()
-                # Our wasd navigation messes up the views stack matplotlib
-                # normally uses, so we define our own home function,
-                # accessible by pressing 'h'
-                def new_home():
-                    print("New home")
-                    self.ax.autoscale()
-                    self.fig.canvas.draw()
-                toolbar.home = new_home
+                        self.push_current()
             self.canvas.mpl_connect("key_press_event", on_key_press)
         # Set focus back to canvas after clicking it
         self.canvas.mpl_connect('button_press_event',
                                 lambda event: self.canvas._tkcanvas.focus_set())
 
-    # Redraw the canvas to show new data (if updated)
-    def draw(self):
-        self.canvas.draw()
+    # Clear the view history stack...
+    def clear_nav_stack(self):
+        self.toolbar._nav_stack.clear()
+        # ...and push the current view onto it
+        self.push_current()
+
+    # Push the current view onto the view history stack
+    def push_current(self):
+        self.toolbar.push_current()
