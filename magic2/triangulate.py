@@ -319,6 +319,10 @@ def distance(points, i1, i2):
 
 # A class representing a triangle
 class Triangle:
+    # Tell Python what properties so that it can manage RAM more efficiently
+    __slots__ = ['vertices', 'vert_coordinates', 'neighbours', 'index',
+                 'flat', 'long_edges']
+
     def __init__(self, dt, index, points, values):
         # Copy the vertex and neighbours info
         self.vertices = dt.simplices[index]
@@ -367,6 +371,9 @@ class Triangle:
 # when creating new triangles that do not relay on the Delaunay
 # triangulation
 class TriangleCopy(Triangle):
+    __slots__ = ['vertices', 'vert_coordinates', 'neighbours', 'index',
+                 'flat', 'long_edges']
+
     def __init__(self, index, points, vertices, neighbours):
         # Making copies is absolutely necessary due to the way Python
         # handles lists - the variable is actually a pointer, so if we just
