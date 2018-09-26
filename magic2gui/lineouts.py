@@ -136,6 +136,8 @@ class Lineout():
         self.mframe.ax.plot(self.xspace, self.profile, color=self.colour)
         # Set the limits so that the entire length of the lineout is shown
         self.mframe.ax.set_xlim([0, sp.amax(self.xspace)])
+        # Push the current view onto the view history stack
+        self.mframe.push_current()
         # Pack the frame, filling all available space
         self.mframe.pack(fill=Tk.BOTH, expand=1)
 
