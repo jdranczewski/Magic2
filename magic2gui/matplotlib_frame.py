@@ -13,6 +13,7 @@ from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import rcParams
+from tkinter.messagebox import askokcancel
 
 
 class MFToolbar(NavigationToolbar2Tk):
@@ -38,6 +39,10 @@ class MFToolbar(NavigationToolbar2Tk):
             ax._set_view(view)
             # There would normally be some view changing settings here...
         self.canvas.draw_idle()
+
+    def save_figure(self, *args):
+        if askokcancel("Using matplotlib's figure saving", "Please note that this will use matplotlib's built-in figure saving mechanism, which doesn't allow resolution setting. You may want to use 'File->Save the graph as an image', which allows you to set the resolution when exporting the graph presented in the main window."):
+            NavigationToolbar2Tk.save_figure(self, *args)
 
 
 class GraphFrame(Tk.Frame):
