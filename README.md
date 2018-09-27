@@ -1,4 +1,4 @@
-# Magic2
+![Magic2](logo.png "Magic2")
 ## A rewrite of the original Magic by George Swadling, done by Jakub Dranczewski during a [UROP](http://www.imperial.ac.uk/urop "Undergraduate Research Opportunities Programme") in 2018.
 
 The purpose of Magic2 is to interpolate and help in the analysis of traced out interferograms, mostly for the purpose of plasma physics research. It also has many functions assisting in the processing and inspection of the obtained data. It is also a fully independent Python library that can be used with other code in headless mode (no GUI).
