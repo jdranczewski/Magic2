@@ -7,6 +7,7 @@ from copy import copy
 import pickle
 import gzip
 import os
+import webbrowser
 from matplotlib.pyplot import cm
 import matplotlib.ticker as ticker
 
@@ -315,6 +316,10 @@ class CmapDialog(m2dialog.Dialog):
         # as just a lot of arguments
         self.e = ttk.OptionMenu(master, self.var, self.options.cmap.name, *choice)
         self.e.grid(row=0, column=1)
+        b = ttk.Button(master, text="?", width=2,
+                       command=lambda:
+                       webbrowser.open("https://matplotlib.org/examples/color/colormaps_reference.html"))
+        b.grid(row=0, column=2, padx=5)
         return self.e
 
     def validate(self):
