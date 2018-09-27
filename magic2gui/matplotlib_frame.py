@@ -21,6 +21,24 @@ class MFToolbar(NavigationToolbar2Tk):
     # particular usecase, and could break things if used unwisely
     del toolitems[6]
 
+    # Override the _update_view function so that it doesn't try setting
+    # the plots position. It mostly failed to do that, and we're not planning
+    # to change that posoition either way.
+    # This function is mostly copied over from matplotlib's source
+    def _update_view(self):
+        # Update the viewlim and position from the view and
+        # position stack for each axes.
+        nav_info = self._nav_stack()
+        if nav_info is None:
+            return
+        # Retrieve all items at once to avoid any risk of GC deleting an Axes
+        # while in the middle of the loop below.
+        items = list(nav_info.items())
+        for ax, (view, (pos_orig, pos_active)) in items:
+            ax._set_view(view)
+            # There would normally be some view changing settings here...
+        self.canvas.draw_idle()
+
 
 class GraphFrame(Tk.Frame):
     def __init__(self, parent, figsize=(5, 4), dpi=100,
