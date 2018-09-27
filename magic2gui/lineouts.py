@@ -204,6 +204,9 @@ class Lineout():
                                                    color=self.colour,
                                                    alpha=0.7)
             self.rect = None
+            # Disable the width controls
+            self.width_box.config(state=Tk.DISABLED)
+            self.sb.config(state=Tk.DISABLED)
 
     # Delete the lineout when the associated window is closed
     def remove(self):
@@ -300,7 +303,8 @@ class Lineout():
     def update_colour(self, *args):
         self.colour = self.colourvar.get()
         self.line_plot.set_color(self.colour)
-        self.rect.set_color(self.colour)
+        if self.rect is not None:
+            self.rect.set_color(self.colour)
         self.mframe.ax.lines[0].set_color(self.colour)
         self.mframe.fig.canvas.draw()
         self.main_canvas_draw()
