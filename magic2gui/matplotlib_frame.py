@@ -44,7 +44,7 @@ class GraphFrame(Tk.Frame):
         self.canvas.draw()
         # Add a toolbar if needed
         if show_toolbar:
-            self.toolbar = NavigationToolbar2Tk(self.canvas, self)
+            self.toolbar = MFToolbar(self.canvas, self)
             self.toolbar.update()
         # Pack the canvas in the Frame
         self.canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
