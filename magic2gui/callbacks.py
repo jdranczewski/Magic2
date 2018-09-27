@@ -300,7 +300,8 @@ class CmapDialog(m2dialog.Dialog):
         self.var = Tk.StringVar()
         # This is a list of all reasonable colourmaps in matplotlib,
         # reasonable meaning that they're rather smooth and not the
-        # flag of France
+        # flag of France.
+        # Actually, screw it, the flag of France stays.
         choice = ('## perceptually uniform ##', 'plasma', 'viridis', 'inferno',
                   'magma', '## the classic ##', 'jet', '## sequnetial ##',
                   'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
@@ -311,7 +312,8 @@ class CmapDialog(m2dialog.Dialog):
                   'hot', 'afmhot', 'gist_heat', 'copper', '## misc ##', 'ocean',
                   'gist_earth', 'terrain', 'gist_stern', 'gnuplot',
                   'gnuplot2', 'CMRmap', 'cubehelix', 'brg', 'hsv',
-                  'gist_rainbow', 'rainbow', 'nipy_spectral', 'gist_ncar')
+                  'gist_rainbow', 'rainbow', 'nipy_spectral', 'gist_ncar',
+                  '## Règle, Britannia! ##', 'flag')
         # The star (*) unpacks the above tuple, as ttk.OptionMenu takes options
         # as just a lot of arguments
         self.e = ttk.OptionMenu(master, self.var, self.options.cmap.name, *choice)
