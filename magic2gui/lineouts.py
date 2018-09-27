@@ -140,6 +140,8 @@ class Lineout():
         self.mframe.push_current()
         # Pack the frame, filling all available space
         self.mframe.pack(fill=Tk.BOTH, expand=1)
+        # Give the focus to the graph
+        self.mframe.canvas._tkcanvas.focus_set()
 
     # This function calculates the vertices of a rectangle of
     # a given width along the lineout
@@ -207,6 +209,8 @@ class Lineout():
                                         initialfile=self.options.namecore)
         # Give focus back to the lineout window
         self.window.focus_set()
+        # Give the focus to the graph
+        self.mframe.canvas._tkcanvas.focus_set()
         if filename != '':
             # Add appropriate units to the header
             if self.mode.split("_")[0] == "density":
@@ -253,6 +257,8 @@ class Lineout():
             self.window.transient(self.options.root)
             self.pinvar.set("Unpin this window")
         self.transient = not self.transient
+        # Give the focus to the graph
+        self.mframe.canvas._tkcanvas.focus_set()
 
     # Update the Lineout's width
     def update_width(self, *args):
@@ -264,6 +270,8 @@ class Lineout():
         # Change the verices of the rectangle in the main window
         self.rect.set_xy(self.get_verts())
         self.main_canvas_draw()
+        # Give the focus to the graph
+        self.mframe.canvas._tkcanvas.focus_set()
 
     # Show or hide the bounding box
     def update_vis(self, draw=True):
@@ -271,6 +279,8 @@ class Lineout():
             self.rect.set_visible(self.showboxvar.get())
             if draw:
                 self.main_canvas_draw()
+        # Give the focus to the graph
+        self.mframe.canvas._tkcanvas.focus_set()
 
     # Update the lineout's colour and draw the necessary lines
     def update_colour(self, *args):
