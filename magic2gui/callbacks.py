@@ -481,9 +481,6 @@ def set_mode(options):
         # The small increment is included to make the limits work when all fringes
         # are unlabelled
         canvas.imshow.set_clim(fringes.min, fringes.max+0.0000000001)
-        options.labeller = m2labelling.label(fringes, canvas,
-                                             options.fig, options.ax,
-                                             options=options, imshow=options.imshow)
     elif key[1] == 'map':
         canvas = options.objects[key[0]]['canvas']
         # The map image is masked where there is no interpolation data and
@@ -534,6 +531,15 @@ def set_mode(options):
     # Update all the active lineouts
     for lineout in options.lineouts:
         lineout.update()
+    # Initialising the labeller is left till the very last moment, as it grabs
+    # the first frame it sees to be the blit background. This can result in
+    # things like the zoom being off and layouts not being shown for a split
+    # second if doen too early. Now we have drawn everything we wanted, we can
+    # peacefully start the animation.
+    if key[1] == 'fringes':
+        options.labeller = m2labelling.label(fringes, canvas,
+                                             options.fig, options.ax,
+                                             options=options, imshow=options.imshow)
     # Refresh the graph's canvas
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position
