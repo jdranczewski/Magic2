@@ -89,6 +89,11 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         #      0##         0 - fringe
         #     ##0          # - line
         #    #  0
+        # We initially set index to -1. You may notice that this will be
+        # usually overriden in the for loop that happens a few lines down.
+        # This is a precaution for when the loop doesn't run at all - for
+        # example the user clicked outside of the array
+        index = -1
         try:
             for index in canvas.fringe_indices[int(y[i])-1:int(y[i])+1, int(x[i])]:
                 # If a non-empty index found, use this and break
