@@ -15,6 +15,13 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import rcParams
 
 
+class MFToolbar(NavigationToolbar2Tk):
+    toolitems = list(NavigationToolbar2Tk.toolitems)
+    # Delete the button for adjusting subplots, it was not useful in this
+    # particular usecase, and could break things if used unwisely
+    del toolitems[6]
+
+
 class GraphFrame(Tk.Frame):
     def __init__(self, parent, figsize=(5, 4), dpi=100,
                  bind_keys=False, show_toolbar=False):
