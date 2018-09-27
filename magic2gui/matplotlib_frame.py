@@ -107,3 +107,4 @@ class GraphFrame(Tk.Frame):
     # Push the current view onto the view history stack
     def push_current(self):
         self.toolbar.push_current()
+        self.toolbar.set_history_buttons()
