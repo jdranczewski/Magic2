@@ -469,7 +469,7 @@ def set_mode(options):
     # (if they exist)
     options.ax.clear()
     if options.labeller is not None:
-        m2labelling.stop_labelling(options.fig, options.labeller)
+        m2labelling.stop_labelling(options.fig, options.labeller, options.mframe)
         options.labeller = None
     if options.cbar is not None:
         # If there exists a colorbar, clean it and hide it
@@ -546,7 +546,9 @@ def set_mode(options):
     if key[1] == 'fringes':
         options.labeller = m2labelling.label(fringes, canvas,
                                              options.fig, options.ax,
-                                             options=options, imshow=options.imshow)
+                                             options=options,
+                                             imshow=options.imshow,
+                                             mframe=options.mframe)
     # Refresh the graph's canvas
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position

@@ -72,6 +72,8 @@ class GraphFrame(Tk.Frame):
         # Pack the canvas in the Frame
         self.canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
         self.canvas._tkcanvas.pack(side=Tk.BOTTOM, fill=Tk.BOTH, expand=1)
+        # Create a placeholder object for an animation
+        self.ani = None
         # Bind keyboard shortcuts
         if bind_keys:
             # Delete default keyboard shortcuts that we will be using elsewhere
@@ -81,8 +83,13 @@ class GraphFrame(Tk.Frame):
             def on_key_press(event):
                 # The default keypress handler
                 key_press_handler(event, self.canvas, self.toolbar)
+                # Grid handling (animation blit cache needs to cleaned
+                # when grid shown)
+                print(self.ani)
+                if event.key == 'g' and self.ani is not None:
+                    self.ani._blit_cache.clear()
                 # Keyboard navigation
-                if event.key == 'x':
+                elif event.key == 'x':
                     # Zoom in
                     ylim = self.ax.get_ylim()
                     xlim = self.ax.get_xlim()

@@ -198,7 +198,7 @@ def ani_update(i, line_plot, temp_line, imshow, prev_lim, ax, labeller):
 
 # This sets up the labeller object, the line that is drawn, as well as
 # attaches all the event handlers
-def label(fringes, canvas, fig, ax, master=None, options=None, imshow=None):
+def label(fringes, canvas, fig, ax, master=None, options=None, imshow=None, mframe=None):
     labeller = Labeller(options=options)
     line_plot, = ax.plot([], [], "--", animated=True)
     temp_line, = ax.plot([], [], "--", animated=True)
@@ -219,6 +219,8 @@ def label(fringes, canvas, fig, ax, master=None, options=None, imshow=None):
     labeller.ani = FuncAnimation(fig, ani_update, interval=100,
                                  fargs=(line_plot, temp_line, imshow,
                                         prev_lim, ax, labeller), blit=True)
+    if mframe is not None:
+        mframe.ani = labeller.ani
     # This is needed for the animation to start.
     # Because reasons
     # I guess
@@ -226,8 +228,10 @@ def label(fringes, canvas, fig, ax, master=None, options=None, imshow=None):
     return labeller
 
 
-def stop_labelling(fig, labeller):
+def stop_labelling(fig, labeller, mframe=None):
     labeller.ani._stop()
+    if mframe is not None:
+        mframe.ani = None
     for bind in labeller.binds:
         fig.canvas.mpl_disconnect(bind)
     del labeller
