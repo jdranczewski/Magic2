@@ -216,6 +216,8 @@ def main():
     options.ax = options.mframe.ax
     # Show a placeholder image
     options.ax.imshow(imread('logo.png'))
+    # Push the current view into the view history stack
+    options.mframe.push_current()
 
     # Create the side menu
     side_frame = Tk.Frame(root)

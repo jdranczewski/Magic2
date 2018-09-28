@@ -8,11 +8,41 @@
 
 import tkinter as Tk
 from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2TkAgg)
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import rcParams
+from tkinter.messagebox import askokcancel
+
+
+class MFToolbar(NavigationToolbar2Tk):
+    toolitems = list(NavigationToolbar2Tk.toolitems)
+    # Delete the button for adjusting subplots, it was not useful in this
+    # particular usecase, and could break things if used unwisely
+    del toolitems[6]
+
+    # Override the _update_view function so that it doesn't try setting
+    # the plots position. It mostly failed to do that, and we're not planning
+    # to change that posoition either way.
+    # This function is mostly copied over from matplotlib's source
+    def _update_view(self):
+        # Update the viewlim and position from the view and
+        # position stack for each axes.
+        nav_info = self._nav_stack()
+        if nav_info is None:
+            return
+        # Retrieve all items at once to avoid any risk of GC deleting an Axes
+        # while in the middle of the loop below.
+        items = list(nav_info.items())
+        for ax, (view, (pos_orig, pos_active)) in items:
+            ax._set_view(view)
+            # There would normally be some view changing settings here...
+        self.canvas.draw_idle()
+
+    def save_figure(self, *args):
+        if askokcancel("Using matplotlib's figure saving", "Please note that this will use matplotlib's built-in figure saving mechanism, which doesn't allow resolution setting. You may want to use 'File->Save the graph as an image', which allows you to set the resolution when exporting the graph presented in the main window."):
+            NavigationToolbar2Tk.save_figure(self, *args)
 
 
 class GraphFrame(Tk.Frame):
@@ -37,11 +67,13 @@ class GraphFrame(Tk.Frame):
         self.canvas.draw()
         # Add a toolbar if needed
         if show_toolbar:
-            toolbar = NavigationToolbar2TkAgg(self.canvas, self)
-            toolbar.update()
+            self.toolbar = MFToolbar(self.canvas, self)
+            self.toolbar.update()
         # Pack the canvas in the Frame
         self.canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
         self.canvas._tkcanvas.pack(side=Tk.BOTTOM, fill=Tk.BOTH, expand=1)
+        # Create a placeholder object for an animation
+        self.ani = None
         # Bind keyboard shortcuts
         if bind_keys:
             # Delete default keyboard shortcuts that we will be using elsewhere
@@ -50,9 +82,13 @@ class GraphFrame(Tk.Frame):
 
             def on_key_press(event):
                 # The default keypress handler
-                key_press_handler(event, self.canvas, toolbar)
+                key_press_handler(event, self.canvas, self.toolbar)
+                # Grid handling (animation blit cache needs to cleaned
+                # when grid shown)
+                if event.key == 'g' and self.ani is not None:
+                    self.ani._blit_cache.clear()
                 # Keyboard navigation
-                if event.key == 'x':
+                elif event.key == 'x':
                     # Zoom in
                     ylim = self.ax.get_ylim()
                     xlim = self.ax.get_xlim()
@@ -61,6 +97,7 @@ class GraphFrame(Tk.Frame):
                     self.ax.set_ylim([ylim[0]+0.1*diffy, ylim[1]-0.1*diffy])
                     self.ax.set_xlim([xlim[0]+0.1*diffx, xlim[1]-0.1*diffx])
                     self.fig.canvas.draw()
+                    self.push_current()
                 elif event.key == 'z':
                     # Zoom out
                     ylim = self.ax.get_ylim()
@@ -70,6 +107,7 @@ class GraphFrame(Tk.Frame):
                     self.ax.set_ylim([ylim[0]-0.1*diffy, ylim[1]+0.1*diffy])
                     self.ax.set_xlim([xlim[0]-0.1*diffx, xlim[1]+0.1*diffx])
                     self.fig.canvas.draw()
+                    self.push_current()
                 else:
                     # Move
                     dx = 0
@@ -90,19 +128,19 @@ class GraphFrame(Tk.Frame):
                         self.ax.set_ylim([ylim[0]+0.3*diffy*dy, ylim[1]+0.3*diffy*dy])
                         self.ax.set_xlim([xlim[0]+0.3*diffx*dx, xlim[1]+0.3*diffx*dx])
                         self.fig.canvas.draw()
-                # Our wasd navigation messes up the views stack matplotlib
-                # normally uses, so we define our own home function,
-                # accessible by pressing 'h'
-                def new_home():
-                    print("New home")
-                    self.ax.autoscale()
-                    self.fig.canvas.draw()
-                toolbar.home = new_home
+                        self.push_current()
             self.canvas.mpl_connect("key_press_event", on_key_press)
         # Set focus back to canvas after clicking it
         self.canvas.mpl_connect('button_press_event',
                                 lambda event: self.canvas._tkcanvas.focus_set())
 
-    # Redraw the canvas to show new data (if updated)
-    def draw(self):
-        self.canvas.draw()
+    # Clear the view history stack...
+    def clear_nav_stack(self):
+        self.toolbar._nav_stack.clear()
+        # ...and push the current view onto it
+        self.push_current()
+
+    # Push the current view onto the view history stack
+    def push_current(self):
+        self.toolbar.push_current()
+        self.toolbar.set_history_buttons()

@@ -7,6 +7,7 @@ from copy import copy
 import pickle
 import gzip
 import os
+import webbrowser
 from matplotlib.pyplot import cm
 import matplotlib.ticker as ticker
 
@@ -270,7 +271,7 @@ class DpiDialog(m2dialog.Dialog):
 
 
 # This function exports the current graph as an image
-def export_image(options):
+def export_image(options=None, fig=None):
     dialog = DpiDialog(options.root, title="Choose quality", parent_mframe=options.mframe)
     if dialog.result is not None:
         # Ask for a file name
@@ -280,7 +281,10 @@ def export_image(options):
                                         initialfile=options.namecore)
         if filename != '':
             # Save the graph, using the dpi obtained with the dialog
-            options.fig.savefig(filename, dpi=dialog.result)
+            if fig is None:
+                options.fig.savefig(filename, dpi=dialog.result)
+            else:
+                fig.savefig(filename, dpi=dialog.result)
 
 
 # This dialog is used by the function that sets the colormap
@@ -296,7 +300,8 @@ class CmapDialog(m2dialog.Dialog):
         self.var = Tk.StringVar()
         # This is a list of all reasonable colourmaps in matplotlib,
         # reasonable meaning that they're rather smooth and not the
-        # flag of France
+        # flag of France.
+        # Actually, screw it, the flag of France stays.
         choice = ('## perceptually uniform ##', 'plasma', 'viridis', 'inferno',
                   'magma', '## the classic ##', 'jet', '## sequnetial ##',
                   'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
@@ -307,11 +312,16 @@ class CmapDialog(m2dialog.Dialog):
                   'hot', 'afmhot', 'gist_heat', 'copper', '## misc ##', 'ocean',
                   'gist_earth', 'terrain', 'gist_stern', 'gnuplot',
                   'gnuplot2', 'CMRmap', 'cubehelix', 'brg', 'hsv',
-                  'gist_rainbow', 'rainbow', 'nipy_spectral', 'gist_ncar')
+                  'gist_rainbow', 'rainbow', 'nipy_spectral', 'gist_ncar',
+                  '## Règle, Britannia! ##', 'flag')
         # The star (*) unpacks the above tuple, as ttk.OptionMenu takes options
         # as just a lot of arguments
         self.e = ttk.OptionMenu(master, self.var, self.options.cmap.name, *choice)
         self.e.grid(row=0, column=1)
+        b = ttk.Button(master, text="?", width=2,
+                       command=lambda:
+                       webbrowser.open("https://matplotlib.org/examples/color/colormaps_reference.html"))
+        b.grid(row=0, column=2, padx=5)
         return self.e
 
     def validate(self):
@@ -459,7 +469,7 @@ def set_mode(options):
     # (if they exist)
     options.ax.clear()
     if options.labeller is not None:
-        m2labelling.stop_labelling(options.fig, options.labeller)
+        m2labelling.stop_labelling(options.fig, options.labeller, options.mframe)
         options.labeller = None
     if options.cbar is not None:
         # If there exists a colorbar, clean it and hide it
@@ -478,9 +488,6 @@ def set_mode(options):
         # The small increment is included to make the limits work when all fringes
         # are unlabelled
         canvas.imshow.set_clim(fringes.min, fringes.max+0.0000000001)
-        options.labeller = m2labelling.label(fringes, canvas,
-                                             options.fig, options.ax,
-                                             options=options, imshow=options.imshow)
     elif key[1] == 'map':
         canvas = options.objects[key[0]]['canvas']
         # The map image is masked where there is no interpolation data and
@@ -517,16 +524,31 @@ def set_mode(options):
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         options.mframe.cax.axis('on')
         options.cbar.ax.set_ylabel('Electron density / $cm^{-3}$', rotation=270, labelpad=20)
+    # Clear the view history stack
+    options.mframe.clear_nav_stack()
     if options.conserve_limits:
         # revert the graph to the old display limits
         options.ax.set_xlim(xlim)
         options.ax.set_ylim(ylim)
+        # Push the cropped view onto the view history stack
+        options.mframe.push_current()
     elif not stop_reverting:
         # Revert to the original setting
         options.conserve_limits = True
     # Update all the active lineouts
     for lineout in options.lineouts:
         lineout.update()
+    # Initialising the labeller is left till the very last moment, as it grabs
+    # the first frame it sees to be the blit background. This can result in
+    # things like the zoom being off and layouts not being shown for a split
+    # second if doen too early. Now we have drawn everything we wanted, we can
+    # peacefully start the animation.
+    if key[1] == 'fringes':
+        options.labeller = m2labelling.label(fringes, canvas,
+                                             options.fig, options.ax,
+                                             options=options,
+                                             imshow=options.imshow,
+                                             mframe=options.mframe)
     # Refresh the graph's canvas
     options.fig.canvas.draw()
     # Set the radio buttons to the correct position
@@ -576,7 +598,7 @@ def higher_width(options):
 def interpolate_exact(options, env=None):
     if options.mode is None:
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
-    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
+    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background' and env==None:
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
     else:
         # If the above checks are passed, perform the triangulation and
@@ -597,7 +619,7 @@ def interpolate_exact(options, env=None):
 def interpolate_fast(options, env=None):
     if options.mode is None:
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
-    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
+    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background' and env==None:
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
     else:
         # If the above checks are passed, perform the triangulation and
@@ -619,7 +641,7 @@ def interpolate_fast(options, env=None):
 def interpolate_debug(options, env=None):
     if options.mode is None:
         mb.showinfo("No file loaded", "You need to load and label an interferogram file first in order to interpolate the phase!")
-    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background':
+    elif options.mode.split("_")[0] != 'plasma' and options.mode.split("_")[0] != 'background' and env==None:
         mb.showinfo("No mode chosen", "Please choose either the background or plasma display mode from the menu on the right!")
     elif mb.askokcancel("Debug triangulation", "You are about to perform a debug mode interpolation. This shows the output of every step in a separate graph window. Close that window to proceed to the next step. Flat triangles are usually highlighted green. Look for error messages and progress reports in the terminal. Do not interact with the main Magic2 window, as who knows what happens then?\n\nThere is a very much non-zero risk of crashing. You may loose your work (so save it)."):
         # The above confirmation dialog is unwieldy, but necessary to explain
@@ -924,7 +946,8 @@ def cosine(options):
             m2lineouts.stop_lineout(options)
         for lineout in options.lineouts:
             lineout.update()
-        # Draw the canvas
+        # Draw the canvas, clering the view history stack too
+        options.mframe.clear_nav_stack()
         options.fig.canvas.draw()
     else:
         mb.showinfo("Open a map", "Taking the cosine is possible only for interpolated phase maps.")
@@ -943,7 +966,7 @@ class AboutDialog(m2dialog.Dialog):
         logo = Tk.Label(master, image=photo)
         logo.photo = photo
         logo.pack()
-        label = Tk.Label(master, text="This software was created by Jakub Dranczewski during a UROP in 2018.\nIt is based on concepts from Magic, which was created by George Swadling.\n\nYou can contact me on jbd17@ic.ac.uk or (as I inevitably loose either the whole email or the 17) jakub.dranczewski@gmail.com\n\nv1.03.1")
+        label = Tk.Label(master, text="This software was created by Jakub Dranczewski during a UROP in 2018.\nIt is based on concepts from Magic, which was created by George Swadling.\n\nYou can contact me on jbd17@ic.ac.uk or (as I inevitably loose either the whole email or the 17) jakub.dranczewski@gmail.com\n\nv1.04")
         label.pack()
 
     def buttonbox(self):

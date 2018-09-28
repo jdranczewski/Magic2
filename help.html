@@ -5,6 +5,7 @@
 html, body {
   background-color: #5709a4;
   background: linear-gradient(140deg, #5709a4, #c84579 35%, #f3cd22);
+  font-family: Arial;
 }
 #main {
   max-width: 700px;
@@ -58,6 +59,23 @@ The main element of Magic2 is the graphing area which takes up most of the
 screen. The output of all functions will be displayed here, it also allows
 interactivity in certain modes.
 </p>
+<p>
+The graphing area has a toolbar at the bottom, which allows you to go back to
+the original view, go backwards and forwards in view history, as well as zoom to
+rectangle or pan the graph. You can also drag with your right mouse button while
+panning in order to zoom in and out.
+</p>
+<p>
+Note that the toolbar's save button differs from Magic2's <a
+href="#h3_saving_figures">File -> Save the graph as an image</a> option - it
+does not ask for the resolution at which the image should be saved.
+</p>
+<p>
+You can also use most of <a
+href="https://matplotlib.org/users/navigation_toolbar.html#navigation-keyboard-shortcuts"
+target=_blank>matplotlib's standard keyboard shortcuts</a>, apart from 'c', 's',
+and 'backspace', which are either assigned to other things, or too easy to click
+while doing other things.
 <h3 id="h3_sidebar">The sidebar</h3>
 <p>
 The sidebar consists of two sections. The top one (Display) can be used to
@@ -74,6 +92,9 @@ thickness of the fringe rendering.
 The bottom section allows for changing the fringe <a href="#h3_labelling">
 labelling mode</a>, so that the phase goes up, down, or stays constant.
 The fringes can also be unlabelled.
+</p>
+<p>
+There is a convenient list of keyboard shortcuts at the bottom of the sidebar.
 </p>
 <h3 id="h3_menu">The menu</h3>
 <p>

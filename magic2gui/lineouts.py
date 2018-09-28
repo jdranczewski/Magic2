@@ -31,11 +31,20 @@ class Lineout():
         # Save the coordinates of the line
         self.line = line.copy()
         # The coordinates have to be in pixels, not in mm
-        if options.mode == "density_graph":
+        if options.mode == "density_graph" and redoing is None:
             self.line *= options.resolution
-        # Draw the line on the graph, using the initially supplied
-        # coordinates (could be in mm)
-        self.line_plot, = options.ax.plot(line[:, 1], line[:, 0],
+            self.line += options.centre
+        # Check if the line will require to be scaled or moved while drawing
+        # (self.line is always pixels and relative to the left top corner)
+        if self.options.mode == "density_graph":
+            scale = self.options.resolution
+            offset = self.options.centre
+        else:
+            scale = 1
+            offset = [0, 0]
+        # Draw the line on the graph
+        self.line_plot, = options.ax.plot((self.line[:, 1]-offset[1])/scale,
+                                          (self.line[:, 0]-offset[0])/scale,
                                           color=self.colour)
 
         # Draw the rectangle
@@ -136,24 +145,33 @@ class Lineout():
         self.mframe.ax.plot(self.xspace, self.profile, color=self.colour)
         # Set the limits so that the entire length of the lineout is shown
         self.mframe.ax.set_xlim([0, sp.amax(self.xspace)])
+        # Push the current view onto the view history stack
+        self.mframe.push_current()
         # Pack the frame, filling all available space
         self.mframe.pack(fill=Tk.BOTH, expand=1)
+        # Give the focus to the graph
+        self.mframe.canvas._tkcanvas.focus_set()
 
     # This function calculates the vertices of a rectangle of
     # a given width along the lineout
     def get_verts(self):
-        dy = self.line[1, 0] - self.line[0, 0]
-        dx = self.line[1, 1] - self.line[0, 1]
-        wx = self.width/2 * sp.sin(sp.arctan2(dy, dx))
-        wy = -self.width/2 * sp.cos(sp.arctan2(dy, dx))
-        verts = sp.array([
-            [self.line[0, 1]-wx, self.line[0, 0]-wy],
-            [self.line[0, 1]+wx, self.line[0, 0]+wy],
-            [self.line[1, 1]+wx, self.line[1, 0]+wy],
-            [self.line[1, 1]-wx, self.line[1, 0]-wy]
-        ])
         if self.options.mode == "density_graph":
-            verts /= self.options.resolution
+            scale = self.options.resolution
+            offset = self.options.centre
+        else:
+            scale = 1
+            offset = [0, 0]
+        line = (self.line - offset)/scale
+        dy = line[1, 0] - line[0, 0]
+        dx = line[1, 1] - line[0, 1]
+        wx = self.width/2/scale * sp.sin(sp.arctan2(dy, dx))
+        wy = -self.width/2/scale * sp.cos(sp.arctan2(dy, dx))
+        verts = sp.array([
+            [line[0, 1]-wx, line[0, 0]-wy],
+            [line[0, 1]+wx, line[0, 0]+wy],
+            [line[1, 1]+wx, line[1, 0]+wy],
+            [line[1, 1]-wx, line[1, 0]-wy]
+        ])
         return verts
 
     # This function can be used to redraw the Lineout. Used in the
@@ -162,25 +180,33 @@ class Lineout():
         # Check if the line will require to be scaled (self.line is in pixels)
         if self.options.mode == "density_graph":
             scale = self.options.resolution
+            offset = self.options.centre
         else:
             scale = 1
+            offset = [0, 0]
         # If we are in the mode in which the lineout was created, draw
         # a solid line. Otherwise, draw a dashed one
         if self.options.mode == self.mode:
-            self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale,
-                                                   self.line[:, 0]/scale,
+            self.line_plot, = self.options.ax.plot((self.line[:, 1]-offset[1])/scale,
+                                                   (self.line[:, 0]-offset[0])/scale,
                                                    color=self.colour)
             # Draw the rectangle
             patch = Polygon(self.get_verts(), color=self.colour,
                             linewidth=0, alpha=0.3)
             self.rect = self.options.ax.add_patch(patch)
             self.update_vis(draw=False)
+            # Make the width controls active
+            self.width_box.config(state=Tk.NORMAL)
+            self.sb.config(state=Tk.NORMAL)
         else:
-            self.line_plot, = self.options.ax.plot(self.line[:, 1]/scale,
-                                                   self.line[:, 0]/scale, "--",
+            self.line_plot, = self.options.ax.plot((self.line[:, 1]-offset[1])/scale,
+                                                   (self.line[:, 0]-offset[0])/scale, "--",
                                                    color=self.colour,
                                                    alpha=0.7)
             self.rect = None
+            # Disable the width controls
+            self.width_box.config(state=Tk.DISABLED)
+            self.sb.config(state=Tk.DISABLED)
 
     # Delete the lineout when the associated window is closed
     def remove(self):
@@ -205,6 +231,8 @@ class Lineout():
                                         initialfile=self.options.namecore)
         # Give focus back to the lineout window
         self.window.focus_set()
+        # Give the focus to the graph
+        self.mframe.canvas._tkcanvas.focus_set()
         if filename != '':
             # Add appropriate units to the header
             if self.mode.split("_")[0] == "density":
@@ -228,13 +256,8 @@ class Lineout():
 
     # Redraw and recalculate the lineout in the current mode
     def redo(self):
-        # Check if the line will require to be scaled (self.line is in pixels)
-        if self.options.mode == "density_graph":
-            scale = self.options.resolution
-        else:
-            scale = 1
         # Create a Lineout object
-        lineout = Lineout(self.line/scale, self.options, redoing=self)
+        lineout = Lineout(self.line, self.options, redoing=self)
         # Add the object ot the list of active lineouts
         self.options.lineouts.append(lineout)
         # Remove this object
@@ -251,6 +274,8 @@ class Lineout():
             self.window.transient(self.options.root)
             self.pinvar.set("Unpin this window")
         self.transient = not self.transient
+        # Give the focus to the graph
+        self.mframe.canvas._tkcanvas.focus_set()
 
     # Update the Lineout's width
     def update_width(self, *args):
@@ -262,6 +287,8 @@ class Lineout():
         # Change the verices of the rectangle in the main window
         self.rect.set_xy(self.get_verts())
         self.main_canvas_draw()
+        # Give the focus to the graph
+        self.mframe.canvas._tkcanvas.focus_set()
 
     # Show or hide the bounding box
     def update_vis(self, draw=True):
@@ -269,12 +296,15 @@ class Lineout():
             self.rect.set_visible(self.showboxvar.get())
             if draw:
                 self.main_canvas_draw()
+        # Give the focus to the graph
+        self.mframe.canvas._tkcanvas.focus_set()
 
     # Update the lineout's colour and draw the necessary lines
     def update_colour(self, *args):
         self.colour = self.colourvar.get()
         self.line_plot.set_color(self.colour)
-        self.rect.set_color(self.colour)
+        if self.rect is not None:
+            self.rect.set_color(self.colour)
         self.mframe.ax.lines[0].set_color(self.colour)
         self.mframe.fig.canvas.draw()
         self.main_canvas_draw()
