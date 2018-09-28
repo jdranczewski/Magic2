@@ -85,7 +85,6 @@ class GraphFrame(Tk.Frame):
                 key_press_handler(event, self.canvas, self.toolbar)
                 # Grid handling (animation blit cache needs to cleaned
                 # when grid shown)
-                print(self.ani)
                 if event.key == 'g' and self.ani is not None:
                     self.ani._blit_cache.clear()
                 # Keyboard navigation
