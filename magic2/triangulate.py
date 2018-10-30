@@ -458,6 +458,13 @@ def triangulate_debug(canvas, options=None):
     plt.triplot(tri.points[:, 1], tri.points[:, 0], [tri.triangles[i].vertices for i in tri.flat_triangles])
     plt.show()
     # plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.dt.simplices)
+
+    # Save the data for plotting
+    import pickle
+    import gzip
+    with gzip.open("dump_for_paper.pkl", 'wb') as f:
+        pickle.dump([canvas.fringe_phases, tri.points, tri.get_simplices(), [tri.triangles[i].vertices for i in tri.flat_triangles]], f)
+
     print("Optimisation")
     tri.optimise()
     print("Finished")
