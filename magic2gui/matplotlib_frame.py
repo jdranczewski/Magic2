@@ -1,10 +1,24 @@
-# The GraphFrame class implements a matplotlib graph in an easy to use way.
-# It inherits from tkinter's Frame and thus behaves like any other widget,
-# but it also exposes a few things like .ax and .cax which can be used
-# for plotting (like normal matplotlib subplots).
-# init arguments are the parent frame, the figure's size, its dpi, a boolean
-# variable that allows for simple binding of matplotlib's default key bindings,
-# and a boolean variable that determines whether to show a toolbar.
+# Magic2 (https://github.com/jdranczewski/Magic2)
+# Copyright (C) 2018  Jakub Dranczewski, based on work by George Swadling
+
+# This work was carried out at during a UROP with the MAGPIE Group,
+# Department of Physics, Imperial College London and was supported in part
+# by the Engineering and Physical Sciences Research Council (EPSRC) Grant
+# No. EP/N013379/1, by the U.S. Department of Energy (DOE) Awards
+# No. DE-F03-02NA00057 and No. DE-SC- 0001063
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import tkinter as Tk
 from matplotlib.backends.backend_tkagg import (
@@ -45,6 +59,13 @@ class MFToolbar(NavigationToolbar2Tk):
             NavigationToolbar2Tk.save_figure(self, *args)
 
 
+# The GraphFrame class implements a matplotlib graph in an easy to use way.
+# It inherits from tkinter's Frame and thus behaves like any other widget,
+# but it also exposes a few things like .ax and .cax which can be used
+# for plotting (like normal matplotlib subplots).
+# init arguments are the parent frame, the figure's size, its dpi, a boolean
+# variable that allows for simple binding of matplotlib's default key bindings,
+# and a boolean variable that determines whether to show a toolbar.
 class GraphFrame(Tk.Frame):
     def __init__(self, parent, figsize=(5, 4), dpi=100,
                  bind_keys=False, show_toolbar=False):

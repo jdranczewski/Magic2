@@ -35,3 +35,5 @@ import magic2.triangulate as m2triangulate
 You have to have the [`magic2`](magic2) folder in a place where Python can find it, either in the same directory as your code, or in a folder that is in your PYTHONPATH.
 
 Bear in mind that while Magic2's functions and classes are general, they will expect the data you provide them with to have a particular structure.
+
+> This work was carried out at during a UROP with the MAGPIE Group, Department of Physics, Imperial College London and was supported in part by the Engineering and Physical Sciences Research Council (EPSRC) Grant No. EP/N013379/1, by the U.S. Department of Energy (DOE) Awards No. DE-F03-02NA00057 and No. DE-SC- 0001063
