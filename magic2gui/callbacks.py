@@ -1,7 +1,7 @@
 # Magic2 (https://github.com/jdranczewski/Magic2)
 # Copyright (C) 2018  Jakub Dranczewski, based on work by George Swadling
 
-# This work was carried out at during a UROP with the MAGPIE Group,
+# This work was carried out during a UROP with the MAGPIE Group,
 # Department of Physics, Imperial College London and was supported in part
 # by the Engineering and Physical Sciences Research Council (EPSRC) Grant
 # No. EP/N013379/1, by the U.S. Department of Energy (DOE) Awards
@@ -988,7 +988,7 @@ class AboutDialog(m2dialog.Dialog):
         logo = Tk.Label(master, image=photo)
         logo.photo = photo
         logo.pack()
-        label = Tk.Label(master, text="This software was created by Jakub Dranczewski during a UROP in 2018.\nIt is based on concepts from Magic, which was created by George Swadling.\n\nYou can contact me on jbd17@ic.ac.uk or (as I inevitably loose either the whole email or the 17) jakub.dranczewski@gmail.com\n\nv1.04")
+        label = Tk.Label(master, text="Copyright (C) 2018  Jakub Dranczewski\nThis software is based on concepts from Magic, which was created by George Swadling.\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License,\nor (at your option) any later version.\n\nYou can contact me on jbd17@ic.ac.uk or (if I ever leave Imperial) jakub.dranczewski@gmail.com\n\nThis work was carried out during a UROP with the MAGPIE Group,\nDepartment of Physics, Imperial College London and was supported in part\nby the Engineering and Physical Sciences Research Council (EPSRC) Grant\nNo. EP/N013379/1, by the U.S. Department of Energy (DOE) Awards\nNo. DE-F03-02NA00057 and No. DE-SC- 0001063\n\nv1.04")
         label.pack()
 
     def buttonbox(self):

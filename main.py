@@ -1,7 +1,7 @@
 # Magic2 (https://github.com/jdranczewski/Magic2)
 # Copyright (C) 2018  Jakub Dranczewski, based on work by George Swadling
 
-# This work was carried out at during a UROP with the MAGPIE Group,
+# This work was carried out during a UROP with the MAGPIE Group,
 # Department of Physics, Imperial College London and was supported in part
 # by the Engineering and Physical Sciences Research Council (EPSRC) Grant
 # No. EP/N013379/1, by the U.S. Department of Energy (DOE) Awards
@@ -225,6 +225,10 @@ def main():
     helpmenu.add_command(label="Display manual",
                          command=lambda:
                          webbrowser.open("help.html"))
+    helpmenu.add_separator()
+    helpmenu.add_command(label="GitHub repository",
+                         command=lambda:
+                         webbrowser.open("https://github.com/jdranczewski/Magic2"))
     helpmenu.add_command(label="About",
                          command=lambda:
                          m2callbacks.about(options))

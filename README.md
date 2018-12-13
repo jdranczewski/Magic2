@@ -36,4 +36,10 @@ You have to have the [`magic2`](magic2) folder in a place where Python can find 
 
 Bear in mind that while Magic2's functions and classes are general, they will expect the data you provide them with to have a particular structure.
 
-> This work was carried out at during a UROP with the MAGPIE Group, Department of Physics, Imperial College London and was supported in part by the Engineering and Physical Sciences Research Council (EPSRC) Grant No. EP/N013379/1, by the U.S. Department of Energy (DOE) Awards No. DE-F03-02NA00057 and No. DE-SC- 0001063
+
+### References
+- Swadling, G. F. et al. (2013) ‘Oblique shock structures formed during the ablation phase of aluminium wire array z-pinches’, *Physics of Plasmas. American Institute of Physics*, 20(2), p. 022705. doi: 10.1063/1.4790520.
+- Swadling, G. F. (2012) ‘An experimental investigation of the azimuthal structures formed during the ablation phase of wire array z-pinches’, Ph.D. dissertation. *Imperial College London*. Available at: [https://spiral.imperial.ac.uk/handle/10044/1/9515](https://spiral.imperial.ac.uk/handle/10044/1/9515).
+- Ware, J. M. (1998) ‘A procedure for automatically correcting invalid flat triangles occurring in triangulated contour data’, *Computers & Geosciences. Pergamon*, 24(2), pp. 141–150. doi: 10.1016/S0098-3004(97)00088-5.
+- [https://codeplea.com/triangular-interpolation](https://codeplea.com/triangular-interpolation)
+> This work was carried out during a UROP with the MAGPIE Group, Department of Physics, Imperial College London and was supported in part by the Engineering and Physical Sciences Research Council (EPSRC) Grant No. EP/N013379/1, by the U.S. Department of Energy (DOE) Awards No. DE-F03-02NA00057 and No. DE-SC- 0001063
