@@ -94,7 +94,7 @@ class Options:
         self.cbar = None
         # Shot properties
         self.resolution = None
-        self.depth = None
+        self.depth = 10.0
         self.wavelength = None
         self.double = None
 
