@@ -158,7 +158,7 @@ class Lineout():
             self.xspace = sp.linspace(0, len(self.profile)/options.resolution,
                                       len(self.profile))
             self.mframe.ax.set_xlabel("Distance / $mm$")
-            self.mframe.ax.set_ylabel("Electron density / $cm^{-3}$")
+            self.mframe.ax.set_ylabel("Line-Integrated Electron Density $\int n_e dL$ / $cm^{-2}$")
         else:
             self.xspace = sp.linspace(0, len(self.profile), len(self.profile))
             self.mframe.ax.set_xlabel("Distance / $px$")
@@ -258,7 +258,7 @@ class Lineout():
         if filename != '':
             # Add appropriate units to the header
             if self.mode.split("_")[0] == "density":
-                header = "distance (mm),\tplasma density (cm^-3)"
+                header = "distance (mm),\tline-integrated electron density (cm^-2)"
                 scale = self.options.resolution
                 units = "mm"
             else:

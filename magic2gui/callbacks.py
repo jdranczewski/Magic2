@@ -544,7 +544,7 @@ def set_mode(options):
         options.ax.set_ylabel("Distance / $mm$")
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         options.mframe.cax.axis('on')
-        options.cbar.ax.set_ylabel('Electron density / $cm^{-3}$', rotation=270, labelpad=20)
+        options.cbar.ax.set_ylabel('Line-Integrated Electron Density, $\int n_e dL$ / $cm^{-2}$', rotation=270, labelpad=20)
     # Clear the view history stack
     options.mframe.clear_nav_stack()
     if options.conserve_limits:
@@ -818,12 +818,12 @@ class PlasmaDialog(m2dialog.Dialog):
         self.e_resolution.grid(row=0, column=1)
         ttk.Label(master, text="pixels per mm").grid(row=0, column=2, sticky=Tk.W)
         # Depth
-        ttk.Label(master, text="Depth of the object:").grid(row=1, sticky=Tk.E)
-        self.e_depth = ttk.Entry(master)
-        if self.options.depth is not None:
-            self.e_depth.insert(0, self.options.depth)
-        self.e_depth.grid(row=1, column=1)
-        ttk.Label(master, text="mm").grid(row=1, column=2, sticky=Tk.W)
+        # ttk.Label(master, text="Depth of the object:").grid(row=1, sticky=Tk.E)
+        # self.e_depth = ttk.Entry(master)
+        # if self.options.depth is not None:
+        #     self.e_depth.insert(0, self.options.depth)
+        # self.e_depth.grid(row=1, column=1)
+        # ttk.Label(master, text="mm").grid(row=1, column=2, sticky=Tk.W)
         # Wavelength
         ttk.Label(master, text="Wavelength:").grid(row=2, sticky=Tk.E)
         self.e_wavelength = ttk.Entry(master)
@@ -844,7 +844,7 @@ class PlasmaDialog(m2dialog.Dialog):
         try:
             # All the inputs should be floats or integers
             float(self.e_resolution.get())
-            float(self.e_depth.get())
+            # float(self.e_depth.get())
             float(self.e_wavelength.get())
             return 1
         except ValueError:
@@ -853,7 +853,8 @@ class PlasmaDialog(m2dialog.Dialog):
 
     def apply(self):
         self.options.resolution = float(self.e_resolution.get())
-        self.options.depth = float(self.e_depth.get())
+        # self.options.depth = float(self.e_depth.get())
+        self.options.depth = 10.0
         self.options.wavelength = float(self.e_wavelength.get())
         self.options.double = self.double_var.get()
         self.result = True
