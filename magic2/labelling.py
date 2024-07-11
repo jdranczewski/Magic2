@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import scipy as sp
+import numpy as np
 import scipy.special as special
 from . import graphics as m2graphics
 from matplotlib.animation import FuncAnimation
@@ -49,7 +49,7 @@ def onclick(event, labeller, line_plot, temp_line, fringes, canvas, fig, ax, ani
     if labeller.control and not event.dblclick and event.xdata:
         labeller.points.append([event.ydata, event.xdata])
         # We use the points list to draw a line on the graph
-        points = sp.array(labeller.points)
+        points = np.array(labeller.points)
         line_plot.set_data(points[:, 1], points[:, 0])
         # If the event was a double click, label the fringes and clear the data
         # related to the current labelling operation
@@ -78,12 +78,12 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
         #           ##
         #             ###
         #                ##
-        resolution = int(sp.amax([abs(labeller.points[i-1][1]-labeller.points[i][1]),
+        resolution = int(np.amax([abs(labeller.points[i-1][1]-labeller.points[i][1]),
                                   abs(labeller.points[i-1][0]-labeller.points[i][0])])) + 1
-        x = sp.append(x, special.round(sp.linspace(labeller.points[i-1][1],
+        x = np.append(x, special.round(np.linspace(labeller.points[i-1][1],
                                                    labeller.points[i][1],
                                                    resolution)))
-        y = sp.append(y, special.round(sp.linspace(labeller.points[i-1][0],
+        y = np.append(y, special.round(np.linspace(labeller.points[i-1][0],
                                                    labeller.points[i][0],
                                                    resolution)))
     # Prepare for labelling. Phase and prev_index are temporarily set to -1
@@ -162,7 +162,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
     else:
         width = 3
     m2graphics.render_fringes(fringes, canvas, width=width, indices=fix_indices)
-    canvas.imshow.set_data(sp.ma.masked_where(canvas.fringe_phases_visual == -1024, canvas.fringe_phases_visual))
+    canvas.imshow.set_data(np.ma.masked_where(canvas.fringe_phases_visual == -1024, canvas.fringe_phases_visual))
     # The small increment is included to make the limits work when all fringes
     # are unlabelled
     canvas.imshow.set_clim(fringes.min, fringes.max+0.0000000001)
@@ -177,7 +177,7 @@ def label_fringes(labeller, fringes, canvas, fig, ax):
 def onmove(event, labeller, line_plot, temp_line, ax):
     if len(labeller.points) and event.inaxes == ax:
         # Note that we are not actually modifying labeller.points here
-        points = sp.array([labeller.points[-1], [event.ydata, event.xdata]])
+        points = np.array([labeller.points[-1], [event.ydata, event.xdata]])
         temp_line.set_data(points[:, 1], points[:, 0])
         # The FuncAnimation will render this, we just update data here
 
@@ -192,7 +192,7 @@ def onpress(event, labeller, line_plot, temp_line):
         # If there are points to display, display them. If not,
         # set the data to empty lists
         if len(labeller.points):
-            points = sp.array(labeller.points)
+            points = np.array(labeller.points)
             line_plot.set_data(points[:, 1], points[:, 0])
         else:
             line_plot.set_data([], [])

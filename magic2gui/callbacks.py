@@ -24,7 +24,7 @@ import tkinter.filedialog as fd
 import tkinter.messagebox as mb
 import tkinter as Tk
 import tkinter.ttk as ttk
-import scipy as sp
+import numpy as np
 from copy import copy
 import pickle
 import gzip
@@ -161,8 +161,8 @@ def m_open(options, interpolate = None):
                     # Create a new fringes object
                     fringes = options.objects[env]['fringes'] = m2fringes.Fringes()
                     # Set the max and min for the colormap to have a correct scale
-                    fringes.min = sp.amin([phase for phase in dump[i+2] if phase != -2048.0])
-                    fringes.max = sp.amax([phase for phase in dump[i+2] if phase != -2048.0])
+                    fringes.min = np.amin([phase for phase in dump[i+2] if phase != -2048.0])
+                    fringes.max = np.amax([phase for phase in dump[i+2] if phase != -2048.0])
                     # Read the fringes, assigning phases as we go
                     m2fringes.read_fringes(fringes, canvas, phases=dump[i+2])
                     options.status.set("Rendering "+env+" fringes", i%2*45 + 35)
@@ -256,11 +256,11 @@ def export(options):
             # The mask is filled with -1024 to make the masking uniform
             if options.mode.split("_")[1] == 'fringes':
                 fringe_phases = options.objects[options.mode.split("_")[0]]['canvas'].fringe_phases.astype(float)
-                sp.savetxt(filename, sp.ma.filled(
-                    sp.ma.masked_where(fringe_phases==-1024.0, fringe_phases),
-                    fill_value=sp.nan), delimiter=",", fmt="%.0f")
+                np.savetxt(filename, np.ma.filled(
+                    np.ma.masked_where(fringe_phases==-1024.0, fringe_phases),
+                    fill_value=np.nan), delimiter=",", fmt="%.0f")
             else:
-                sp.savetxt(filename, sp.ma.filled(options.imshow.get_array(),fill_value=sp.nan), delimiter=",")
+                np.savetxt(filename, np.ma.filled(options.imshow.get_array(),fill_value=np.nan), delimiter=",")
             options.status.set("Done", 100)
     else:
         mb.showinfo("No mode chosen", "Please choose one of the display modes from the menu on the right!")
@@ -455,8 +455,8 @@ def recompute(event, options):
     if key[1] == 'fringes':
         phases = [fringe.phase for fringe in options.objects[key[0]]['fringes'].list]
         try:
-            options.objects[key[0]]['fringes'].min = sp.amin([phase for phase in phases if phase != -2048.0])
-            options.objects[key[0]]['fringes'].max = sp.amax([phase for phase in phases if phase != -2048.0])
+            options.objects[key[0]]['fringes'].min = np.amin([phase for phase in phases if phase != -2048.0])
+            options.objects[key[0]]['fringes'].max = np.amax([phase for phase in phases if phase != -2048.0])
             set_mode(options)
         except ValueError:
             pass
@@ -502,7 +502,7 @@ def set_mode(options):
         fringes = options.objects[key[0]]['fringes']
         # The fringes image is masked where there is no data
         options.imshow = canvas.imshow = options.ax.imshow(
-            sp.ma.masked_where(canvas.fringe_phases_visual == -1024,
+            np.ma.masked_where(canvas.fringe_phases_visual == -1024,
                                canvas.fringe_phases_visual),
             cmap=options.cmap
         )
@@ -514,7 +514,7 @@ def set_mode(options):
         # The map image is masked where there is no interpolation data and
         # on the user-defined mask
         options.imshow = canvas.imshow = options.ax.imshow(
-            sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated == -1024.0),
+            np.ma.masked_where(np.logical_or(canvas.mask == False, canvas.interpolated == -1024.0),
                                canvas.interpolated),
             cmap=options.cmap
         )
@@ -533,7 +533,7 @@ def set_mode(options):
         options.cbar.ax.set_ylabel('Fringe shift', rotation=270, labelpad=20)
     elif key[0] == 'density':
         y_size, x_size = options.density.shape
-        extent = sp.array([0-options.centre[1],x_size-options.centre[1],y_size-options.centre[0],0-options.centre[0]])/options.resolution
+        extent = np.array([0-options.centre[1],x_size-options.centre[1],y_size-options.centre[0],0-options.centre[0]])/options.resolution
         # Don't conserve limits (we're changing the range here)
         options.conserve_limits = False
         # This means that next time we switch mode, the limits will be reset:
@@ -690,8 +690,8 @@ def subtract(options):
         # as well as the regions that couldn't be interpolated for both
         # background and plasma images
         # try:
-        options.subtracted = sp.ma.masked_where(
-            sp.logical_or(sp.logical_or(
+        options.subtracted = np.ma.masked_where(
+            np.logical_or(np.logical_or(
                 options.objects['plasma']['canvas'].mask == False,
                 options.objects['plasma']['canvas'].interpolated == -1024.0),
                 options.objects['background']['canvas'].interpolated == -1024.0
@@ -769,7 +769,7 @@ def set_zero(options):
     if options.mode == "subtracted_graph":
         dialog = ZeroDialog(options.root, options, title="Choose zero point", parent_mframe=options.mframe)
         if dialog.result == "auto":
-            options.offset = sp.amin(options.subtracted)
+            options.offset = np.amin(options.subtracted)
         elif dialog.result is not None:
             options.offset = dialog.result
         set_mode(options)
@@ -896,7 +896,7 @@ def plasma_density(options):
             multiplier = 1
         # Calculate the density map
         options.density = (multiplier * (options.subtracted-options.offset) * 8
-                           * (sp.pi * c / e)**2 * me * e0 / d / wavelength)
+                           * (np.pi * c / e)**2 * me * e0 / d / wavelength)
         # Convert to centimetres cubed
         options.density /= 1e6
         # Let set_mode render the map
@@ -958,7 +958,7 @@ def cosine(options):
         # Clear the canvas
         options.ax.clear()
         # Draw the cosine
-        options.imshow = options.ax.imshow(sp.cos(options.imshow.get_array()*multiplier*sp.pi), cmap="Greys")
+        options.imshow = options.ax.imshow(np.cos(options.imshow.get_array()*multiplier*np.pi), cmap="Greys")
         # Set the mode variable
         mode = options.mode.split("_")[0]+"_cosine_graph"
         options.show_var.set(mode)

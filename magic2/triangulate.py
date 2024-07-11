@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import scipy as sp
+import numpy as np
 from scipy.spatial import Delaunay
 from scipy.interpolate import LinearNDInterpolator
 import matplotlib.pyplot as plt
@@ -176,28 +176,28 @@ class Triangulation:
         # Basically we need to update the neighbours lists of the
         # triangles we're working with...
         triangle.neighbours[op1] = nn[
-            sp.argwhere(neighbour.vertices == triangle.vertices[(op1+1) % 3])
+            np.argwhere(neighbour.vertices == triangle.vertices[(op1+1) % 3])
         ]
         triangle.neighbours[(op1+2) % 3] = neighbour.index
         neighbour.neighbours[op2] = tn[(op1+2) % 3]
         neighbour.neighbours[
-            sp.argwhere(neighbour.vertices == triangle.vertices[(op1+1) % 3])
+            np.argwhere(neighbour.vertices == triangle.vertices[(op1+1) % 3])
         ] = triangle.index
         # ...as well as their neighbouring triangles (if they exist)
         if triangle.neighbours[op1] != -1:
             n_temp = self.triangles[triangle.neighbours[op1]].neighbours
             n_temp[
-                sp.argwhere(n_temp == neighbour.index)
+                np.argwhere(n_temp == neighbour.index)
             ] = triangle.index
         if neighbour.neighbours[op2] != -1:
             n_temp = self.triangles[neighbour.neighbours[op2]].neighbours
             n_temp[
-                sp.argwhere(n_temp == triangle.index)
+                np.argwhere(n_temp == triangle.index)
             ] = neighbour.index
         # Now we just need to update the triangles' vertices
         triangle.vertices[(op1+1) % 3] = neighbour.vertices[op2]
         neighbour.vertices[
-            sp.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3])
+            np.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3])
         ] = triangle.vertices[op1]
         triangle.vert_coordinates = self.points[triangle.vertices]
         neighbour.vert_coordinates = self.points[neighbour.vertices]
@@ -208,7 +208,7 @@ class Triangulation:
     def add_point(self, triangle, neighbour, op1, op2):
         # The point is added in the middle of the line shared by
         # the two triangles
-        new_point = sp.mean([triangle.vert_coordinates[(op1+1) % 3],
+        new_point = np.mean([triangle.vert_coordinates[(op1+1) % 3],
                              triangle.vert_coordinates[(op1+2) % 3]], 0)
         # print(triangle.vert_coordinates[(op1+1) % 3],
         #       triangle.vert_coordinates[(op1+2) % 3], new_point)
@@ -216,13 +216,13 @@ class Triangulation:
         # The point's value is calculated with a variation on linear
         # interpolation of George's design. It seems to produce
         # reasonable values
-        d1 = sp.sqrt(sp.sum((new_point-sp.array(triangle.vert_coordinates[(op1+1)%3]))**2, 0))
-        d2 = sp.sqrt(sp.sum((new_point-sp.array(neighbour.vert_coordinates[op2]))**2, 0))
+        d1 = np.sqrt(np.sum((new_point-np.array(triangle.vert_coordinates[(op1+1)%3]))**2, 0))
+        d2 = np.sqrt(np.sum((new_point-np.array(neighbour.vert_coordinates[op2]))**2, 0))
         new_value = (d2*self.values[triangle.vertices[(op1+1) % 3]]
                      + d1*self.values[neighbour.vertices[op2]])/(d1+d2)
         new_index = len(self.points)
-        self.points = sp.append(self.points, [new_point], 0)
-        self.values = sp.append(self.values, [new_value], 0)
+        self.points = np.append(self.points, [new_point], 0)
+        self.values = np.append(self.values, [new_value], 0)
         # Change the triangulation to include the new point
         # A drawing is helpful in understanding what is happening here
         # https://imgur.com/5uUkYz4
@@ -236,24 +236,24 @@ class Triangulation:
         # Now change the neighbours
         triangle.neighbours[(op1+2) % 3] = t2.index
         neighbour.neighbours[
-            sp.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3])
+            np.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3])
         ] = n2.index
         t2.neighbours[op1] = n2.index
         t2.neighbours[(op1+1) % 3] = triangle.index
         n2.neighbours[op2] = t2.index
         n2.neighbours[
-            sp.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3])
+            np.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3])
         ] = neighbour.index
         if t2.neighbours[(op1+2) % 3] != -1:
             n_temp = self.triangles[t2.neighbours[(op1+2) % 3]].neighbours
             n_temp[
-                sp.argwhere(n_temp == triangle.index)
+                np.argwhere(n_temp == triangle.index)
             ] = t2.index
-        arg = int(sp.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3]))
+        arg = int(np.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3]))
         if n2.neighbours[arg] != -1:
             n_temp = self.triangles[t2.neighbours[arg]].neighbours
             n_temp[
-                sp.argwhere(n_temp == neighbour.index)
+                np.argwhere(n_temp == neighbour.index)
             ] = n2.index
         # Now update the vertices
         # A copy is created as we change the triangle's vertices, but we
@@ -261,11 +261,11 @@ class Triangulation:
         tv = triangle.vertices.copy()
         triangle.vertices[(op1+1) % 3] = new_index
         neighbour.vertices[
-            sp.argwhere(neighbour.vertices == tv[(op1+1) % 3])
+            np.argwhere(neighbour.vertices == tv[(op1+1) % 3])
         ] = new_index
         t2.vertices[(op1+2) % 3] = new_index
         n2.vertices[
-            sp.argwhere(n2.vertices == tv[(op1+2) % 3])
+            np.argwhere(n2.vertices == tv[(op1+2) % 3])
         ] = new_index
         triangle.vert_coordinates = self.points[triangle.vertices]
         neighbour.vert_coordinates = self.points[neighbour.vertices]
@@ -277,7 +277,7 @@ class Triangulation:
     # Interpolate the data based on the calculated triangulation
     def interpolate(self, canvas, status=None):
         # Clear the interpolated canvas
-        canvas.interpolated = sp.zeros_like(canvas.fringes_image)-1024.0
+        canvas.interpolated = np.zeros_like(canvas.fringes_image)-1024.0
         if status is not None:
             status.set("Performing the interpolation", 70)
         else:
@@ -295,15 +295,15 @@ class Triangulation:
             a3 = (co[0, 1]-co[2, 1])
             # Calculate the bounds of a rectangle that fully encloses
             # the current triangle
-            xmin = int(sp.amin(triangle.vert_coordinates[:,1]))
-            xmax = int(sp.amax(triangle.vert_coordinates[:,1]))+1
-            ymin = int(sp.amin(triangle.vert_coordinates[:,0]))
-            ymax = int(sp.amax(triangle.vert_coordinates[:,0]))+1
+            xmin = int(np.amin(triangle.vert_coordinates[:,1]))
+            xmax = int(np.amax(triangle.vert_coordinates[:,1]))+1
+            ymin = int(np.amin(triangle.vert_coordinates[:,0]))
+            ymax = int(np.amax(triangle.vert_coordinates[:,0]))+1
             # Take out slices of the x and y arrays,
             # containing the points' coordinates
             x_slice = canvas.x[ymin:ymax, xmin:xmax]
             y_slice = canvas.y[ymin:ymax, xmin:xmax]
-            # Use Barycentric Coordinates and the magic of numpy (scipy in this
+            # Use Barycentric Coordinates and the magic of numpy (numpy in this
             # case) to perform the calculations with the C backend, instead
             # of iterating on pixels with Python loops.
             # If you have not worked with numpy arrays befor dear reader,
@@ -316,7 +316,7 @@ class Triangulation:
             # Convenient, and really fast!
             w0 = (a0*(x_slice-co[2,1])+a1*(y_slice-co[2,0]))/div
             w1 = (a2*(x_slice-co[2,1])+a3*(y_slice-co[2,0]))/div
-            w2 = sp.round_(1-w0-w1, 10)
+            w2 = np.round_(1-w0-w1, 10)
             # Calculate the values for a rectangle enclosing our triangle
             slice = (
                 self.values[triangle.vertices[0]]*w0
@@ -327,7 +327,7 @@ class Triangulation:
             # inside of the triangle).
             # In Barycentric Coordinates the points outside of the triangle
             # have at least one of the coefficients negative, so we use that
-            mask = sp.logical_and(sp.logical_and(w0 >= 0, w1 >= 0), w2 >= 0)
+            mask = np.logical_and(np.logical_and(w0 >= 0, w1 >= 0), w2 >= 0)
             # Change the points in the actual canvas
             canvas.interpolated[ymin:ymax, xmin:xmax][mask] = slice[mask]
         canvas.interpolation_done = True
@@ -335,7 +335,7 @@ class Triangulation:
 
 # Calculate the distance between two points in the points list
 def distance(points, i1, i2):
-    return sp.sqrt((points[i2, 0]-points[i1, 0])**2
+    return np.sqrt((points[i2, 0]-points[i1, 0])**2
                    + (points[i2, 1]-points[i1, 1])**2)
 
 
@@ -360,12 +360,12 @@ class Triangle:
             # getting lines that cut the contours. The contour lines are always
             # sqrt(2) or shorter
             self.long_edges = [
-                distance(points, self.vertices[1], self.vertices[2]) > sp.sqrt(2),
-                distance(points, self.vertices[2], self.vertices[0]) > sp.sqrt(2),
-                distance(points, self.vertices[0], self.vertices[1]) > sp.sqrt(2)]
+                distance(points, self.vertices[1], self.vertices[2]) > np.sqrt(2),
+                distance(points, self.vertices[2], self.vertices[0]) > np.sqrt(2),
+                distance(points, self.vertices[0], self.vertices[1]) > np.sqrt(2)]
             # If none of the edges is longer than sqrt(2), the triangle lies
             # within the contour and it doesn't make sense to fix it.
-            self.flat = self.flat and sp.count_nonzero(self.long_edges)
+            self.flat = self.flat and np.count_nonzero(self.long_edges)
         # This will not be used, but assign a value for consistency
         else:
             self.long_edges = [True, True, True]
@@ -382,7 +382,7 @@ class Triangle:
                 if n_index != -1 and not tri.triangles[n_index].flat:
                     neighbour = tri.triangles[n_index]
                     return neighbour, i, int(
-                        sp.argwhere(neighbour.neighbours == self.index)
+                        np.argwhere(neighbour.neighbours == self.index)
                     )
         # If no neighbour found, return None three times, to make the return
         # length consistent
@@ -414,8 +414,8 @@ class TriangleCopy(Triangle):
 # remove all flat triangles that are possible to remove
 def triangulate(canvas, ax, status):
     # Create a Triangulation object
-    tri = Triangulation(sp.transpose(
-                        sp.nonzero(canvas.fringes_image_clean)),
+    tri = Triangulation(np.transpose(
+                        np.nonzero(canvas.fringes_image_clean)),
                         canvas, status)
     # Check if an error has been encountered (this would be due to the
     # user not labelling any fringes)
@@ -431,12 +431,12 @@ def triangulate(canvas, ax, status):
 
 
 # This is a quick interpolation method that does not bother with fixing
-# flat triangles. It uses standard scipy functions, which makes it faster
+# flat triangles. It uses standard numpy functions, which makes it faster
 def fast_tri(canvas, ax, status):
     if status is not None:
         status.set("Creating the interpolant", 0)
     # Create a list of the points for the triangulation
-    points = sp.transpose(sp.nonzero(canvas.fringes_image_clean))
+    points = np.transpose(np.nonzero(canvas.fringes_image_clean))
     try:
         # Create an interpolation object. The second argument is a list
         # of values for all the supplied points
@@ -445,7 +445,7 @@ def fast_tri(canvas, ax, status):
         # This calls the interpolant's calculating function and returns values
         # for every point on the canvas. This is then reshaped to fit the
         # original image
-        canvas.interpolated = sp.reshape(interpolation.__call__([canvas.xy]), canvas.fringes_image.shape)
+        canvas.interpolated = np.reshape(interpolation.__call__([canvas.xy]), canvas.fringes_image.shape)
         canvas.interpolation_done = True
         status.set("Done", 100)
         return True
@@ -471,8 +471,8 @@ def triangulate_debug(canvas, options=None):
     global plt
     if options is not None:
         plt = DebugWindow(options)
-    tri = Triangulation(sp.transpose(
-                        sp.nonzero(canvas.fringes_image_clean)),
+    tri = Triangulation(np.transpose(
+                        np.nonzero(canvas.fringes_image_clean)),
                         canvas)
     plt.imshow(canvas.fringes_image_clean, cmap=m2graphics.cmap)
     # Plot the triangulation. Flat triangles will be green
@@ -494,9 +494,9 @@ def triangulate_debug(canvas, options=None):
     # Perform interpolation
     print("Interpolating")
     tri.interpolate(canvas)
-    plt.imshow(sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated==-1024.0), canvas.interpolated), cmap=m2graphics.cmap)
+    plt.imshow(np.ma.masked_where(np.logical_or(canvas.mask == False, canvas.interpolated==-1024.0), canvas.interpolated), cmap=m2graphics.cmap)
     plt.show()
-    plt.imshow(sp.ma.masked_where(sp.logical_or(canvas.mask == False, canvas.interpolated==-1024.0), canvas.interpolated), cmap=m2graphics.cmap)
+    plt.imshow(np.ma.masked_where(np.logical_or(canvas.mask == False, canvas.interpolated==-1024.0), canvas.interpolated), cmap=m2graphics.cmap)
     plt.triplot(tri.points[:, 1], tri.points[:, 0], tri.get_simplices())
     plt.show()
 

@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import scipy as sp
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from copy import copy
@@ -45,30 +45,30 @@ class Canvas():
                 self.fringes_image = image == 0
                 # This is the user defined mask, it was grey (so neither black
                 # nor white, which is the condition we're using here)
-                self.mask = sp.logical_or(image == 1, self.fringes_image)
+                self.mask = np.logical_or(image == 1, self.fringes_image)
             else:
                 # This uses a provide mask and image (for example from an .m2 file)
                 self.fringes_image = fi
                 self.mask = m
             # This will store only the labelled fringes, currently empty
-            self.fringes_image_clean = sp.zeros_like(self.fringes_image)-0
+            self.fringes_image_clean = np.zeros_like(self.fringes_image)-0
             # -1024 indicates an area where there is no data
             # Visual stores the fringe phases, but allows for width, making
             # the fringes easier to display
-            self.fringe_phases_visual = sp.zeros_like(self.fringes_image)-1024
+            self.fringe_phases_visual = np.zeros_like(self.fringes_image)-1024
             # In fringe_phases all the fringes have their initial width
-            self.fringe_phases = sp.zeros_like(self.fringes_image)-1024
+            self.fringe_phases = np.zeros_like(self.fringes_image)-1024
             # Indexing starts at 0, so -1 is a good choice for 'not an index'
-            self.fringe_indices = sp.zeros_like(self.fringes_image)-1
+            self.fringe_indices = np.zeros_like(self.fringes_image)-1
             # x and y are used during interpolation processes to make
             # calculations easier, they store the x and y position of
             # every pixel
-            self.x, self.y = sp.meshgrid(sp.arange(0, len(self.fringes_image[0])),
-                                         sp.arange(0, len(self.fringes_image)))
-            self.xy = sp.transpose([self.y.ravel(), self.x.ravel()])
+            self.x, self.y = np.meshgrid(np.arange(0, len(self.fringes_image[0])),
+                                         np.arange(0, len(self.fringes_image)))
+            self.xy = np.transpose([self.y.ravel(), self.x.ravel()])
             # Interpolated will store the interpolated version of the image
             self.interpolation_done = False
-            self.interpolated = sp.zeros_like(self.fringes_image)-1024.0
+            self.interpolated = np.zeros_like(self.fringes_image)-1024.0
             # this parameter will store the object returned by matplotlib's
             # imshow function, making it easy to change the data being displayed
             self.imshow = imshow
@@ -121,7 +121,7 @@ def render_fringes(fringes, canvas, width=0, indices=None):
 
 
 def clear_visual(canvas):
-    canvas.fringe_phases_visual = sp.zeros_like(canvas.fringes_image)-1024
+    canvas.fringe_phases_visual = np.zeros_like(canvas.fringes_image)-1024
 
 
 # Define a normalization and a colour map that can be used with
