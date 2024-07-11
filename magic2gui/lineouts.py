@@ -25,7 +25,7 @@ import tkinter.ttk as ttk
 import tkinter.filedialog as fd
 from matplotlib.animation import FuncAnimation
 from matplotlib.patches import Polygon
-import scipy as sp
+import numpy as np
 import ctypes
 from skimage.measure import profile_line
 
@@ -148,25 +148,25 @@ class Lineout():
         self.colour_option.pack(side=Tk.LEFT)
 
         # Calculate the profile
-        self.profile = profile_line(sp.ma.filled(options.imshow.get_array().astype(float), fill_value=sp.nan), self.line[0], self.line[1], linewidth=self.width)
+        self.profile = profile_line(np.ma.filled(options.imshow.get_array().astype(float), fill_value=np.nan), self.line[0], self.line[1], linewidth=self.width)
 
         # Create the matplotlib frame
         self.mframe = m2mframe.GraphFrame(window, bind_keys=True,
                                           show_toolbar=True)
         # Create an x axis, with the units depending on the mode
         if options.mode == "density_graph":
-            self.xspace = sp.linspace(0, len(self.profile)/options.resolution,
+            self.xspace = np.linspace(0, len(self.profile)/options.resolution,
                                       len(self.profile))
             self.mframe.ax.set_xlabel("Distance / $mm$")
             self.mframe.ax.set_ylabel("Line-Integrated Electron Density $\int n_e dL$ / $cm^{-2}$")
         else:
-            self.xspace = sp.linspace(0, len(self.profile), len(self.profile))
+            self.xspace = np.linspace(0, len(self.profile), len(self.profile))
             self.mframe.ax.set_xlabel("Distance / $px$")
             self.mframe.ax.set_ylabel("Fringes")
         # Plot the lineout
         self.mframe.ax.plot(self.xspace, self.profile, color=self.colour)
         # Set the limits so that the entire length of the lineout is shown
-        self.mframe.ax.set_xlim([0, sp.amax(self.xspace)])
+        self.mframe.ax.set_xlim([0, np.amax(self.xspace)])
         # Push the current view onto the view history stack
         self.mframe.push_current()
         # Pack the frame, filling all available space
@@ -186,9 +186,9 @@ class Lineout():
         line = (self.line - offset)/scale
         dy = line[1, 0] - line[0, 0]
         dx = line[1, 1] - line[0, 1]
-        wx = self.width/2/scale * sp.sin(sp.arctan2(dy, dx))
-        wy = -self.width/2/scale * sp.cos(sp.arctan2(dy, dx))
-        verts = sp.array([
+        wx = self.width/2/scale * np.sin(np.arctan2(dy, dx))
+        wy = -self.width/2/scale * np.cos(np.arctan2(dy, dx))
+        verts = np.array([
             [line[0, 1]-wx, line[0, 0]-wy],
             [line[0, 1]+wx, line[0, 0]+wy],
             [line[1, 1]+wx, line[1, 0]+wy],
@@ -272,8 +272,8 @@ class Lineout():
                 self.mode
             ) + header
             # Save the data under the given filename
-            sp.savetxt(filename,
-                       sp.vstack((self.xspace, self.profile)).transpose(),
+            np.savetxt(filename,
+                       np.vstack((self.xspace, self.profile)).transpose(),
                        header=header)
 
     # Redraw and recalculate the lineout in the current mode
@@ -302,7 +302,7 @@ class Lineout():
     # Update the Lineout's width
     def update_width(self, *args):
         self.width = float(self.width_box.get())
-        self.profile = profile_line(sp.ma.filled(self.options.imshow.get_array().astype(float), fill_value=sp.nan), self.line[0], self.line[1], linewidth=self.width)
+        self.profile = profile_line(np.ma.filled(self.options.imshow.get_array().astype(float), fill_value=np.nan), self.line[0], self.line[1], linewidth=self.width)
         self.mframe.ax.lines[0].set_data(self.xspace, self.profile)
         # Redraw the graph in lineout's window
         self.mframe.fig.canvas.draw()
@@ -350,7 +350,7 @@ def lineout_onclick(event, line_plot, options, binds, ani):
     elif len(line) == 2 and event.inaxes == options.ax:
         # Convert the data into the format of [[y0, x0],
         #                                      [y1, x1]]
-        line = sp.array(line).transpose()[:, ::-1]
+        line = np.array(line).transpose()[:, ::-1]
         stop_lineout(options)
         # Create a Lineout object
         lineout = Lineout(line, options)
