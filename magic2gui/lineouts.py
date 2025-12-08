@@ -158,7 +158,7 @@ class Lineout():
             self.xspace = np.linspace(0, len(self.profile)/options.resolution,
                                       len(self.profile))
             self.mframe.ax.set_xlabel("Distance / $mm$")
-            self.mframe.ax.set_ylabel("Line-Integrated Electron Density $\int n_e dL$ / $cm^{-2}$")
+            self.mframe.ax.set_ylabel(r"Line-Integrated Electron Density $\int n_e dL$ / $cm^{-2}$")
         else:
             self.xspace = np.linspace(0, len(self.profile), len(self.profile))
             self.mframe.ax.set_xlabel("Distance / $px$")
