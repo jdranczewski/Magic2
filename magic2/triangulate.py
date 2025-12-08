@@ -316,7 +316,7 @@ class Triangulation:
             # Convenient, and really fast!
             w0 = (a0*(x_slice-co[2,1])+a1*(y_slice-co[2,0]))/div
             w1 = (a2*(x_slice-co[2,1])+a3*(y_slice-co[2,0]))/div
-            w2 = np.round_(1-w0-w1, 10)
+            w2 = np.round(1-w0-w1, 10)
             # Calculate the values for a rectangle enclosing our triangle
             slice = (
                 self.values[triangle.vertices[0]]*w0

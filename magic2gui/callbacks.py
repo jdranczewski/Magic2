@@ -544,7 +544,7 @@ def set_mode(options):
         options.ax.set_ylabel("Distance / $mm$")
         options.cbar = options.fig.colorbar(options.imshow, cax=options.mframe.cax)
         options.mframe.cax.axis('on')
-        options.cbar.ax.set_ylabel('Line-Integrated Electron Density, $\int n_e dL$ / $cm^{-2}$', rotation=270, labelpad=20)
+        options.cbar.ax.set_ylabel(r'Line-Integrated Electron Density, $\int n_e dL$ / $cm^{-2}$', rotation=270, labelpad=20)
     # Clear the view history stack
     options.mframe.clear_nav_stack()
     if options.conserve_limits:
@@ -1002,3 +1002,23 @@ def about(options):
 def close_window(options):
     if mb.askokcancel("Quit", "Do you actually want to quit?"):
         options.root.destroy()
+
+
+def reset_labelling(options):
+    key = options.mode.split("_")
+    if len(key) > 1 and key[1] == 'fringes':
+        if mb.askokcancel("Reset Labelling?", "Are you sure you want to reset all labelling for this image?"):
+            fringes = options.objects[key[0]]['fringes']
+            canvas = options.objects[key[0]]['canvas']
+            for fringe in fringes.list:
+                fringe.phase = -2048
+            fringes.min = 0
+            fringes.max = 0
+            
+            # Re-render the fringes with the new phases
+            m2graphics.clear_visual(canvas)
+            m2graphics.render_fringes(fringes, canvas, width=options.width_var.get())
+            
+            set_mode(options)
+    else:
+        mb.showinfo("Not in fringes mode", "Please select a fringes view (Background fringes or Plasma fringes) to reset labelling.")

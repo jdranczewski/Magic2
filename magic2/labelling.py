@@ -240,7 +240,8 @@ def label(fringes, canvas, fig, ax, master=None, options=None, imshow=None, mfra
     prev_lim = [ax.get_xlim(), ax.get_ylim()]
     labeller.ani = FuncAnimation(fig, ani_update, interval=100,
                                  fargs=(line_plot, temp_line, imshow,
-                                        prev_lim, ax, labeller), blit=True)
+                                        prev_lim, ax, labeller), blit=True,
+                                 cache_frame_data=False)
     if mframe is not None:
         mframe.ani = labeller.ani
     # This is needed for the animation to start.

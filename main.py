@@ -300,6 +300,10 @@ def main():
                             command=lambda: options.mframe.canvas._tkcanvas.focus_set())
         b.pack(anchor=Tk.W)
 
+    # Add Reset button
+    b = Tk.Button(direction_group, text="Reset", command=lambda: m2callbacks.reset_labelling(options))
+    b.pack(fill=Tk.X, pady=5)
+
     # Create a small help section
     help_group = Tk.LabelFrame(side_frame, text="Keyboard shortcuts", padx=5, pady=5)
     help_group.pack(fill=Tk.BOTH)
