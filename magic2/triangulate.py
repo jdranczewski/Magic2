@@ -106,6 +106,11 @@ class Triangulation:
                 # for the points that do not lay on the joining edge
                 triangle = self.triangles[self.flat_triangles[i]]
                 neighbour, op1, op2 = triangle.get_sloped_neighbour(self)
+                #print(op1, np.ndim(op1), op2, np.ndim(op2))
+                if np.ndim(op1) == 2:
+                    op1 = op1[0][0]
+                if np.ndim(op2) == 2:
+                    op2 = op2[0][0]
                 # If there is no sloped neighbour across a long edge, we leave
                 # this flat triangle alone. It is possible that it will get a
                 # sloped neighbour later in the loop. If not, the while loop
@@ -175,9 +180,8 @@ class Triangulation:
         # https://imgur.com/ZvuKOZH
         # Basically we need to update the neighbours lists of the
         # triangles we're working with...
-        triangle.neighbours[op1] = nn[
-            np.argwhere(neighbour.vertices == triangle.vertices[(op1+1) % 3])
-        ]
+        neighs = nn[np.argwhere(neighbour.vertices == triangle.vertices[(op1+1) % 3])][0][0]
+        triangle.neighbours[op1] = neighs
         triangle.neighbours[(op1+2) % 3] = neighbour.index
         neighbour.neighbours[op2] = tn[(op1+2) % 3]
         neighbour.neighbours[
@@ -249,7 +253,9 @@ class Triangulation:
             n_temp[
                 np.argwhere(n_temp == triangle.index)
             ] = t2.index
-        arg = int(np.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3]))
+        arg = np.argwhere(neighbour.vertices == triangle.vertices[(op1+2) % 3]).astype(int)
+        if np.ndim(arg) == 2:
+            arg = arg[0][0]
         if n2.neighbours[arg] != -1:
             n_temp = self.triangles[t2.neighbours[arg]].neighbours
             n_temp[
@@ -381,9 +387,7 @@ class Triangle:
                 # If the neighbour exists and isn't flat, return its index
                 if n_index != -1 and not tri.triangles[n_index].flat:
                     neighbour = tri.triangles[n_index]
-                    return neighbour, i, int(
-                        np.argwhere(neighbour.neighbours == self.index)
-                    )
+                    return neighbour, i, np.argwhere(neighbour.neighbours == self.index).astype(int)
         # If no neighbour found, return None three times, to make the return
         # length consistent
         return None, None, None
