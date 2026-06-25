@@ -1,25 +1,3 @@
-# Magic2 (https://github.com/jdranczewski/Magic2)
-# Copyright (C) 2018  Jakub Dranczewski, based on work by George Swadling
-
-# This work was carried out during a UROP with the MAGPIE Group,
-# Department of Physics, Imperial College London and was supported in part
-# by the Engineering and Physical Sciences Research Council (EPSRC) Grant
-# No. EP/N013379/1, by the U.S. Department of Energy (DOE) Awards
-# No. DE-F03-02NA00057 and No. DE-SC- 0001063
-
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 import tkinter as Tk
 import tkinter.ttk as ttk
 import magic2.graphics as m2graphics
@@ -94,7 +72,7 @@ class Options:
         self.cbar = None
         # Shot properties
         self.resolution = None
-        self.depth = 10.0
+        self.depth = None
         self.wavelength = None
         self.double = None
 
@@ -225,10 +203,6 @@ def main():
     helpmenu.add_command(label="Display manual",
                          command=lambda:
                          webbrowser.open("help.html"))
-    helpmenu.add_separator()
-    helpmenu.add_command(label="GitHub repository",
-                         command=lambda:
-                         webbrowser.open("https://github.com/jdranczewski/Magic2"))
     helpmenu.add_command(label="About",
                          command=lambda:
                          m2callbacks.about(options))
@@ -299,10 +273,6 @@ def main():
                             variable=options.direction_var, value=key,
                             command=lambda: options.mframe.canvas._tkcanvas.focus_set())
         b.pack(anchor=Tk.W)
-
-    # Add Reset button
-    b = Tk.Button(direction_group, text="Reset", command=lambda: m2callbacks.reset_labelling(options))
-    b.pack(fill=Tk.X, pady=5)
 
     # Create a small help section
     help_group = Tk.LabelFrame(side_frame, text="Keyboard shortcuts", padx=5, pady=5)
