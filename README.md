@@ -8,8 +8,38 @@ The purpose of Magic2 is to interpolate and help in the analysis of traced out i
 
 All of the code is heavily commented, so it shouldn't be very hard to understand.
 
+### Preparing the python environment
+Magic2 has been tested with:
+
+Python 3.14.0 environment with
+Package         Version
+--------------- -----------
+contourpy       1.3.3
+cycler          0.12.1
+fonttools       4.63.0
+imageio         2.37.3
+kiwisolver      1.5.0
+lazy-loader     0.5
+matplotlib      3.11.0
+networkx        3.6.1
+numpy           2.5.0
+packaging       26.2
+pillow          12.2.0
+pyparsing       3.3.2
+python-dateutil 2.9.0.post0
+scikit-image    0.26.0
+scipy           1.18.0
+six             1.17.0
+tifffile        2026.6.1
+
+Errors with Magic2 can occur as these packages updated and change their syntax. We recommend you use a virtual environmenet, such as uv or conda, to install compatible packages. For example, after creating a venv with uv, you can use
+
+`uv pip install numpy, scipy, matplotlib, scikit-image`
+
+to install the relevant packages. If you find incompatibilities with the latest packages, please submit an issue in github, or if you are able to fix it, please submit a pull request.
+
 ### Running the software
-Run `main.py` in the Python distribution of your choice or double click `Magic2.bat`. You need Python 3.x and a few additional libraries: `scipy`, `matplotlib`, and `skimage`. Those should be installed alongside Python if you use an Anaconda distribution.
+Run `main.py` in the Python distribution of your choice or double click `Magic2.bat` in Windows.
 
 ### What's the difference between Magic2 and Magic?
 - **Magic2 is the sequel written in Python instead of Matlab**, which means it doesn't require proprietary software to run.

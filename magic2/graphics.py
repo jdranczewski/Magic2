@@ -22,6 +22,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 from matplotlib.colors import Normalize
 from copy import copy
 
@@ -127,7 +128,7 @@ def clear_visual(canvas):
 # Define a normalization and a colour map that can be used with
 # matplotlib's imshow to show phase in a good looking way and on
 # a white background.
-cmap = copy(plt.cm.get_cmap('plasma'))
+cmap = copy(matplotlib.colormaps['plasma'])
 # White is for masking
 cmap.set_bad('white', 1.0)
 # Black is for unlabelled fringes
